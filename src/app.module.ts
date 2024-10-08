@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AccueilsModule } from './accueils/accueils.module';
+import entities from './models/typeorm';
 import * as dotenv from 'dotenv';
 
 // Charger les variables d'environnement
@@ -18,9 +20,11 @@ dotenv.config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [],
+      entities: entities,
       synchronize: true,
+      logging: true,
     }),
+    AccueilsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
