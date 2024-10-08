@@ -19,4 +19,14 @@ export class AccueilsService {
   findAllAccueil() {
     return this.accueilRepository.find();
   }
+
+  findAccueilById(id: number) {
+    return this.accueilRepository.findOne({
+      where: { id: id },
+    });
+  }
+
+  deleteAccueilById(id: number) {
+    return this.accueilRepository.delete(id);
+  }
 }

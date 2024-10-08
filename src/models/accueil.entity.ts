@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({
-  schema: 'accueil',
+  schema: 'infos',
 })
 export class Accueil {
   @PrimaryGeneratedColumn({
@@ -12,10 +12,17 @@ export class Accueil {
 
   @Column({
     type: 'text',
-    name: 'article',
+    name: 'titre',
     nullable: false,
   })
-  article: string;
+  titre: string;
+
+  @Column({
+    type: 'text',
+    name: 'description',
+    nullable: false,
+  })
+  description: string;
 
   @Column({
     type: 'text',
@@ -23,10 +30,4 @@ export class Accueil {
     nullable: false,
   })
   image: string;
-
-  /*@Column({
-    type: 'tinyint',
-    name: 'numero_page',
-  })
-  numero_page: number;*/
 }

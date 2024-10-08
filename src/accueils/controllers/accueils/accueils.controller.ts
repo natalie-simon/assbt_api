@@ -2,7 +2,10 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
+  Delete,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -18,9 +21,19 @@ export class AccueilsController {
     return this.accueilsService.findAllAccueil();
   }
 
+  @Get(':id')
+  findAccueilById(@Param('id', ParseIntPipe) id: number) {
+    return this.accueilsService.findAccueilById(id);
+  }
+
   @Post('create')
   @UsePipes(ValidationPipe)
   createAccueils(@Body() createAccueilDto: CreateAccueilDto) {
     return this.accueilsService.createAccueil(createAccueilDto);
+  }
+
+  @Delete('delete/:id')
+  deleteAccueil(@Param('id', ParseIntPipe) id: number) {
+    return this.accueilsService.deleteAccueilById(id);
   }
 }
