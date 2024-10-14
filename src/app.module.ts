@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccueilsModule } from './accueils/accueils.module';
+import { UsersModule } from './users/users.module';
 import entities from './models/typeorm';
 import * as dotenv from 'dotenv';
 
@@ -12,7 +12,6 @@ dotenv.config();
 
 @Module({
   imports: [
-    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -25,6 +24,7 @@ dotenv.config();
       logging: process.env.NODE_ENV === 'development',
     }),
     AccueilsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

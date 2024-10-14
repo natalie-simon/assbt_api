@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Accueil } from 'src/models/accueil.entity';
 import { Repository } from 'typeorm';
-import { CreateAccueilDto } from 'src/accueils/accueil.dtos';
+import { CreateAccueilDto } from 'src/accueils/dtos/accueil.dtos';
 
 @Injectable()
 export class AccueilsService {

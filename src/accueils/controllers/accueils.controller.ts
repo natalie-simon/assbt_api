@@ -9,8 +9,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { CreateAccueilDto } from 'src/accueils/accueil.dtos';
-import { AccueilsService } from 'src/accueils/services/accueils/accueils.service';
+import { CreateAccueilDto } from 'src/accueils/dtos/accueil.dtos';
+import { AccueilsService } from 'src/accueils/services/accueils.service';
 
 @Controller('accueils')
 export class AccueilsController {
