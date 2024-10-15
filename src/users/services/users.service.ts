@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/models/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createuser.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +16,7 @@ export class UsersService {
     if (createUserDto.clef !== process.env.CLEF) {
       throw new BadRequestException('La clé est incorrecte, contactez le club');
     }
+    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
     const newUser = this.userRepository.create(createUserDto);
     const existingUser = await this.findOneByEmail(createUserDto.email);
     if (existingUser) {
