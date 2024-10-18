@@ -1,5 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
+import {
+  Column,
+  Entity,
+  OneToOne,
+  JoinColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Role } from './role.entity';
 @Entity({
   schema: 'users',
 })
@@ -23,4 +29,8 @@ export class User {
     nullable: false,
   })
   password: string;
+
+  @OneToOne(() => Role, { nullable: true })
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 }

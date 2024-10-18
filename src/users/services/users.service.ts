@@ -27,10 +27,13 @@ export class UsersService {
   }
 
   findOneByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ email });
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['role'],
+    });
   }
 
   findAllUsers() {
-    return this.userRepository.find();
+    return this.userRepository.find({ relations: ['role'] });
   }
 }
