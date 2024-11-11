@@ -1,9 +1,9 @@
 import {
   Column,
   Entity,
-  OneToOne,
-  JoinColumn,
   PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
 @Entity({
@@ -19,6 +19,7 @@ export class User {
   @Column({
     type: 'text',
     name: 'email',
+    unique: true,
     nullable: false,
   })
   email: string;
@@ -30,7 +31,7 @@ export class User {
   })
   password: string;
 
-  @OneToOne(() => Role, { nullable: true })
+  @ManyToOne(() => Role)
   @JoinColumn({ name: 'role_id' })
   role: Role;
 }
