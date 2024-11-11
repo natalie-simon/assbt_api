@@ -1,5 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Role } from './role.entity';
 @Entity({
   schema: 'users',
 })
@@ -13,6 +19,7 @@ export class User {
   @Column({
     type: 'text',
     name: 'email',
+    unique: true,
     nullable: false,
   })
   email: string;
@@ -23,4 +30,8 @@ export class User {
     nullable: false,
   })
   password: string;
+
+  @ManyToOne(() => Role)
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 }
