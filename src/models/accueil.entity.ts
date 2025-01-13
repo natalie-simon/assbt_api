@@ -1,7 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+/** Définition de la tablle Accueil */
 @Entity({
-  schema: 'infos',
+  schema: 'public',
 })
 export class Accueil {
   @PrimaryGeneratedColumn({

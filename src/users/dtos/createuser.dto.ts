@@ -1,5 +1,20 @@
-export type CreateUserDto = {
+import { IsString, IsNotEmpty, MinLength, IsEmail } from 'class-validator';
+export class CreateUserDto {
+  @IsString({ message: "L'email doit être une chaine de caractères" })
+  @IsNotEmpty({ message: "L'email doit être renseigné" })
+  @IsEmail({}, { message: "L'email doit être un email valide" })
   email: string;
+
+  @IsString({ message: 'Le mot de passe doit être une chaine de caractères' })
+  @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
+  @MinLength(8, {
+    message: 'Le mot de passe doit contenir au moins 6 caractères',
+  })
   password: string;
+
+  @IsString({
+    message: 'Le clef de validation doit être une chaine de caractères',
+  })
+  @IsNotEmpty({ message: 'La clef de validation doit être renseignée' })
   clef: string;
-};
+}

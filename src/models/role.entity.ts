@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({
-  schema: 'users',
+  schema: 'public',
 })
 export class Role {
   @PrimaryGeneratedColumn({
