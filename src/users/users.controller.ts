@@ -26,7 +26,7 @@ export class UsersController {
   @Public()
   @Post('register')
   @ApiOperation({
-    summary: 'Register a new user',
+    summary: "Création d'un nouvel utilisateur",
     description: 'Enregistrer un nouvel utilisateur',
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
@@ -40,12 +40,12 @@ export class UsersController {
    */
   @Get()
   @ApiOperation({
-    summary: 'Récupérer tout les utilisateur',
-    description: 'Récupérer l\'ensemble des utilisateurs',
+    summary: 'Récupérer tout les utilisateurs',
+    description: "Récupérer l'ensemble des utilisateurs",
   })
   @ApiResponse({
     status: 200,
-    description: 'Liste des utilisateurs',
+    description: 'Un tableau comportant la liste des utilisateurs',
   })
   getUsers() {
     return this.usersService.findAllUsers();

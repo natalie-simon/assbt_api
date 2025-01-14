@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, MinLength, IsEmail } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * DTO pour la création d'un utilisateur
@@ -10,6 +11,10 @@ export class CreateUserDto {
    * @type {string}
    * @memberof CreateUserDto
    */
+  @ApiProperty({
+    description: "L'email de l'utilisateur",
+    example: 'toto@assbt.com',
+  })
   @IsString({ message: "L'email doit être une chaine de caractères" })
   @IsNotEmpty({ message: "L'email doit être renseigné" })
   @IsEmail({}, { message: "L'email doit être un email valide" })
@@ -21,6 +26,10 @@ export class CreateUserDto {
    * @type {string}
    * @memberof CreateUserDto
    */
+  @ApiProperty({
+    description: "Le mot de passe de l'utilisateur",
+    example: 'motdepasse',
+  })
   @IsString({ message: 'Le mot de passe doit être une chaine de caractères' })
   @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
   @MinLength(8, {
@@ -34,6 +43,10 @@ export class CreateUserDto {
    * @type {string}
    * @memberof CreateUserDto
    */
+  @ApiProperty({
+    description: "La clef d'inscription, celle-ci est fournie par le club",
+    example: 'clef',
+  })
   @IsString({
     message: 'Le clef de validation doit être une chaine de caractères',
   })
