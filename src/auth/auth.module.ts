@@ -8,6 +8,9 @@ import * as dotenv from 'dotenv';
 import { APP_GUARD } from '@nestjs/core';
 dotenv.config();
 
+/**
+ * Gestion du module Auth
+ */
 @Module({
   imports: [
     UsersModule,

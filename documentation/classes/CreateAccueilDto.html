@@ -123,6 +123,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>DTO pour la création d&#39;un accueil</p>
+
+            </p>
 
 
 
@@ -203,10 +210,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="14" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:14</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:29</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Description de l&#39;accueil (minimum 20 caractères)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -240,10 +253,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="20" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:20</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:41</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Image de l&#39;accueil (minimum 10 caractères)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -277,10 +296,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="8" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:8</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:17</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Titre de l&#39;accueil (minimum 10 caractères)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -298,19 +323,40 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsNotEmpty, MinLength } from &#x27;class-validator&#x27;;
 
+/**
+ * DTO pour la création d&#x27;un accueil
+ */
 export class CreateAccueilDto {
+  /**
+   * Titre de l&#x27;accueil (minimum 10 caractères)
+   *
+   * @type {string}
+   * @memberof CreateAccueilDto
+   */
   @IsNotEmpty({ message: &#x27;Le champ titre doit être renseigné.&#x27; })
   @MinLength(10, {
     message: &#x27;Le champ titre doit contenir au moins 10 caractères.&#x27;,
   })
   titre: string;
 
+  /**
+   * Description de l&#x27;accueil (minimum 20 caractères)
+   *
+   * @type {string}
+   * @memberof CreateAccueilDto
+   */
   @IsNotEmpty({ message: &#x27;Le champ titre doit être renseigné.&#x27; })
   @MinLength(20, {
     message: &#x27;Le champ titre doit contenir au moins 20 caractères.&#x27;,
   })
   description: string;
 
+  /**
+   * Image de l&#x27;accueil (minimum 10 caractères)
+   *
+   * @type {string}
+   * @memberof CreateAccueilDto
+   */
   @IsNotEmpty({ message: &#x27;Le champ image doit être renseigné.&#x27; })
   @MinLength(10, {
     message: &#x27;Le champ image doit contenir au moins 10 caractères.&#x27;,

@@ -119,6 +119,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>Service de gestion de l&#39;authentification</p>
+
+            </p>
 
 
 
@@ -162,12 +169,14 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/auth/services/auth.service.ts:7</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/auth/services/auth.service.ts:10</a></div>
                             </td>
                         </tr>
 
                 <tr>
                     <td class="col-md-4">
+                            <div class="io-description"><p>Constructeur du service AuthService</p>
+</div>
                             <div>
                                     <b>Parameters :</b>
                                     <table class="params">
@@ -176,6 +185,7 @@
                                                 <td>Name</td>
                                                     <td>Type</td>
                                                 <td>Optional</td>
+                                                    <td>Description</td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -190,6 +200,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>le service des Users</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>jwtService</td>
@@ -202,6 +216,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>le service de gestion du JWT</p>
+
+                                                        </td>
                                                 </tr>
                                         </tbody>
                                     </table>
@@ -239,14 +257,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="13"
-                                    class="link-to-prism">src/auth/services/auth.service.ts:13</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="28"
+                                    class="link-to-prism">src/auth/services/auth.service.ts:28</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Le service de connection &amp; d&#39;authentification</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -257,6 +277,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -271,6 +292,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>l&#39;email du User</p>
+
+                                            </td>
                                         </tr>
                                         <tr>
                                                 <td>pass</td>
@@ -283,6 +308,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>le mot de passe</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -309,13 +338,28 @@ import { UsersService } from &#x27;src/users/services/users.service&#x27;;
 import { JwtService } from &#x27;@nestjs/jwt&#x27;;
 import * as bcrypt from &#x27;bcryptjs&#x27;;
 
+/**
+ * Service de gestion de l&#x27;authentification
+ */
 @Injectable()
 export class AuthService {
+  /**
+   * Constructeur du service AuthService
+   * @param usersService le service des Users
+   * @param jwtService  le service de gestion du JWT
+   */
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * Le service de connection &amp; d&#x27;authentification
+   * @param email l&#x27;email du User
+   * @param pass  le mot de passe
+   * @returns
+   * @throws UnauthorizedException
+   */
   async signIn(email: string, pass: string): Promise&lt;{ access_token: string }&gt; {
     console.log(&#x60;Tentative de connexion avec l&#x27;email: ${email} ${pass}&#x60;); // Ajout du console.log à la ligne 14 //
     const user &#x3D; await this.usersService.findOneByEmail(email);

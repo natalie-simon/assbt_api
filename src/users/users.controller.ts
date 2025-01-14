@@ -5,13 +5,24 @@ import { Public } from 'src/auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 
-/** Controleur pour les Users (membres) */
+/**
+ * Users controller
+ * Controlleur pour les routes liées aux utilisateurs
+ */
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
+  /**
+   * Constructeur
+   * @param usersService Le service UsersService
+   */
   constructor(private readonly usersService: UsersService) {}
 
-  /** Route pour enregister un nouvel utilisateur */
+  /**
+   * Route pour la création d'un nouvel utilisateur
+   * @param createUserDto La DTO correspondant à la création d'un utilisateur
+   * @returns
+   */
   @Public()
   @Post('register')
   @ApiOperation({
@@ -19,10 +30,14 @@ export class UsersController {
     description: 'Enregistrer un nouvel utilisateur',
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
+    console.log(createUserDto);
     return this.usersService.createUser(createUserDto);
   }
 
-  /** Route pour récupérer l'ensemble des utilisateurs */
+  /**
+   * Route pour la récupérer l'ensemble des utilisateurs
+   * @returns
+   */
   @Get()
   @ApiOperation({
     summary: 'Récupérer tout les utilisateur',

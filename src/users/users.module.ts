@@ -4,7 +4,10 @@ import { UsersController } from './users.controller';
 import { UsersService } from './services/users.service';
 import { User } from 'src/models/user.entity';
 
-/** Module concernant toute la partie User */
+
+/**
+ * Gestion du module Users
+ */
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],

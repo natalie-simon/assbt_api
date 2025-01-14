@@ -123,6 +123,15 @@
             </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>Accueils controller
+Controlleur pour les routes liées aux accueils
+Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p>
+
+            </p>
 
 
 
@@ -206,14 +215,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="33"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:33</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="57"
+                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:57</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Route pour créer un nouvel accueil</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -224,6 +235,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -238,6 +250,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>La BTO correspondant à la création d&#39;un accueil</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -282,14 +298,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="38"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:38</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="67"
+                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:67</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Route pour supprimer un accueil par son id</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -300,6 +318,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -314,6 +333,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>Un entier correspondant à l&#39;id de l&#39;accueil à supprimer</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -359,14 +382,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="27"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:27</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="46"
+                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:46</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Route pour récupérer un accueil par son id</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -377,6 +402,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -391,6 +417,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>Un Entier correspondant à l&#39;id de l&#39;accueil</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -436,19 +466,24 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="21"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:21</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="35"
+                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:35</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Route pour récupérer l&#39;ensemble des accueils</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -471,28 +506,57 @@
 import { CreateAccueilDto } from &#x27;src/accueils/dtos/accueil.dtos&#x27;;
 import { AccueilsService } from &#x27;src/accueils/services/accueils.service&#x27;;
 import { Public } from &#x27;src/auth/decorators/public.decorators&#x27;;
+
+/**
+ * Accueils controller
+ * Controlleur pour les routes liées aux accueils
+ * Cela correpond aux informations de la page d&#x27;accueil de l&#x27;application
+ */
 @Controller(&#x27;accueils&#x27;)
 export class AccueilsController {
+  /**
+   * Constructeur
+   * @param accueilsService Le service AccueilsService
+   */
   constructor(private readonly accueilsService: AccueilsService) {}
 
+  /**
+   * Route pour récupérer l&#x27;ensemble des accueils
+   * @returns
+   */
   @Public()
   @Get()
   getAccueils() {
     return this.accueilsService.findAllAccueil();
   }
 
+  /**
+   * Route pour récupérer un accueil par son id
+   * @param id Un Entier correspondant à l&#x27;id de l&#x27;accueil
+   * @returns 
+   */
   @Public()
   @Get(&#x27;:id&#x27;)
   findAccueilById(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
     return this.accueilsService.findAccueilById(id);
   }
 
+  /**
+   * Route pour créer un nouvel accueil
+   * @param createAccueilDto La BTO correspondant à la création d&#x27;un accueil
+   * @returns
+   */
   @Post(&#x27;create&#x27;)
   @UsePipes(ValidationPipe)
   createAccueils(@Body() createAccueilDto: CreateAccueilDto) {
     return this.accueilsService.createAccueil(createAccueilDto);
   }
 
+  /**
+   * Route pour supprimer un accueil par son id
+   * @param id Un entier correspondant à l&#x27;id de l&#x27;accueil à supprimer
+   * @returns
+   */
   @Delete(&#x27;delete/:id&#x27;)
   deleteAccueil(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
     return this.accueilsService.deleteAccueilById(id);

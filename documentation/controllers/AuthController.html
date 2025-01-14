@@ -123,6 +123,14 @@
             </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>Auth controller
+Controlleur pour les routes liées à l&#39;authentification</p>
+
+            </p>
 
 
 
@@ -196,14 +204,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="20"
-                                    class="link-to-prism">src/auth/controller/auth.controller.ts:20</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="33"
+                                    class="link-to-prism">src/auth/controller/auth.controller.ts:33</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Route de connection</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -214,6 +224,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -228,6 +239,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>la DTO correspondant au login</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -259,10 +274,23 @@ import { AuthService } from &#x27;../services/auth.service&#x27;;
 import { SignInDto } from &#x27;src/auth/dtos/signin.dto&#x27;;
 import { Public } from &#x27;src/auth/decorators/public.decorators&#x27;;
 
+/**
+ * Auth controller
+ * Controlleur pour les routes liées à l&#x27;authentification
+ */
 @Controller(&#x27;auth&#x27;)
 export class AuthController {
+  /**
+   * Constructeur
+   * @param authService Le service AuthService
+   */
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Route de connection
+   * @param signInDto la DTO correspondant au login
+   * @returns
+   */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post(&#x27;signin&#x27;)

@@ -121,6 +121,14 @@
             </p>
 
 
+                <p class="comment">
+                <h3>Description</h3>
+                </p>
+                <p class="comment">
+                    <p> Garde d&#39;authentication pour sécuriser les routes de l&#39;application</p>
+<p> Utilise des jetons JWT pour vérifier l&#39;accès des utilisateurs</p>
+
+                </p>
 
 
 
@@ -169,12 +177,14 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/auth/auth.guard.ts:16</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="21" class="link-to-prism">src/auth/auth.guard.ts:21</a></div>
                             </td>
                         </tr>
 
                 <tr>
                     <td class="col-md-4">
+                            <div class="io-description"><p>Constructeur</p>
+</div>
                             <div>
                                     <b>Parameters :</b>
                                     <table class="params">
@@ -183,6 +193,7 @@
                                                 <td>Name</td>
                                                     <td>Type</td>
                                                 <td>Optional</td>
+                                                    <td>Description</td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -197,6 +208,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Service permettant de manipuler et vérifier les jetons JWT</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>reflector</td>
@@ -209,6 +224,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Service pour accéder aux métadonnées des handlers et classes</p>
+
+                                                        </td>
                                                 </tr>
                                         </tbody>
                                     </table>
@@ -246,14 +265,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="22"
-                                    class="link-to-prism">src/auth/auth.guard.ts:22</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="38"
+                                    class="link-to-prism">src/auth/auth.guard.ts:38</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Vérifie si une route est accessible ou protégée</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -264,6 +285,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -278,6 +300,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>Le contexte d&#39;exécution de la requête</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -287,7 +313,8 @@
 
                         </div>
                             <div class="io-description">
-                                
+                                <p>Un booléen indiquant si l&#39;accès est autorisé ou non</p>
+
                             </div>
                 </td>
             </tr>
@@ -315,14 +342,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="49"
-                                    class="link-to-prism">src/auth/auth.guard.ts:49</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="70"
+                                    class="link-to-prism">src/auth/auth.guard.ts:70</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Extrait le jeton JWT du header &#39;Authorization&#39; de la requête</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -333,6 +362,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -347,6 +377,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>La requête HTTP</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -356,7 +390,8 @@
 
                         </div>
                             <div class="io-description">
-                                
+                                <p>Le jeton JWT si présent et valide, sinon undefined</p>
+
                             </div>
                 </td>
             </tr>
@@ -381,20 +416,36 @@ import { IS_PUBLIC_KEY } from &#x27;./decorators/public.decorators&#x27;;
 
 dotenv.config();
 
+/**
+ *  Garde d&#x27;authentication pour sécuriser les routes de l&#x27;application
+ *
+ *  Utilise des jetons JWT pour vérifier l&#x27;accès des utilisateurs
+ */
 @Injectable()
 export class AuthGuard implements CanActivate {
+  /**
+   * Constructeur
+   * @param jwtService Service permettant de manipuler et vérifier les jetons JWT
+   * @param reflector  Service pour accéder aux métadonnées des handlers et classes
+   */
   constructor(
     private readonly jwtService: JwtService,
     private reflector: Reflector,
   ) {}
 
+  /**
+   * Vérifie si une route est accessible ou protégée
+   * @param context Le contexte d&#x27;exécution de la requête
+   * @returns Un booléen indiquant si l&#x27;accès est autorisé ou non
+   * @throws UnauthorizedException si le jeton est manquant ou invalide
+   */
   async canActivate(context: ExecutionContext): Promise&lt;boolean&gt; {
     const isPublic &#x3D; this.reflector.getAllAndOverride&lt;boolean&gt;(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     if (isPublic) {
-      // 💡 Voir cette condition
+      // La route est publique
       return true;
     }
 
@@ -415,6 +466,11 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
+  /**
+   * Extrait le jeton JWT du header &#x27;Authorization&#x27; de la requête
+   * @param request La requête HTTP
+   * @returns Le jeton JWT si présent et valide, sinon undefined
+   */
   private extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] &#x3D; request.headers.authorization?.split(&#x27; &#x27;) ?? [];
     return type &#x3D;&#x3D;&#x3D; &#x27;Bearer&#x27; ? token : undefined;

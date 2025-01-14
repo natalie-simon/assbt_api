@@ -10,7 +10,9 @@ import * as dotenv from 'dotenv';
 
 // Charger les variables d'environnement
 dotenv.config();
-
+/**
+ * Gestion du module principal de l'application
+ */
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -28,7 +30,7 @@ dotenv.config();
     UsersModule,
     AuthModule,
   ],
-  controllers: [AppController],
+  //controllers: [AppController],
   //providers: [AppService],
 })
 export class AppModule {}

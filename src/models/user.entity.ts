@@ -6,6 +6,10 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Role } from './role.entity';
+
+/**
+ * Entité représentant un utilisateur dans l'application.
+ */
 @Entity({
   schema: 'public',
 })

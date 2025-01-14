@@ -1,6 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-/** Définition de la tablle Accueil */
+/**
+ * Entité représentant un Accueil dans l'application.
+ */
 @Entity({
   schema: 'public',
 })

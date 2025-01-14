@@ -1,5 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+/**
+ * Entité représentant un role dans l'application.
+ */
 @Entity({
   schema: 'public',
 })

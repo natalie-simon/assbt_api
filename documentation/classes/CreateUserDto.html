@@ -123,6 +123,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>DTO pour la création d&#39;un utilisateur</p>
+
+            </p>
 
 
 
@@ -205,10 +212,17 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/users/dtos/createuser.dto.ts:19</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/users/dtos/createuser.dto.ts:41</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>La clef d&#39;inscription (fournie par le club)
+permet de limiter les inscriptions au membre du club</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -243,10 +257,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/users/dtos/createuser.dto.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/users/dtos/createuser.dto.ts:16</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Email de l&#39;utilisateur (User)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -275,16 +295,22 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsString({message: &#x27;Le mot de passe doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;Le mot de passe doit être renseigné&#x27;})<br />@MinLength(8, {message: &#x27;Le mot de passe doit contenir au moins 6 caractères&#x27;})<br />
+                            @IsString({message: &#x27;Le mot de passe doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;Le mot de passe doit être renseigné&#x27;})<br />@MinLength(8, {message: &#x27;Le mot de passe doit contenir au moins 8 caractères&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/users/dtos/createuser.dto.ts:13</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/users/dtos/createuser.dto.ts:29</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Mot de passe de l&#39;utilisateur (User)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -301,19 +327,41 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsString, IsNotEmpty, MinLength, IsEmail } from &#x27;class-validator&#x27;;
+
+/**
+ * DTO pour la création d&#x27;un utilisateur
+ */
 export class CreateUserDto {
+  /**
+   * Email de l&#x27;utilisateur (User)
+   *
+   * @type {string}
+   * @memberof CreateUserDto
+   */
   @IsString({ message: &quot;L&#x27;email doit être une chaine de caractères&quot; })
   @IsNotEmpty({ message: &quot;L&#x27;email doit être renseigné&quot; })
   @IsEmail({}, { message: &quot;L&#x27;email doit être un email valide&quot; })
   email: string;
 
+  /**
+   * Mot de passe de l&#x27;utilisateur (User)
+   *
+   * @type {string}
+   * @memberof CreateUserDto
+   */
   @IsString({ message: &#x27;Le mot de passe doit être une chaine de caractères&#x27; })
   @IsNotEmpty({ message: &#x27;Le mot de passe doit être renseigné&#x27; })
   @MinLength(8, {
-    message: &#x27;Le mot de passe doit contenir au moins 6 caractères&#x27;,
+    message: &#x27;Le mot de passe doit contenir au moins 8 caractères&#x27;,
   })
   password: string;
 
+  /**
+   * La clef d&#x27;inscription (fournie par le club)
+   * permet de limiter les inscriptions au membre du club
+   * @type {string}
+   * @memberof CreateUserDto
+   */
   @IsString({
     message: &#x27;Le clef de validation doit être une chaine de caractères&#x27;,
   })

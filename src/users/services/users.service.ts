@@ -5,16 +5,26 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createuser.dto';
 import * as bcrypt from 'bcryptjs';
 
-/** Service de gestion des appels concernant les utilisateurs */
+/**
+ * Service de gestion des utilisateurs
+ */
 @Injectable()
 export class UsersService {
-  /** Constructeur */
+  /**
+   * Constructeur du service UsersService
+   * @param userRepository le repository des Users
+   */
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
-  /** Service de création d'un utilisateur */
+  /**
+   * Le service de création d'un utilisateur
+   * @param createUserDto La DTO pour la création d'un utilisateur
+   * @returns
+   * @throws BadRequestException
+   */
   async createUser(createUserDto: CreateUserDto) {
     if (createUserDto.clef !== process.env.CLEF) {
       throw new BadRequestException('La clé est incorrecte, contactez le club');
@@ -29,7 +39,12 @@ export class UsersService {
     return this.userRepository.save(newUser);
   }
 
-  /** Service qui récupère un utilisateur par son email */
+  /**
+   * Le service de récupération d'un utilisateur par son email
+   * @param email L'email de l'utilisateur
+   * @returns
+   * @throws BadRequestException
+   */
   findOneByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email },
@@ -37,7 +52,10 @@ export class UsersService {
     });
   }
 
-  /** Service de récupération de tout les utilisateurs */
+  /**
+   * Service qui récupère tous les utilisateurs
+   * @returns
+   */
   findAllUsers() {
     return this.userRepository.find({ relations: ['role'] });
   }

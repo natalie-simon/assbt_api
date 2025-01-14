@@ -123,6 +123,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>DTO pour la connexion d&#39;un utilisateur</p>
+
+            </p>
 
 
 
@@ -199,10 +206,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/auth/dtos/signin.dto.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/auth/dtos/signin.dto.ts:15</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Email de l&#39;utilisateur (User)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -237,10 +250,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/auth/dtos/signin.dto.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">src/auth/dtos/signin.dto.ts:30</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Mot de passe de l&#39;utilisateur (User)</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -258,11 +277,26 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsString, IsNotEmpty, MinLength, IsEmail } from &#x27;class-validator&#x27;;
 
+/**
+ * DTO pour la connexion d&#x27;un utilisateur
+ */
 export class SignInDto {
+  /**
+   * Email de l&#x27;utilisateur (User)
+   *
+   * @type {string}
+   * @memberof SignInDto
+   */
   @IsNotEmpty({ message: &#x27;Le champ email doit être renseigné.&#x27; })
   @IsEmail({}, { message: &#x27;Le champ email doit être une adresse email.&#x27; })
   email: string;
 
+  /**
+   * Mot de passe de l&#x27;utilisateur (User)
+   *
+   * @type {string}
+   * @memberof SignInDto
+   */
   @IsString({
     message: &#x27;Le champ mot de passe doit être une chaîne de caractères.&#x27;,
   })

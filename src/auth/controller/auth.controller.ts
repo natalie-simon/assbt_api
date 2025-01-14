@@ -10,10 +10,23 @@ import { AuthService } from '../services/auth.service';
 import { SignInDto } from 'src/auth/dtos/signin.dto';
 import { Public } from 'src/auth/decorators/public.decorators';
 
+/**
+ * Auth controller
+ * Controlleur pour les routes liées à l'authentification
+ */
 @Controller('auth')
 export class AuthController {
+  /**
+   * Constructeur
+   * @param authService Le service AuthService
+   */
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Route de connection
+   * @param signInDto la DTO correspondant au login
+   * @returns
+   */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('signin')
