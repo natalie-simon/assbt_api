@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AccueilsController } from './controllers/accueils.controller';
+import { AccueilsController } from './accueils.controller';
 import { AccueilsService } from './services/accueils.service';
-import { Accueil } from 'src/models/accueil.entity';
+import { Accueil } from 'src/accueils/accueil.entity';
 
 /**3
  * Gestion du module Accueils

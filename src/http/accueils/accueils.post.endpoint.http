@@ -1,4 +1,4 @@
-POST http://localhost:3000/users/register
+POST http://localhost:3000/accueils/create
 Content-Type: application/json
 
 {

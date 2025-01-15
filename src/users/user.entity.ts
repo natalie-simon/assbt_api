@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Role } from './role.entity';
+//import { Role } from '../models/role.entity';
 
 /**
  * Entité représentant un utilisateur dans l'application.
@@ -21,7 +21,8 @@ export class User {
   id: number;
 
   @Column({
-    type: 'text',
+    type: 'varchar',
+    length: 96,
     name: 'email',
     unique: true,
     nullable: false,
@@ -35,7 +36,12 @@ export class User {
   })
   password: string;
 
-  @ManyToOne(() => Role)
+  @Column({
+    default: true,
+  })
+  isActive: boolean;
+
+  /*@ManyToOne(() => Role)
   @JoinColumn({ name: 'role_id' })
-  role: Role;
+  role: Role;*/
 }

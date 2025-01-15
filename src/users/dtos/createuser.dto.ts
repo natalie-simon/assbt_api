@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MinLength, IsEmail } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, IsEmail, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -18,6 +18,7 @@ export class CreateUserDto {
   @IsString({ message: "L'email doit être une chaine de caractères" })
   @IsNotEmpty({ message: "L'email doit être renseigné" })
   @IsEmail({}, { message: "L'email doit être un email valide" })
+  @MaxLength(96, { message: "L'email doit contenir au maximum 96 caractères" })
   email: string;
 
   /**

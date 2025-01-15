@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/models/user.entity';
+import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createuser.dto';
 import * as bcrypt from 'bcryptjs';
@@ -12,11 +12,11 @@ import * as bcrypt from 'bcryptjs';
 export class UsersService {
   /**
    * Constructeur du service UsersService
-   * @param userRepository le repository des Users
+   * @param usersRepository le repository des Users
    */
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   /**
@@ -30,13 +30,13 @@ export class UsersService {
       throw new BadRequestException('La clé est incorrecte, contactez le club');
     }
     createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
-    const newUser = this.userRepository.create(createUserDto);
+    const newUser = this.usersRepository.create(createUserDto);
     const existingUser = await this.findOneByEmail(createUserDto.email);
     if (existingUser) {
       throw new BadRequestException('Cet email possède déjà un compte');
     }
 
-    return this.userRepository.save(newUser);
+    return this.usersRepository.save(newUser);
   }
 
   /**
@@ -46,9 +46,9 @@ export class UsersService {
    * @throws BadRequestException
    */
   findOneByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({
+    return this.usersRepository.findOne({
       where: { email },
-      relations: ['role'],
+      //relations: ['role'],
     });
   }
 
@@ -57,6 +57,6 @@ export class UsersService {
    * @returns
    */
   findAllUsers() {
-    return this.userRepository.find({ relations: ['role'] });
+    return this.usersRepository.find({ relations: ['role'] });
   }
 }

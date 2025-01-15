@@ -32,12 +32,12 @@ export class AuthService {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
-    const role = user?.role?.roleName ?? 'aucun';
+    //const role = user?.role?.roleName ?? 'aucun';
 
     const payload = {
       sub: user.id,
       email: user.email,
-      role: role,
+      //role: role,
     };
     return {
       access_token: await this.jwtService.signAsync(payload),
