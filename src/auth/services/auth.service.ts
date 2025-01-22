@@ -28,7 +28,7 @@ export class AuthService {
   async signIn(email: string, pass: string): Promise<{ access_token: string }> {
     console.log(`Tentative de connexion avec l'email: ${email} ${pass}`); // Ajout du console.log à la ligne 14 //
     const user = await this.usersService.findOneByEmail(email);
-    if (!user || !bcrypt.compareSync(pass, user.password)) {
+    if (!user || !bcrypt.compareSync(pass, user.mot_de_passe)) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 

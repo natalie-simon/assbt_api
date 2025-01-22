@@ -29,7 +29,7 @@ export class UsersService {
     if (createUserDto.clef !== process.env.CLEF) {
       throw new BadRequestException('La clé est incorrecte, contactez le club');
     }
-    createUserDto.password = bcrypt.hashSync(createUserDto.password, 10);
+    createUserDto.mot_de_passe = bcrypt.hashSync(createUserDto.mot_de_passe, 10);
     const newUser = this.usersRepository.create(createUserDto);
     const existingUser = await this.findOneByEmail(createUserDto.email);
     if (existingUser) {
@@ -57,6 +57,6 @@ export class UsersService {
    * @returns
    */
   findAllUsers() {
-    return this.usersRepository.find({ relations: ['role'] });
+    return this.usersRepository.find(/*{ relations: ['role'] }*/);
   }
 }

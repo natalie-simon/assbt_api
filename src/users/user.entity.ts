@@ -10,14 +10,11 @@ import {
 /**
  * Entité représentant un utilisateur dans l'application.
  */
-@Entity({
+@Entity('membre',{
   schema: 'public',
 })
 export class User {
-  @PrimaryGeneratedColumn({
-    type: 'bigint',
-    name: 'user_id',
-  })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
@@ -31,15 +28,15 @@ export class User {
 
   @Column({
     type: 'text',
-    name: 'password',
+    name: 'mot_de_passe',
     nullable: false,
   })
-  password: string;
+  mot_de_passe: string;
 
   @Column({
     default: true,
   })
-  isActive: boolean;
+  est_supprime: boolean;
 
   /*@ManyToOne(() => Role)
   @JoinColumn({ name: 'role_id' })

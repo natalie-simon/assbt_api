@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccueilsModule } from './accueils/accueils.module';
 import { UsersModule } from './users/users.module';
+import { StatutsModule } from './statuts/statuts.module';
 import { AuthModule } from './auth/auth.module';
+import { ArticlesModule } from './articles/articles.module';
+import { CategoriesArticlesModule } from './categories-articles/categories-articles.modules';
 import * as dotenv from 'dotenv';
 
 // Charger les variables d'environnement
@@ -23,11 +26,14 @@ dotenv.config();
         autoLoadEntities: true,
         synchronize: true,
         logging: process.env.NODE_ENV === 'development',
-      })
+      }),
     }),
-    AccueilsModule,
-    UsersModule,
-    AuthModule,
+    //AccueilsModule,
+    //UsersModule,
+    //AuthModule,
+    StatutsModule,
+    CategoriesArticlesModule,
+    ArticlesModule,
   ],
 })
 export class AppModule {}

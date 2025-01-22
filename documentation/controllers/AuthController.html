@@ -152,6 +152,8 @@ Controlleur pour les routes liées à l&#39;authentification</p>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#signIn" >signIn</a>
                             </li>
@@ -181,6 +183,8 @@ Controlleur pour les routes liées à l&#39;authentification</p>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>signIn</b></span>
                         <a href="#signIn"><span class="icon ion-ios-link"></span></a>
@@ -198,14 +202,14 @@ Controlleur pour les routes liées à l&#39;authentification</p>
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Public()<br />@HttpCode(HttpStatus.OK)<br />@Post(&#x27;signin&#x27;)<br /></code>
+                    <code>@Public()<br />@HttpCode(HttpStatus.OK)<br />@Post(&#x27;signin&#x27;)<br />@ApiOperation({summary: &#x27;Connexion&#x27;, description: &#x27;Permet de se connecter à l&#x27;application&#x27;})<br />@ApiResponse({status: 200, description: &#x27;le token de connection&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="33"
-                                    class="link-to-prism">src/auth/controller/auth.controller.ts:33</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="43"
+                                    class="link-to-prism">src/auth/controller/auth.controller.ts:43</a></div>
                         </td>
                     </tr>
 
@@ -273,12 +277,14 @@ Controlleur pour les routes liées à l&#39;authentification</p>
 import { AuthService } from &#x27;../services/auth.service&#x27;;
 import { SignInDto } from &#x27;src/auth/dtos/signin.dto&#x27;;
 import { Public } from &#x27;src/auth/decorators/public.decorators&#x27;;
+import { ApiTags, ApiOperation, ApiResponse } from &#x27;@nestjs/swagger&#x27;;
 
 /**
  * Auth controller
  * Controlleur pour les routes liées à l&#x27;authentification
  */
 @Controller(&#x27;auth&#x27;)
+@ApiTags(&#x27;auth&#x27;)
 export class AuthController {
   /**
    * Constructeur
@@ -294,6 +300,14 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post(&#x27;signin&#x27;)
+  @ApiOperation({
+    summary: &#x27;Connexion&#x27;,
+    description: &quot;Permet de se connecter à l&#x27;application&quot;,
+  })
+  @ApiResponse({
+    status: 200,
+    description: &#x27;le token de connection&#x27;,
+  })
   async signIn(
     @Body(new ValidationPipe())
     signInDto: SignInDto,

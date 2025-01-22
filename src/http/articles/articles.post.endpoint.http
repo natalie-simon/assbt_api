@@ -1,0 +1,9 @@
+POST http://localhost:3000/articles/create
+Content-Type: application/json
+
+{
+  "titre": "Voir un titre",
+  "contenu": "toto123456",
+  "statut": "1",
+  "categorie": "1"
+}

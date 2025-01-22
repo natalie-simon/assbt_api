@@ -149,9 +149,11 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#email" >email</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -184,6 +186,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>email</b></span>
                         <a href="#email"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -200,13 +203,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsNotEmpty({message: &#x27;Le champ email doit être renseigné.&#x27;})<br />@IsEmail({}, {message: &#x27;Le champ email doit être une adresse email.&#x27;})<br />
+                            @ApiProperty({description: &#x27;L&#x27;email de l&#x27;utilisateur&#x27;, example: &#x27;coucou@assbt.com&#x27;})<br />@IsNotEmpty({message: &#x27;Le champ email doit être renseigné.&#x27;})<br />@IsEmail({}, {message: &#x27;Le champ email doit être une adresse email.&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/auth/dtos/signin.dto.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="20" class="link-to-prism">src/auth/dtos/signin.dto.ts:20</a></div>
                         </td>
                     </tr>
 
@@ -228,6 +231,7 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>password</b></span>
                         <a href="#password"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -244,13 +248,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsString({message: &#x27;Le champ mot de passe doit être une chaîne de caractères.&#x27;})<br />@IsNotEmpty({message: &#x27;Le champ mot de passe doit être renseigné.&#x27;})<br />@MinLength(6, {message: &#x27;Le champ mot de passe doit contenir au moins 6 caractères.&#x27;})<br />
+                            @ApiProperty({description: &#x27;Le mot de passe de l&#x27;utilisateur&#x27;, example: &#x27;motdepasse&#x27;})<br />@IsString({message: &#x27;Le champ mot de passe doit être une chaîne de caractères.&#x27;})<br />@IsNotEmpty({message: &#x27;Le champ mot de passe doit être renseigné.&#x27;})<br />@MinLength(8, {message: &#x27;Le champ mot de passe doit contenir au moins 8 caractères.&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">src/auth/dtos/signin.dto.ts:30</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="39" class="link-to-prism">src/auth/dtos/signin.dto.ts:39</a></div>
                         </td>
                     </tr>
 
@@ -276,6 +280,7 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsString, IsNotEmpty, MinLength, IsEmail } from &#x27;class-validator&#x27;;
+import { ApiProperty } from &#x27;@nestjs/swagger&#x27;;
 
 /**
  * DTO pour la connexion d&#x27;un utilisateur
@@ -287,6 +292,10 @@ export class SignInDto {
    * @type {string}
    * @memberof SignInDto
    */
+  @ApiProperty({
+    description: &quot;L&#x27;email de l&#x27;utilisateur&quot;,
+    example: &#x27;coucou@assbt.com&#x27;,
+    })
   @IsNotEmpty({ message: &#x27;Le champ email doit être renseigné.&#x27; })
   @IsEmail({}, { message: &#x27;Le champ email doit être une adresse email.&#x27; })
   email: string;
@@ -297,12 +306,16 @@ export class SignInDto {
    * @type {string}
    * @memberof SignInDto
    */
+  @ApiProperty({
+    description: &quot;Le mot de passe de l&#x27;utilisateur&quot;,
+    example: &#x27;motdepasse&#x27;,
+  })
   @IsString({
     message: &#x27;Le champ mot de passe doit être une chaîne de caractères.&#x27;,
   })
   @IsNotEmpty({ message: &#x27;Le champ mot de passe doit être renseigné.&#x27; })
-  @MinLength(6, {
-    message: &#x27;Le champ mot de passe doit contenir au moins 6 caractères.&#x27;,
+  @MinLength(8, {
+    message: &#x27;Le champ mot de passe doit contenir au moins 8 caractères.&#x27;,
   })
   password: string;
 }

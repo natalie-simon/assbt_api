@@ -149,9 +149,12 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#clef" >clef</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -161,7 +164,8 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                <a href="#password" >password</a>
+                                    <span class="modifier"></span>
+                                <a href="#mot_de_passe" >mot_de_passe</a>
                             </li>
                         </ul>
                     </td>
@@ -190,6 +194,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>clef</b></span>
                         <a href="#clef"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -206,13 +211,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsString({message: &#x27;Le clef de validation doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;La clef de validation doit être renseignée&#x27;})<br />
+                            @ApiProperty({description: &#x27;La clef d&#x27;inscription, celle-ci est fournie par le club&#x27;, example: &#x27;clef&#x27;})<br />@IsString({message: &#x27;Le clef de validation doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;La clef de validation doit être renseignée&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/users/dtos/createuser.dto.ts:41</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="55" class="link-to-prism">src/users/dtos/createuser.dto.ts:55</a></div>
                         </td>
                     </tr>
 
@@ -235,6 +240,8 @@ permet de limiter les inscriptions au membre du club</p>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>email</b></span>
                         <a href="#email"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -251,13 +258,13 @@ permet de limiter les inscriptions au membre du club</p>
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsString({message: &#x27;L&#x27;email doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;L&#x27;email doit être renseigné&#x27;})<br />@IsEmail({}, {message: &#x27;L&#x27;email doit être un email valide&#x27;})<br />
+                            @ApiProperty({description: &#x27;L&#x27;email de l&#x27;utilisateur&#x27;, example: &#x27;toto@assbt.com&#x27;})<br />@IsString({message: &#x27;L&#x27;email doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;L&#x27;email doit être renseigné&#x27;})<br />@IsEmail({}, {message: &#x27;L&#x27;email doit être un email valide&#x27;})<br />@MaxLength(96, {message: &#x27;L&#x27;email doit contenir au maximum 96 caractères&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/users/dtos/createuser.dto.ts:16</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/users/dtos/createuser.dto.ts:22</a></div>
                         </td>
                     </tr>
 
@@ -274,13 +281,14 @@ permet de limiter les inscriptions au membre du club</p>
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="password"></a>
+                    <a name="mot_de_passe"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                        <span ><b>password</b></span>
-                        <a href="#password"><span class="icon ion-ios-link"></span></a>
+                            <span class="modifier"></span>
+                        <span ><b>mot_de_passe</b></span>
+                        <a href="#mot_de_passe"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
@@ -295,13 +303,13 @@ permet de limiter les inscriptions au membre du club</p>
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsString({message: &#x27;Le mot de passe doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;Le mot de passe doit être renseigné&#x27;})<br />@MinLength(8, {message: &#x27;Le mot de passe doit contenir au moins 8 caractères&#x27;})<br />
+                            @ApiProperty({description: &#x27;Le mot de passe de l&#x27;utilisateur&#x27;, example: &#x27;motdepasse&#x27;})<br />@IsString({message: &#x27;Le mot de passe doit être une chaine de caractères&#x27;})<br />@IsNotEmpty({message: &#x27;Le mot de passe doit être renseigné&#x27;})<br />@MinLength(8, {message: &#x27;Le mot de passe doit contenir au moins 8 caractères&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/users/dtos/createuser.dto.ts:29</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="39" class="link-to-prism">src/users/dtos/createuser.dto.ts:39</a></div>
                         </td>
                     </tr>
 
@@ -326,7 +334,8 @@ permet de limiter les inscriptions au membre du club</p>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsString, IsNotEmpty, MinLength, IsEmail } from &#x27;class-validator&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsString, IsNotEmpty, MinLength, IsEmail, MaxLength } from &#x27;class-validator&#x27;;
+import { ApiProperty } from &#x27;@nestjs/swagger&#x27;;
 
 /**
  * DTO pour la création d&#x27;un utilisateur
@@ -338,9 +347,14 @@ export class CreateUserDto {
    * @type {string}
    * @memberof CreateUserDto
    */
+  @ApiProperty({
+    description: &quot;L&#x27;email de l&#x27;utilisateur&quot;,
+    example: &#x27;toto@assbt.com&#x27;,
+  })
   @IsString({ message: &quot;L&#x27;email doit être une chaine de caractères&quot; })
   @IsNotEmpty({ message: &quot;L&#x27;email doit être renseigné&quot; })
   @IsEmail({}, { message: &quot;L&#x27;email doit être un email valide&quot; })
+  @MaxLength(96, { message: &quot;L&#x27;email doit contenir au maximum 96 caractères&quot; })
   email: string;
 
   /**
@@ -349,12 +363,16 @@ export class CreateUserDto {
    * @type {string}
    * @memberof CreateUserDto
    */
+  @ApiProperty({
+    description: &quot;Le mot de passe de l&#x27;utilisateur&quot;,
+    example: &#x27;motdepasse&#x27;,
+  })
   @IsString({ message: &#x27;Le mot de passe doit être une chaine de caractères&#x27; })
   @IsNotEmpty({ message: &#x27;Le mot de passe doit être renseigné&#x27; })
   @MinLength(8, {
     message: &#x27;Le mot de passe doit contenir au moins 8 caractères&#x27;,
   })
-  password: string;
+  mot_de_passe: string;
 
   /**
    * La clef d&#x27;inscription (fournie par le club)
@@ -362,6 +380,10 @@ export class CreateUserDto {
    * @type {string}
    * @memberof CreateUserDto
    */
+  @ApiProperty({
+    description: &quot;La clef d&#x27;inscription, celle-ci est fournie par le club&quot;,
+    example: &#x27;clef&#x27;,
+  })
   @IsString({
     message: &#x27;Le clef de validation doit être une chaine de caractères&#x27;,
   })

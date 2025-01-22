@@ -363,16 +363,16 @@ export class AuthService {
   async signIn(email: string, pass: string): Promise&lt;{ access_token: string }&gt; {
     console.log(&#x60;Tentative de connexion avec l&#x27;email: ${email} ${pass}&#x60;); // Ajout du console.log à la ligne 14 //
     const user &#x3D; await this.usersService.findOneByEmail(email);
-    if (!user || !bcrypt.compareSync(pass, user.password)) {
+    if (!user || !bcrypt.compareSync(pass, user.mot_de_passe)) {
       throw new UnauthorizedException(&#x27;Email ou mot de passe incorrect&#x27;);
     }
 
-    const role &#x3D; user?.role?.roleName ?? &#x27;aucun&#x27;;
+    //const role &#x3D; user?.role?.roleName ?? &#x27;aucun&#x27;;
 
     const payload &#x3D; {
       sub: user.id,
       email: user.email,
-      role: role,
+      //role: role,
     };
     return {
       access_token: await this.jwtService.signAsync(payload),

@@ -119,7 +119,7 @@
                 <h3>Prefix</h3>
             </p>
             <p class="comment">
-                <code>users</code>
+                <code>membres</code>
             </p>
 
 
@@ -202,7 +202,7 @@ Controlleur pour les routes liées aux utilisateurs</p>
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Récupérer tout les utilisateur&#x27;, description: &#x27;Récupérer l&#x27;ensemble des utilisateurs&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Liste des utilisateurs&#x27;})<br /></code>
+                    <code>@Get()<br />@ApiOperation({summary: &#x27;Récupérer tout les utilisateurs&#x27;, description: &#x27;Récupérer l&#x27;ensemble des utilisateurs&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Un tableau comportant la liste des utilisateurs&#x27;})<br /></code>
                 </td>
             </tr>
 
@@ -255,7 +255,7 @@ Controlleur pour les routes liées aux utilisateurs</p>
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Public()<br />@Post(&#x27;register&#x27;)<br />@ApiOperation({summary: &#x27;Register a new user&#x27;, description: &#x27;Enregistrer un nouvel utilisateur&#x27;})<br /></code>
+                    <code>@Public()<br />@Post(&#x27;register&#x27;)<br />@ApiOperation({summary: &#x27;Création d&#x27;un nouvel utilisateur&#x27;, description: &#x27;Enregistrer un nouvel utilisateur&#x27;})<br /></code>
                 </td>
             </tr>
 
@@ -330,8 +330,8 @@ import { ApiTags, ApiOperation, ApiResponse } from &#x27;@nestjs/swagger&#x27;;
  * Users controller
  * Controlleur pour les routes liées aux utilisateurs
  */
-@Controller(&#x27;users&#x27;)
-@ApiTags(&#x27;Users&#x27;)
+@Controller(&#x27;membres&#x27;)
+@ApiTags(&#x27;membres&#x27;)
 export class UsersController {
   /**
    * Constructeur
@@ -347,7 +347,7 @@ export class UsersController {
   @Public()
   @Post(&#x27;register&#x27;)
   @ApiOperation({
-    summary: &#x27;Register a new user&#x27;,
+    summary: &quot;Création d&#x27;un nouvel utilisateur&quot;,
     description: &#x27;Enregistrer un nouvel utilisateur&#x27;,
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
@@ -361,12 +361,12 @@ export class UsersController {
    */
   @Get()
   @ApiOperation({
-    summary: &#x27;Récupérer tout les utilisateur&#x27;,
-    description: &#x27;Récupérer l\&#x27;ensemble des utilisateurs&#x27;,
+    summary: &#x27;Récupérer tout les utilisateurs&#x27;,
+    description: &quot;Récupérer l&#x27;ensemble des utilisateurs&quot;,
   })
   @ApiResponse({
     status: 200,
-    description: &#x27;Liste des utilisateurs&#x27;,
+    description: &#x27;Un tableau comportant la liste des utilisateurs&#x27;,
   })
   getUsers() {
     return this.usersService.findAllUsers();

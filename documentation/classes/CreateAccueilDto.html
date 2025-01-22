@@ -149,14 +149,17 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#description" >description</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#image" >image</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#titre" >titre</a>
@@ -188,6 +191,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>description</b></span>
                         <a href="#description"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -204,13 +208,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsNotEmpty({message: &#x27;Le champ titre doit être renseigné.&#x27;})<br />@MinLength(20, {message: &#x27;Le champ titre doit contenir au moins 20 caractères.&#x27;})<br />
+                            @ApiProperty({description: &#x27;La description de l&#x27;accueil&#x27;, example: &#x27;&lt;h1&gt;Ceci est le site des Bulleurs Toulonnais&lt;/h1&gt;&#x27;})<br />@IsNotEmpty({message: &#x27;Le champ titre doit être renseigné.&#x27;})<br />@MinLength(20, {message: &#x27;Le champ titre doit contenir au moins 20 caractères.&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:29</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="38" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:38</a></div>
                         </td>
                     </tr>
 
@@ -231,6 +235,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>image</b></span>
                         <a href="#image"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -247,13 +252,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsNotEmpty({message: &#x27;Le champ image doit être renseigné.&#x27;})<br />@MinLength(10, {message: &#x27;Le champ image doit contenir au moins 10 caractères.&#x27;})<br />
+                            @ApiProperty({description: &#x27;Le lien de l&#x27;image de l&#x27;accueil&#x27;, example: &#x27;https://www.google.com/image.png&#x27;})<br />@IsNotEmpty({message: &#x27;Le champ image doit être renseigné.&#x27;})<br />@MinLength(10, {message: &#x27;Le champ image doit contenir au moins 10 caractères.&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:41</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="54" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:54</a></div>
                         </td>
                     </tr>
 
@@ -274,6 +279,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>titre</b></span>
                         <a href="#titre"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -290,13 +296,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsNotEmpty({message: &#x27;Le champ titre doit être renseigné.&#x27;})<br />@MinLength(10, {message: &#x27;Le champ titre doit contenir au moins 10 caractères.&#x27;})<br />
+                            @ApiProperty({description: &#x27;Le titre de l&#x27;accueil&#x27;, example: &#x27;Bienvenue sur le site&#x27;})<br />@IsNotEmpty({message: &#x27;Le champ titre doit être renseigné.&#x27;})<br />@MinLength(10, {message: &#x27;Le champ titre doit contenir au moins 10 caractères.&#x27;})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:17</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/accueils/dtos/accueil.dtos.ts:22</a></div>
                         </td>
                     </tr>
 
@@ -322,6 +328,7 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsNotEmpty, MinLength } from &#x27;class-validator&#x27;;
+import { ApiProperty } from &#x27;@nestjs/swagger&#x27;;
 
 /**
  * DTO pour la création d&#x27;un accueil
@@ -333,6 +340,10 @@ export class CreateAccueilDto {
    * @type {string}
    * @memberof CreateAccueilDto
    */
+  @ApiProperty({
+    description: &#x27;Le titre de l\&#x27;accueil&#x27;,
+    example: &#x27;Bienvenue sur le site&#x27;,
+  })
   @IsNotEmpty({ message: &#x27;Le champ titre doit être renseigné.&#x27; })
   @MinLength(10, {
     message: &#x27;Le champ titre doit contenir au moins 10 caractères.&#x27;,
@@ -345,6 +356,10 @@ export class CreateAccueilDto {
    * @type {string}
    * @memberof CreateAccueilDto
    */
+  @ApiProperty({
+    description: &quot;La description de l&#x27;accueil&quot;,
+    example: &#x27;&lt;h1&gt;Ceci est le site des Bulleurs Toulonnais&lt;/h1&gt;&#x27;
+  })
   @IsNotEmpty({ message: &#x27;Le champ titre doit être renseigné.&#x27; })
   @MinLength(20, {
     message: &#x27;Le champ titre doit contenir au moins 20 caractères.&#x27;,
@@ -357,6 +372,10 @@ export class CreateAccueilDto {
    * @type {string}
    * @memberof CreateAccueilDto
    */
+  @ApiProperty({
+    description: &quot;Le lien de l&#x27;image de l&#x27;accueil&quot;,
+    example: &#x27;https://www.google.com/image.png&#x27;,
+  })
   @IsNotEmpty({ message: &#x27;Le champ image doit être renseigné.&#x27; })
   @MinLength(10, {
     message: &#x27;Le champ image doit contenir au moins 10 caractères.&#x27;,

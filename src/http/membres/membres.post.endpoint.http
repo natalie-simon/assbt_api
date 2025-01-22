@@ -1,8 +1,8 @@
-POST http://localhost:3000/users/register
+POST http://localhost:3000/membres/register
 Content-Type: application/json
 
 {
   "email": "toto@example.com",
-  "password": "toto123456",
+  "mot_de_passe": "toto123456",
   "clef": "toto"
 }

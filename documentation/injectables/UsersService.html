@@ -170,7 +170,7 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(userRepository: <a href="../entitys/User.html" target="_self">Repository&lt;User&gt;</a>)</code>
+<code>constructor(usersRepository: <a href="../entitys/User.html" target="_self">Repository&lt;User&gt;</a>)</code>
                     </td>
                 </tr>
                         <tr>
@@ -196,7 +196,7 @@
                                         </thead>
                                         <tbody>
                                                 <tr>
-                                                        <td>userRepository</td>
+                                                        <td>usersRepository</td>
                                                   
                                                         <td>
                                                                         <code><a href="../entitys/User.html" target="_self" >Repository&lt;User&gt;</a></code>
@@ -291,7 +291,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -321,8 +321,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="62"
-                                    class="link-to-prism">src/users/services/users.service.ts:62</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="59"
+                                    class="link-to-prism">src/users/services/users.service.ts:59</a></div>
                         </td>
                     </tr>
 
@@ -363,8 +363,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="51"
-                                    class="link-to-prism">src/users/services/users.service.ts:51</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="48"
+                                    class="link-to-prism">src/users/services/users.service.ts:48</a></div>
                         </td>
                     </tr>
 
@@ -425,7 +425,7 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, BadRequestException } from &#x27;@nestjs/common&#x27;;
 import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
-import { User } from &#x27;src/models/user.entity&#x27;;
+import { User } from &#x27;src/users/user.entity&#x27;;
 import { Repository } from &#x27;typeorm&#x27;;
 import { CreateUserDto } from &#x27;../dtos/createuser.dto&#x27;;
 import * as bcrypt from &#x27;bcryptjs&#x27;;
@@ -437,11 +437,11 @@ import * as bcrypt from &#x27;bcryptjs&#x27;;
 export class UsersService {
   /**
    * Constructeur du service UsersService
-   * @param userRepository le repository des Users
+   * @param usersRepository le repository des Users
    */
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository&lt;User&gt;,
+    private readonly usersRepository: Repository&lt;User&gt;,
   ) {}
 
   /**
@@ -451,20 +451,17 @@ export class UsersService {
    * @throws BadRequestException
    */
   async createUser(createUserDto: CreateUserDto) {
-    console.log(&#x27;userservice createuser&#x27;);
-    console.log(createUserDto);
-    
-    /*if (createUserDto.clef !&#x3D;&#x3D; process.env.CLEF) {
+    if (createUserDto.clef !&#x3D;&#x3D; process.env.CLEF) {
       throw new BadRequestException(&#x27;La clé est incorrecte, contactez le club&#x27;);
     }
-    createUserDto.password &#x3D; bcrypt.hashSync(createUserDto.password, 10);
-    //const newUser &#x3D; this.userRepository.create(createUserDto);
-    //const existingUser &#x3D; await this.findOneByEmail(createUserDto.email);
-    /*if (existingUser) {
+    createUserDto.mot_de_passe &#x3D; bcrypt.hashSync(createUserDto.mot_de_passe, 10);
+    const newUser &#x3D; this.usersRepository.create(createUserDto);
+    const existingUser &#x3D; await this.findOneByEmail(createUserDto.email);
+    if (existingUser) {
       throw new BadRequestException(&#x27;Cet email possède déjà un compte&#x27;);
     }
 
-    return this.userRepository.save(newUser);*/
+    return this.usersRepository.save(newUser);
   }
 
   /**
@@ -474,9 +471,9 @@ export class UsersService {
    * @throws BadRequestException
    */
   findOneByEmail(email: string): Promise&lt;User | null&gt; {
-    return this.userRepository.findOne({
+    return this.usersRepository.findOne({
       where: { email },
-      relations: [&#x27;role&#x27;],
+      //relations: [&#x27;role&#x27;],
     });
   }
 
@@ -485,7 +482,7 @@ export class UsersService {
    * @returns
    */
   findAllUsers() {
-    return this.userRepository.find({ relations: [&#x27;role&#x27;] });
+    return this.usersRepository.find(/*{ relations: [&#x27;role&#x27;] }*/);
   }
 }
 </code></pre>

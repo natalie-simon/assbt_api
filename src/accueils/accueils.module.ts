@@ -4,7 +4,7 @@ import { AccueilsController } from './accueils.controller';
 import { AccueilsService } from './services/accueils.service';
 import { Accueil } from 'src/accueils/accueil.entity';
 
-/**3
+/**
  * Gestion du module Accueils
  */
 @Module({

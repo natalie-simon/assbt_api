@@ -9,8 +9,8 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
  * Users controller
  * Controlleur pour les routes liées aux utilisateurs
  */
-@Controller('users')
-@ApiTags('Users')
+@Controller('membres')
+@ApiTags('membres')
 export class UsersController {
   /**
    * Constructeur

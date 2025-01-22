@@ -184,8 +184,7 @@
             <h3>Description</h3>
         </p>
         <p class="comment">
-            <p>3
-Gestion du module Accueils</p>
+            <p>Gestion du module Accueils</p>
 
         </p>
 
@@ -221,11 +220,11 @@ Gestion du module Accueils</p>
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Module } from &#x27;@nestjs/common&#x27;;
 import { TypeOrmModule } from &#x27;@nestjs/typeorm&#x27;;
-import { AccueilsController } from &#x27;./controllers/accueils.controller&#x27;;
+import { AccueilsController } from &#x27;./accueils.controller&#x27;;
 import { AccueilsService } from &#x27;./services/accueils.service&#x27;;
-import { Accueil } from &#x27;src/models/accueil.entity&#x27;;
+import { Accueil } from &#x27;src/accueils/accueil.entity&#x27;;
 
-/**3
+/**
  * Gestion du module Accueils
  */
 @Module({

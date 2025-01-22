@@ -112,7 +112,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/accueils/controllers/accueils.controller.ts</code>
+            <code>src/accueils/accueils.controller.ts</code>
         </p>
 
             <p class="comment">
@@ -152,18 +152,25 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#createAccueils" >createAccueils</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#deleteAccueil" >deleteAccueil</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#findAccueilById" >findAccueilById</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#getAccueils" >getAccueils</a>
@@ -193,6 +200,7 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>createAccueils</b></span>
                         <a href="#createAccueils"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -209,14 +217,14 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;create&#x27;)<br />@UsePipes(ValidationPipe)<br /></code>
+                    <code>@ApiOperation({summary: &#x27;Créer un accueil&#x27;})<br />@ApiResponse({status: 201, description: &#x27;L&#x27;Accueil créé&#x27;})<br />@Post(&#x27;create&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="57"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:57</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="62"
+                                    class="link-to-prism">src/accueils/accueils.controller.ts:62</a></div>
                         </td>
                     </tr>
 
@@ -276,6 +284,8 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                     <a name="deleteAccueil"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>deleteAccueil</b></span>
                         <a href="#deleteAccueil"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -292,21 +302,21 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;delete/:id&#x27;)<br /></code>
+                    <code>@ApiOperation({summary: &#x27;Supprimer un accueil&#x27;})<br />@ApiResponse({status: 200, description: &#x27;&#x27;})<br />@Delete(&#x27;delete/:id&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="67"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:67</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">src/accueils/accueils.controller.ts:74</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
-                        <div class="io-description"><p>Route pour supprimer un accueil par son id</p>
+                        <div class="io-description"><p>Route pour supprimer un acc</p>
 </div>
 
                             <div class="io-description">
@@ -360,6 +370,8 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>findAccueilById</b></span>
                         <a href="#findAccueilById"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -376,14 +388,14 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Public()<br />@Get(&#x27;:id&#x27;)<br /></code>
+                    <code>@ApiOperation({summary: &#x27;Récupérer un accueil par son id&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Un accueil&#x27;})<br />@Public()<br />@Get(&#x27;:id&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="46"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:46</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="50"
+                                    class="link-to-prism">src/accueils/accueils.controller.ts:50</a></div>
                         </td>
                     </tr>
 
@@ -444,6 +456,8 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>getAccueils</b></span>
                         <a href="#getAccueils"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -460,14 +474,14 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Public()<br />@Get()<br /></code>
+                    <code>@Public()<br />@Get()<br />@ApiOperation({summary: &#x27;Liste des accueils&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Un tableau comportant la liste des Accueils&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="35"
-                                    class="link-to-prism">src/accueils/controllers/accueils.controller.ts:35</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="37"
+                                    class="link-to-prism">src/accueils/accueils.controller.ts:37</a></div>
                         </td>
                     </tr>
 
@@ -500,12 +514,11 @@ Cela correpond aux informations de la page d&#39;accueil de l&#39;application</p
   ParseIntPipe,
   Post,
   Delete,
-  UsePipes,
-  ValidationPipe,
 } from &#x27;@nestjs/common&#x27;;
 import { CreateAccueilDto } from &#x27;src/accueils/dtos/accueil.dtos&#x27;;
 import { AccueilsService } from &#x27;src/accueils/services/accueils.service&#x27;;
 import { Public } from &#x27;src/auth/decorators/public.decorators&#x27;;
+import { ApiTags, ApiOperation, ApiResponse } from &#x27;@nestjs/swagger&#x27;;
 
 /**
  * Accueils controller
@@ -513,6 +526,7 @@ import { Public } from &#x27;src/auth/decorators/public.decorators&#x27;;
  * Cela correpond aux informations de la page d&#x27;accueil de l&#x27;application
  */
 @Controller(&#x27;accueils&#x27;)
+@ApiTags(&#x27;accueils&#x27;)
 export class AccueilsController {
   /**
    * Constructeur
@@ -526,6 +540,8 @@ export class AccueilsController {
    */
   @Public()
   @Get()
+  @ApiOperation({ summary: &#x27;Liste des accueils&#x27; })
+  @ApiResponse({ status: 200, description: &#x27;Un tableau comportant la liste des Accueils&#x27; })
   getAccueils() {
     return this.accueilsService.findAllAccueil();
   }
@@ -533,8 +549,10 @@ export class AccueilsController {
   /**
    * Route pour récupérer un accueil par son id
    * @param id Un Entier correspondant à l&#x27;id de l&#x27;accueil
-   * @returns 
+   * @returns
    */
+  @ApiOperation({ summary: &#x27;Récupérer un accueil par son id&#x27; })
+  @ApiResponse({ status: 200, description: &#x27;Un accueil&#x27; })
   @Public()
   @Get(&#x27;:id&#x27;)
   findAccueilById(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
@@ -546,17 +564,20 @@ export class AccueilsController {
    * @param createAccueilDto La BTO correspondant à la création d&#x27;un accueil
    * @returns
    */
+  @ApiOperation({ summary: &#x27;Créer un accueil&#x27; })
+  @ApiResponse({ status: 201, description: &quot;L&#x27;Accueil créé&quot; })
   @Post(&#x27;create&#x27;)
-  @UsePipes(ValidationPipe)
   createAccueils(@Body() createAccueilDto: CreateAccueilDto) {
     return this.accueilsService.createAccueil(createAccueilDto);
   }
 
   /**
-   * Route pour supprimer un accueil par son id
+   * Route pour supprimer un acc
    * @param id Un entier correspondant à l&#x27;id de l&#x27;accueil à supprimer
    * @returns
    */
+  @ApiOperation({ summary: &#x27;Supprimer un accueil&#x27; })
+  @ApiResponse({ status: 200, description: &quot;&quot; })
   @Delete(&#x27;delete/:id&#x27;)
   deleteAccueil(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
     return this.accueilsService.deleteAccueilById(id);
