@@ -10,7 +10,7 @@ import {
 
 import { ArticlesService } from './services/articles.service';
 import { CreateArticleDto } from './dtos/create-article.dto';
-import { Public } from 'src/auth/decorators/public.decorators';
+import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**

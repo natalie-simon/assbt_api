@@ -2,5 +2,5 @@ POST http://localhost:3000/categories-articles/create
 Content-Type: application/json
 
 {
-  "lbl_categorie": "Accueil"
+  "lbl_categorie": "Vente / Echange"
 }

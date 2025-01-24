@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Statut } from "src/statuts/statut.entity";
+import { Statut } from '../statut.entity';
 import { Repository } from "typeorm";
 import { CreateStatutDto } from "../dtos/create-statut.dto";
 

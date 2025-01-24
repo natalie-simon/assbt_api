@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CategorieArticle } from 'src/categories-articles/categorie-article.entity';
+import { CategorieArticle } from '../categorie-article.entity';
 import { Repository } from 'typeorm';
 import { CreateCategorieArticleDto } from '../dtos/create-categorie-article.dto';
 
@@ -34,7 +34,7 @@ export class CatetogiesArticlesService {
    * Récupération de toutes les Catégories d'Articles
    * @returns
    */
-  findAllCategorieArticle() {
+  async findAllCategorieArticle() {
     return this.categorieArticleRepository.find();
   }
 
@@ -43,7 +43,7 @@ export class CatetogiesArticlesService {
    * @param id
    * @returns
    */
-  findCategorieArticleById(id: number) {
+  async findCategorieArticleById(id: number) {
     return this.categorieArticleRepository.findOne({
       where: { id: id },
     });
