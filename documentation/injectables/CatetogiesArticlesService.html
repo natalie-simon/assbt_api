@@ -146,9 +146,11 @@
                                 <a href="#createCategorieArticle" >createCategorieArticle</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#findAllCategorieArticle" >findAllCategorieArticle</a>
                             </li>
                             <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#findCategorieArticleById" >findCategorieArticleById</a>
                             </li>
                         </ul>
@@ -294,6 +296,7 @@
                 <td class="col-md-4">
                     <a name="findAllCategorieArticle"></a>
                     <span class="name">
+                            <span class="modifier">Async</span>
                         <span ><b>findAllCategorieArticle</b></span>
                         <a href="#findAllCategorieArticle"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -301,7 +304,8 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>findAllCategorieArticle()</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findAllCategorieArticle()</code>
                 </td>
             </tr>
 
@@ -320,7 +324,7 @@
 </div>
 
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -336,6 +340,7 @@
                 <td class="col-md-4">
                     <a name="findCategorieArticleById"></a>
                     <span class="name">
+                            <span class="modifier">Async</span>
                         <span ><b>findCategorieArticleById</b></span>
                         <a href="#findCategorieArticleById"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -343,7 +348,8 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>findCategorieArticleById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findCategorieArticleById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -389,7 +395,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -407,7 +413,7 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
 import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
-import { CategorieArticle } from &#x27;src/categories-articles/categorie-article.entity&#x27;;
+import { CategorieArticle } from &#x27;../categorie-article.entity&#x27;;
 import { Repository } from &#x27;typeorm&#x27;;
 import { CreateCategorieArticleDto } from &#x27;../dtos/create-categorie-article.dto&#x27;;
 
@@ -441,7 +447,7 @@ export class CatetogiesArticlesService {
    * Récupération de toutes les Catégories d&#x27;Articles
    * @returns
    */
-  findAllCategorieArticle() {
+  async findAllCategorieArticle() {
     return this.categorieArticleRepository.find();
   }
 
@@ -450,7 +456,7 @@ export class CatetogiesArticlesService {
    * @param id
    * @returns
    */
-  findCategorieArticleById(id: number) {
+  async findCategorieArticleById(id: number) {
     return this.categorieArticleRepository.findOne({
       where: { id: id },
     });
