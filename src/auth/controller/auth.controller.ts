@@ -7,8 +7,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { SignInDto } from 'src/auth/dtos/signin.dto';
-import { Public } from 'src/auth/decorators/public.decorators';
+import { SignInDto } from '../dtos/signin.dto';
+import { Public } from '../decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**

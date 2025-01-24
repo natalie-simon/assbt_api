@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { CatetogiesArticlesService } from './services/categories-articles.services';
 import { CreateCategorieArticleDto } from "./dtos/create-categorie-article.dto";
-import { Public } from "src/auth/decorators/public.decorators";
+import { Public } from "../auth/decorators/public.decorators";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 
@@ -18,7 +18,7 @@ import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 export class CategoriesArticlesController {
   /**
    * Constructeur
-   * @param categoriesArticles 
+   * @param categoriesArticles
    */
   constructor(private readonly categoriesArticles: CatetogiesArticlesService) {}
 

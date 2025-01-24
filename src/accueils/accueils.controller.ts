@@ -7,9 +7,9 @@ import {
   Post,
   Delete,
 } from '@nestjs/common';
-import { CreateAccueilDto } from 'src/accueils/dtos/accueil.dtos';
-import { AccueilsService } from 'src/accueils/services/accueils.service';
-import { Public } from 'src/auth/decorators/public.decorators';
+import { CreateAccueilDto } from '../accueils/dtos/accueil.dtos';
+import { AccueilsService } from '../accueils/services/accueils.service';
+import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**
