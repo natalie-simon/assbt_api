@@ -2,8 +2,9 @@ POST http://localhost:3000/articles/create
 Content-Type: application/json
 
 {
-  "titre": "Voir un titre",
-  "contenu": "toto123456",
+  "titre": "Article suivant (3)",
+  "contenu": "<h1>Un peu de html</h1><p>Lorem ipsum dolor sit amet</p>",
   "statut": "1",
-  "categorie": "1"
+  "categorie": "1",
+  "image": "https://wikiclic.com/wp-content/uploads/2023/05/image-libre-de-droit-wikiclic.jpg"
 }

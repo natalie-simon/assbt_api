@@ -153,6 +153,10 @@
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                <a href="#image" >image</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#statut" >statut</a>
                             </li>
@@ -303,6 +307,48 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="image"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                        <span ><b>image</b></span>
+                        <a href="#image"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @Column({type: &#x27;text&#x27;, name: &#x27;image&#x27;, nullable: true})<br />
+                        </code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="79" class="link-to-prism">src/articles/article.entity.ts:79</a></div>
+                        </td>
+                    </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Url de l&#39;image liée à l&#39;article</p>
+</div>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="statut"></a>
                     <span class="name">
                             <span class="modifier"></span>
@@ -398,7 +444,7 @@
 } from &#x27;typeorm&#x27;;
 import { Statut } from &#x27;../statuts/statut.entity&#x27;;
 import { CategorieArticle } from &#x27;../categories-articles/categorie-article.entity&#x27;;
-//import { User } from &#x27;src/users/user.entity&#x27;;
+import { User } from &#x27;../users/user.entity&#x27;;
 
 /**
  * Entité Article
@@ -455,6 +501,19 @@ export class Article {
   @ManyToOne(() &#x3D;&gt; CategorieArticle, (categorie) &#x3D;&gt; categorie.articles)
   @JoinColumn()
   categorie: CategorieArticle;
+
+  /**
+   * Url de l&#x27;image liée à l&#x27;article
+   *
+   * @type {string}
+   * @memberof Article
+   */
+  @Column({
+    type: &#x27;text&#x27;,
+    name: &#x27;image&#x27;,
+    nullable: true,
+  })
+  image: string;
 
   /*@OneToOne(() &#x3D;&gt; User)
   @JoinColumn({

@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from '../article.entity';
 import { Repository } from 'typeorm';
-import { CreateArticleDto } from 'src/articles/dtos/create-article.dto';
-import { UsersService } from 'src/users/services/users.service';
-import { StatutsService } from 'src/statuts/services/statuts.service';
-import { CatetogiesArticlesService } from 'src/categories-articles/services/categories-articles.services';
+import { CreateArticleDto } from '../dtos/create-article.dto';
+import { UsersService } from '../../users/services/users.service';
+import { StatutsService } from '../../statuts/services/statuts.service';
+import { CatetogiesArticlesService } from '../../categories-articles/services/categories-articles.services';
 
 /**
  * Service des articles
@@ -33,8 +33,13 @@ export class ArticlesService {
    * @returns
    */
   public async createArticle(createArticleDto: CreateArticleDto) {
-    let statut = await this.statutsService.findStatutById(createArticleDto.statut);
-    let categorie = await this.catetogieArticlesService.findCategorieArticleById(createArticleDto.categorie);
+    let statut = await this.statutsService.findStatutById(
+      createArticleDto.statut,
+    );
+    let categorie =
+      await this.catetogieArticlesService.findCategorieArticleById(
+        createArticleDto.categorie,
+      );
     const newArticle = this.articleRepository.create({
       ...createArticleDto,
       statut: statut,
@@ -49,7 +54,7 @@ export class ArticlesService {
    */
   public async findAllArticles() {
     return await this.articleRepository.find({
-      relations: ['statut'/*, 'categorie', 'redacteur'*/],
+      relations: ['statut', 'categorie' /*, 'redacteur'*/],
     });
   }
 
@@ -61,6 +66,18 @@ export class ArticlesService {
   public async findArticleById(id: number) {
     return await this.articleRepository.findOne({
       where: { id: id },
+    });
+  }
+
+  /**
+   * Récupération de tous les articles d'une catégorie
+   * @param categorieId
+   * @returns
+   */
+  public async findArticleByCategorie(categorieId: number) {
+    return await this.articleRepository.find({
+      relations: ['statut', 'categorie' /*, 'redacteur'*/],
+      where: { categorie: { id: categorieId } },
     });
   }
 

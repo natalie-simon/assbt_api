@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Statut } from '../statuts/statut.entity';
 import { CategorieArticle } from '../categories-articles/categorie-article.entity';
-//import { User } from 'src/users/user.entity';
+import { User } from '../users/user.entity';
 
 /**
  * Entité Article
@@ -64,6 +64,19 @@ export class Article {
   @ManyToOne(() => CategorieArticle, (categorie) => categorie.articles)
   @JoinColumn()
   categorie: CategorieArticle;
+
+  /**
+   * Url de l'image liée à l'article
+   *
+   * @type {string}
+   * @memberof Article
+   */
+  @Column({
+    type: 'text',
+    name: 'image',
+    nullable: true,
+  })
+  image: string;
 
   /*@OneToOne(() => User)
   @JoinColumn({

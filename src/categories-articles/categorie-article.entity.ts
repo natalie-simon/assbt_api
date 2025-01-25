@@ -14,7 +14,6 @@ import { Article } from '../articles/article.entity';
 })
 export class CategorieArticle{
   @PrimaryGeneratedColumn({
-    type: 'bigint',
     name: 'categorie_article_id',
   })
   id: number;

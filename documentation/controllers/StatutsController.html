@@ -324,9 +324,9 @@ Gestion des routes liées aux Statuts</p>
   Body,
   Post,
 } from &#x27;@nestjs/common&#x27;;
-import { StatutsService } from &#x27;src/statuts/services/statuts.service&#x27;;
-import { CreateStatutDto } from &#x27;src/statuts/dtos/create-statut.dto&#x27;;
-import { Public } from &#x27;src/auth/decorators/public.decorators&#x27;;
+import { StatutsService } from &#x27;./services/statuts.service&#x27;;
+import { CreateStatutDto } from &#x27;./dtos/create-statut.dto&#x27;;
+import { Public } from &#x27;../auth/decorators/public.decorators&#x27;;
 import { ApiTags, ApiOperation, ApiResponse } from &#x27;@nestjs/swagger&#x27;;
 
 /**

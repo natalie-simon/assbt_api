@@ -1,4 +1,4 @@
-import { IsNotEmpty, MaxLength, IsString, IsInt } from "class-validator";
+import { IsNotEmpty, MaxLength, IsString, IsInt, IsUrl, IsOptional } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from 'class-transformer';
 
@@ -75,4 +75,21 @@ export class CreateArticleDto {
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: "La catégorie de l'article doit être renseignée" })
   categorie: number;
+
+  /**
+   * L'url de l'image de l'article
+   *
+   * @type {string}
+   * @memberof CreateArticleDto
+   */
+  @ApiProperty({
+    description: "L'url de l'image de l'article",
+    example: 'https://www.example.com/image.jpg',
+    required: false,
+    type: String,
+  })
+  @IsUrl({}, { message: 'L\'url de l\'image doit être une url valide' })
+  @IsOptional()
+  image: string;
+
 }

@@ -69,11 +69,23 @@ export class ArticlesController {
    * @param id
    * @returns
    */
-  @ApiOperation({ summary: 'Supprimer un article par son id' })
+  /*@ApiOperation({ summary: 'Supprimer un article par son id' })
   @ApiResponse({ status: 200, description: "L'Article supprimé" })
   @Delete(':id')
   deleteArticleById(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.deleteArticleById(id);
+  }*/
+
+  /**
+   * Récupération des articles d'une catégorie
+   * @param id
+   * @returns
+   */
+  @ApiOperation({ summary: "Récupération de tout les articles d'une catégorie" })
+  @ApiResponse({ status: 200, description: 'Un tableau comportant la liste des Articles' })
+  @Get('categorie/:id')
+  public async findArticlesByCategorie(@Param('id', ParseIntPipe) id: number) {
+    return this.articlesService.findArticleByCategorie(id);
   }
 
 }

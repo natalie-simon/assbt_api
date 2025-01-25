@@ -24,13 +24,16 @@ describe('CategoriesArticlesController', () => {
     );
   });
 
+    it('should be defined', () => {
+      expect(controller).toBeDefined();
+    });
   describe("getCategoriesArticles", () => {
     it("should return an array of CategoriesArticles", () => {
       expect(controller.getCategoriesArticles()).resolves.toEqual(categoriesArticlesMock);
     });
   });
 
-  describe("createCategorieAricle", () => {
+  describe("createCategorieArticle", () => {
     const dto = { lbl_categorie: 'Accueil' } as CreateCategorieArticleDto;
 
     it("should return a new CategorieArticle", () => {
@@ -39,7 +42,4 @@ describe('CategoriesArticlesController', () => {
     });
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
 });

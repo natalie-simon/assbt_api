@@ -4,9 +4,9 @@ import {
   Body,
   Post,
 } from '@nestjs/common';
-import { StatutsService } from 'src/statuts/services/statuts.service';
-import { CreateStatutDto } from 'src/statuts/dtos/create-statut.dto';
-import { Public } from 'src/auth/decorators/public.decorators';
+import { StatutsService } from './services/statuts.service';
+import { CreateStatutDto } from './dtos/create-statut.dto';
+import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**

@@ -158,6 +158,11 @@
                             <li>
                                     <span class="modifier">Public</span>
                                     <span class="modifier">Async</span>
+                                <a href="#findArticleByCategorie" >findArticleByCategorie</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Public</span>
+                                    <span class="modifier">Async</span>
                                 <a href="#findArticleById" >findArticleById</a>
                             </li>
                         </ul>
@@ -356,8 +361,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="73"
-                                    class="link-to-prism">src/articles/services/articles.service.ts:73</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="90"
+                                    class="link-to-prism">src/articles/services/articles.service.ts:90</a></div>
                         </td>
                     </tr>
 
@@ -428,8 +433,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="50"
-                                    class="link-to-prism">src/articles/services/articles.service.ts:50</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="55"
+                                    class="link-to-prism">src/articles/services/articles.service.ts:55</a></div>
                         </td>
                     </tr>
 
@@ -439,6 +444,78 @@
                         <div class="io-description"><p>Récupération de tous les articles</p>
 </div>
 
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findArticleByCategorie"></a>
+                    <span class="name">
+                            <span class="modifier">Public</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>findArticleByCategorie</b></span>
+                        <a href="#findArticleByCategorie"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findArticleByCategorie(categorieId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="77"
+                                    class="link-to-prism">src/articles/services/articles.service.ts:77</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Récupération de tous les articles d&#39;une catégorie</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>categorieId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
                             <b>Returns : </b>    <code>unknown</code>
 
@@ -473,8 +550,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="61"
-                                    class="link-to-prism">src/articles/services/articles.service.ts:61</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="66"
+                                    class="link-to-prism">src/articles/services/articles.service.ts:66</a></div>
                         </td>
                     </tr>
 
@@ -532,10 +609,10 @@
 import { InjectRepository } from &#x27;@nestjs/typeorm&#x27;;
 import { Article } from &#x27;../article.entity&#x27;;
 import { Repository } from &#x27;typeorm&#x27;;
-import { CreateArticleDto } from &#x27;src/articles/dtos/create-article.dto&#x27;;
-import { UsersService } from &#x27;src/users/services/users.service&#x27;;
-import { StatutsService } from &#x27;src/statuts/services/statuts.service&#x27;;
-import { CatetogiesArticlesService } from &#x27;src/categories-articles/services/categories-articles.services&#x27;;
+import { CreateArticleDto } from &#x27;../dtos/create-article.dto&#x27;;
+import { UsersService } from &#x27;../../users/services/users.service&#x27;;
+import { StatutsService } from &#x27;../../statuts/services/statuts.service&#x27;;
+import { CatetogiesArticlesService } from &#x27;../../categories-articles/services/categories-articles.services&#x27;;
 
 /**
  * Service des articles
@@ -563,8 +640,13 @@ export class ArticlesService {
    * @returns
    */
   public async createArticle(createArticleDto: CreateArticleDto) {
-    let statut &#x3D; await this.statutsService.findStatutById(createArticleDto.statut);
-    let categorie &#x3D; await this.catetogieArticlesService.findCategorieArticleById(createArticleDto.categorie);
+    let statut &#x3D; await this.statutsService.findStatutById(
+      createArticleDto.statut,
+    );
+    let categorie &#x3D;
+      await this.catetogieArticlesService.findCategorieArticleById(
+        createArticleDto.categorie,
+      );
     const newArticle &#x3D; this.articleRepository.create({
       ...createArticleDto,
       statut: statut,
@@ -579,7 +661,7 @@ export class ArticlesService {
    */
   public async findAllArticles() {
     return await this.articleRepository.find({
-      relations: [&#x27;statut&#x27;/*, &#x27;categorie&#x27;, &#x27;redacteur&#x27;*/],
+      relations: [&#x27;statut&#x27;, &#x27;categorie&#x27; /*, &#x27;redacteur&#x27;*/],
     });
   }
 
@@ -595,6 +677,18 @@ export class ArticlesService {
   }
 
   /**
+   * Récupération de tous les articles d&#x27;une catégorie
+   * @param categorieId
+   * @returns
+   */
+  public async findArticleByCategorie(categorieId: number) {
+    return await this.articleRepository.find({
+      relations: [&#x27;statut&#x27;, &#x27;categorie&#x27; /*, &#x27;redacteur&#x27;*/],
+      where: { categorie: { id: categorieId } },
+    });
+  }
+
+  /**
    * Mise à jour d&#x27;un article
    * @param id
    * @param createArticleDto
@@ -603,7 +697,8 @@ export class ArticlesService {
   deleteArticleById(id: number) {
     return this.articleRepository.delete(id);
   }
-}</code></pre>
+}
+</code></pre>
     </div>
 
 </div>

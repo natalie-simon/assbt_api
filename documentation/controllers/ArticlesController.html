@@ -159,14 +159,16 @@ Gestion des routes liées aux Articles</p>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                <a href="#deleteArticleById" >deleteArticleById</a>
+                                    <span class="modifier"></span>
+                                <a href="#findArticleById" >findArticleById</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                <a href="#findArticleById" >findArticleById</a>
+                                    <span class="modifier">Public</span>
+                                    <span class="modifier">Async</span>
+                                <a href="#findArticlesByCategorie" >findArticlesByCategorie</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -277,86 +279,6 @@ Gestion des routes liées aux Articles</p>
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="deleteArticleById"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                        <span ><b>deleteArticleById</b></span>
-                        <a href="#deleteArticleById"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deleteArticleById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@ApiOperation({summary: &#x27;Supprimer un article par son id&#x27;})<br />@ApiResponse({status: 200, description: &#x27;L&#x27;Article supprimé&#x27;})<br />@Delete(&#x27;:id&#x27;)<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="75"
-                                    class="link-to-prism">src/articles/articles.controller.ts:75</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-                        <div class="io-description"><p>Suppresion d&#39;un article par son id</p>
-</div>
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>id</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
                     <a name="findArticleById"></a>
                     <span class="name">
                             <span class="modifier"></span>
@@ -425,6 +347,88 @@ Gestion des routes liées aux Articles</p>
                             </div>
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findArticlesByCategorie"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Public</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>findArticlesByCategorie</b></span>
+                        <a href="#findArticlesByCategorie"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findArticlesByCategorie(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@ApiOperation({summary: &#x27;Récupération de tout les articles d&#x27;une catégorie&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Un tableau comportant la liste des Articles&#x27;})<br />@Get(&#x27;categorie/:id&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="87"
+                                    class="link-to-prism">src/articles/articles.controller.ts:87</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Récupération des articles d&#39;une catégorie</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -563,11 +567,23 @@ export class ArticlesController {
    * @param id
    * @returns
    */
-  @ApiOperation({ summary: &#x27;Supprimer un article par son id&#x27; })
+  /*@ApiOperation({ summary: &#x27;Supprimer un article par son id&#x27; })
   @ApiResponse({ status: 200, description: &quot;L&#x27;Article supprimé&quot; })
   @Delete(&#x27;:id&#x27;)
   deleteArticleById(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
     return this.articlesService.deleteArticleById(id);
+  }*/
+
+  /**
+   * Récupération des articles d&#x27;une catégorie
+   * @param id
+   * @returns
+   */
+  @ApiOperation({ summary: &quot;Récupération de tout les articles d&#x27;une catégorie&quot; })
+  @ApiResponse({ status: 200, description: &#x27;Un tableau comportant la liste des Articles&#x27; })
+  @Get(&#x27;categorie/:id&#x27;)
+  public async findArticlesByCategorie(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
+    return this.articlesService.findArticleByCategorie(id);
   }
 
 }</code></pre>

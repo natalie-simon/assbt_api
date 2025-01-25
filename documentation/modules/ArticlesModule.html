@@ -271,10 +271,10 @@
 import { TypeOrmModule } from &#x27;@nestjs/typeorm&#x27;;
 import { ArticlesController } from &#x27;./articles.controller&#x27;;
 import { ArticlesService } from &#x27;./services/articles.service&#x27;;
-import { Article } from &#x27;src/articles/article.entity&#x27;;
-import { UsersModule } from &#x27;src/users/users.module&#x27;;
-import { StatutsModule } from &#x27;src/statuts/statuts.module&#x27;;
-import { CategoriesArticlesModule } from &#x27;src/categories-articles/categories-articles.modules&#x27;;
+import { Article } from &#x27;./article.entity&#x27;;
+import { UsersModule } from &#x27;../users/users.module&#x27;;
+import { StatutsModule } from &#x27;../statuts/statuts.module&#x27;;
+import { CategoriesArticlesModule } from &#x27;../categories-articles/categories-articles.modules&#x27;;
 
 @Module({
   controllers: [ArticlesController],
