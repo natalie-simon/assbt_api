@@ -1,4 +1,4 @@
-import { statutsMock } from "./statuts.mock";
+import { statutsMock } from './statuts.mock';
 
 /**
  * Mock of the StatutsService class.
@@ -10,7 +10,7 @@ export class StatutsServiceMock {
    * @memberof StatutsServiceMock
    */
   findAllStatuts = jest.fn().mockResolvedValue(statutsMock);
-  
+
   /**
    * Mock of the findStatutById method.
    *
@@ -23,5 +23,7 @@ export class StatutsServiceMock {
    *
    * @memberof StatutsServiceMock
    */
-  findStatutById = jest.fn().mockResolvedValue(statutsMock[0]);
+  findStatutById = jest.fn((id: number) =>
+    Promise.resolve(statutsMock.find((statut) => statut.id === id)),
+  );
 }

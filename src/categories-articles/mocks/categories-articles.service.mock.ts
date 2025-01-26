@@ -7,22 +7,22 @@ export class CategoriesArticlesServiceMock {
   /**
    * Mock of the findAllCategorieArticle method.
    *
-   * @memberof CategoriesAriclesServiceMock
+   * @memberof CategoriesArticlesServiceMock
    */
   findAllCategorieArticle = jest.fn().mockResolvedValue(categoriesArticlesMock);
 
   /**
    * Mock of the findCategorieArticleById method.
    *
-   * @memberof CategoriesAriclesServiceMock
+   * @memberof CategoriesArticlesServiceMock
    **/
-  findCategorieArticleById = jest.fn().mockResolvedValue(categoriesArticlesMock[0]);
-
-
+  findCategorieArticleById = jest.fn((id: number) =>
+    Promise.resolve(categoriesArticlesMock.find(categorieArticle => categorieArticle.id === id))
+  );
   /**
    * Mock of the createCategorieArticle method.
    *
-   * @memberof CategoriesAriclesServiceMock
+   * @memberof CategoriesArticlesServiceMock
    */
   createCategorieArticle = jest
     .fn()
