@@ -10,7 +10,7 @@ import {
 
 import { ArticlesService } from './services/articles.service';
 import { CreateArticleDto } from './dtos/create-article.dto';
-import { Public } from '../auth/decorators/public.decorators';
+//import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**
@@ -30,7 +30,7 @@ export class ArticlesController {
    * Récupération de tout les articles existants dans l'applications
    * @returns
    */
-  @Public()
+  //@Public()
   @Get()
   @ApiOperation({ summary: 'Liste des articles' })
   @ApiResponse({ status: 200, description: 'Un tableau comportant la liste des Articles' })
@@ -45,7 +45,7 @@ export class ArticlesController {
    */
   @ApiOperation({ summary: 'Récupérer un article par son id' })
   @ApiResponse({ status: 200, description: 'Un article' })
-  @Public()
+  //@Public()
   @Get(':id')
   findArticleById(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.findArticleById(id);
@@ -56,7 +56,7 @@ export class ArticlesController {
    * @param createArticleDto
    * @returns
    */
-  @Public()
+  //@Public()
   @ApiOperation({ summary: 'Créer un article' })
   @ApiResponse({ status: 201, description: "L'Article créé" })
   @Post('create')

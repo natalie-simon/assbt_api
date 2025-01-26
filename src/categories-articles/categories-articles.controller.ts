@@ -4,9 +4,8 @@ import {
   Post,
   Body,
 } from "@nestjs/common";
-import { CatetogiesArticlesService } from './services/categories-articles.services';
+import { CategoriesArticlesService } from './services/categories-articles.services';
 import { CreateCategorieArticleDto } from "./dtos/create-categorie-article.dto";
-import { Public } from "../auth/decorators/public.decorators";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 
@@ -20,7 +19,7 @@ export class CategoriesArticlesController {
    * Constructeur
    * @param categoriesArticles
    */
-  constructor(private readonly categoriesArticles: CatetogiesArticlesService) {}
+  constructor(private readonly categoriesArticles: CategoriesArticlesService) {}
 
   /**
    * Récupérer la liste des catégories d'articles
@@ -28,7 +27,7 @@ export class CategoriesArticlesController {
    * @return {*}
    * @memberof CategoriesArticlesController
    */
-  @Public()
+  //@Public()
   @Get()
   @ApiOperation({ summary: "Liste des catégories d'articles" })
   @ApiResponse({
@@ -41,10 +40,10 @@ export class CategoriesArticlesController {
 
   /**
    * Création d'une catégorie d'articles
-   * @param createCategorieArticleDto 
-   * @returns 
+   * @param createCategorieArticleDto
+   * @returns
    */
-  @Public()
+  //@Public()
   @Post('create')
   @ApiOperation({ summary: "Créer une catégorie d'articles" })
   @ApiResponse({ status: 201, description: "La catégorie d'articles créée" })

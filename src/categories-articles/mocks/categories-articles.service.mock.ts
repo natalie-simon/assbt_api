@@ -3,7 +3,7 @@ import { categoriesArticlesMock } from "./categories-articles.mock";
 /**
  * Mock of the CategoriesArticlesService class.
  */
-export class CategoriesAriclesServiceMock {
+export class CategoriesArticlesServiceMock {
   /**
    * Mock of the findAllCategorieArticle method.
    *
@@ -13,6 +13,14 @@ export class CategoriesAriclesServiceMock {
 
   /**
    * Mock of the findCategorieArticleById method.
+   *
+   * @memberof CategoriesAriclesServiceMock
+   **/
+  findCategorieArticleById = jest.fn().mockResolvedValue(categoriesArticlesMock[0]);
+
+
+  /**
+   * Mock of the createCategorieArticle method.
    *
    * @memberof CategoriesAriclesServiceMock
    */

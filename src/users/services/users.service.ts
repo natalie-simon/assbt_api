@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createuser.dto';
-import * as bcrypt from 'bcryptjs';
+import { CreateUserProvider } from '../../auth/services/create-user.provider';
 
 /**
  * Service de gestion des utilisateurs
@@ -17,6 +17,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+
+    private readonly createUserProvider: CreateUserProvider,
   ) {}
 
   /**
@@ -25,18 +27,11 @@ export class UsersService {
    * @returns
    * @throws BadRequestException
    */
-  async createUser(createUserDto: CreateUserDto) {
+  public async createUser(createUserDto: CreateUserDto) {
     if (createUserDto.clef !== process.env.CLEF) {
       throw new BadRequestException('La clé est incorrecte, contactez le club');
     }
-    createUserDto.mot_de_passe = bcrypt.hashSync(createUserDto.mot_de_passe, 10);
-    const newUser = this.usersRepository.create(createUserDto);
-    const existingUser = await this.findOneByEmail(createUserDto.email);
-    if (existingUser) {
-      throw new BadRequestException('Cet email possède déjà un compte');
-    }
-
-    return this.usersRepository.save(newUser);
+    return this.createUserProvider.createUser(createUserDto);
   }
 
   /**

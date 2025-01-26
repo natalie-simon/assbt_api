@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesArticlesController } from './categories-articles.controller';
-import { CatetogiesArticlesService } from './services/categories-articles.services';
-import { CategoriesAriclesServiceMock } from './mocks/categories-articles.service.mock';
+import { CategoriesArticlesService } from './services/categories-articles.services';
+import { CategoriesArticlesServiceMock } from './mocks/categories-articles.service.mock';
 import { categoriesArticlesMock } from './mocks/categories-articles.mock';
 import { CreateCategorieArticleDto } from './dtos/create-categorie-article.dto';
 
@@ -13,8 +13,8 @@ describe('CategoriesArticlesController', () => {
       controllers: [CategoriesArticlesController],
       providers: [
         {
-          provide: CatetogiesArticlesService,
-          useClass: CategoriesAriclesServiceMock,
+          provide: CategoriesArticlesService,
+          useClass: CategoriesArticlesServiceMock,
         },
       ],
     }).compile();

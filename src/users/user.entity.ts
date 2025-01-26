@@ -34,7 +34,7 @@ export class User {
   mot_de_passe: string;
 
   @Column({
-    default: true,
+    default: false,
   })
   est_supprime: boolean;
 

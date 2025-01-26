@@ -13,7 +13,7 @@ export const articlesMock = [
       lbl_statut: 'Brouillon',
     },
     categorie: {
-      id: '1',
+      id: 1,
       lbl_categorie: 'Accueil',
     },
   },

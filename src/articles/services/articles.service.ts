@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { UsersService } from '../../users/services/users.service';
 import { StatutsService } from '../../statuts/services/statuts.service';
-import { CatetogiesArticlesService } from '../../categories-articles/services/categories-articles.services';
+import { CategoriesArticlesService } from '../../categories-articles/services/categories-articles.services';
 
 /**
  * Service des articles
@@ -20,9 +20,9 @@ export class ArticlesService {
    * @param articleRepository
    */
   constructor(
-    private readonly usersService: UsersService,
+    //private readonly usersService: UsersService,
     private readonly statutsService: StatutsService,
-    private readonly catetogieArticlesService: CatetogiesArticlesService,
+    private readonly catetogieArticlesService: CategoriesArticlesService,
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
   ) {}
