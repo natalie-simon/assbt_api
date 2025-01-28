@@ -11,7 +11,7 @@ dotenv.config();
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('API');
+  app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
     forbidNonWhitelisted: true,
