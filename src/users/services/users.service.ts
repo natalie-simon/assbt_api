@@ -58,6 +58,11 @@ export class UsersService {
     return this.usersRepository.find(/*{ relations: ['role'] }*/);
   }
 
+  /**
+   * Récupération d'un utilisateur
+   * @param email
+   * @returns
+   */
   public async findOneUserByEmailProvider(email: string) {
     return this.findOneByEmailProvider.findOneUserByEmailProvider(email);
   }

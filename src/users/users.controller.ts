@@ -1,8 +1,9 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UsersService } from './services/users.service';
 //import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AccessTokenGuard } from 'src/auth/guards/access-token.guards';
 
 
 /**
@@ -39,6 +40,7 @@ export class UsersController {
    * @returns
    */
   @Get()
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({
     summary: 'Récupérer tout les utilisateurs',
     description: "Récupérer l'ensemble des utilisateurs",
@@ -50,4 +52,6 @@ export class UsersController {
   getUsers() {
     return this.usersService.findAllUsers();
   }
+
 }
+
