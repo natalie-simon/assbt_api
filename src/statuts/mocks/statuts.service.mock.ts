@@ -9,7 +9,7 @@ export class StatutsServiceMock {
    *
    * @memberof StatutsServiceMock
    */
-  findAllStatuts = jest.fn().mockResolvedValue(statutsMock);
+  findAllStatut = jest.fn().mockResolvedValue(statutsMock);
 
   /**
    * Mock of the findStatutById method.

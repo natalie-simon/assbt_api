@@ -1,8 +1,0 @@
-POST http://localhost:3000/accueils/create
-Content-Type: application/json
-
-{
-  "email": "toto@example.com",
-  "password": "toto123456",
-  "clef": "toto"
-}

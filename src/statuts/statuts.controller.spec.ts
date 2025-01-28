@@ -26,11 +26,11 @@ describe('StatutsController', () => {
     expect(controller).toBeDefined();
   });
 
-  /*describe('getStatuts', () => {
+  describe('getStatuts', () => {
     it('should return an array of Statuts', () => {
       expect(controller.getStatuts()).resolves.toEqual(statutsMock);
     });
-  });*/
+  });
 
   describe('createStatut', () => {
     const dto = {

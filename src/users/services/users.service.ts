@@ -4,6 +4,7 @@ import { User } from '../user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createuser.dto';
 import { CreateUserProvider } from '../../auth/services/create-user.provider';
+import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
 
 /**
  * Service de gestion des utilisateurs
@@ -19,6 +20,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
 
     private readonly createUserProvider: CreateUserProvider,
+
+    private readonly findOneByEmailProvider: FindOneByEmailProvider,
   ) {}
 
   /**
@@ -40,7 +43,7 @@ export class UsersService {
    * @returns
    * @throws BadRequestException
    */
-  findOneByEmail(email: string): Promise<User | null> {
+  public async findOneByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email },
       //relations: ['role'],
@@ -51,7 +54,11 @@ export class UsersService {
    * Service qui récupère tous les utilisateurs
    * @returns
    */
-  findAllUsers() {
+  public async findAllUsers() {
     return this.usersRepository.find(/*{ relations: ['role'] }*/);
+  }
+
+  public async findOneUserByEmailProvider(email: string) {
+    return this.findOneByEmailProvider.findOneUserByEmailProvider(email);
   }
 }
