@@ -59,7 +59,7 @@ describe('CateloriesArticlesService', () => {
   /**
    * T.U. createCategorieArticle
    */
-  /*describe('createCategorieArticle', () => {
+  describe('createCategorieArticle', () => {
     it('should create and save a new category article', async () => {
       const result = await service.createCategorieArticle(dto);
       expect(mockCategoriesArticlesRepository.create).toHaveBeenCalledWith(dto);
@@ -69,5 +69,5 @@ describe('CateloriesArticlesService', () => {
       });
       expect(result).toEqual(categoriesArticlesMock[0]);
     });
-  });*/
+  });
 });

@@ -10,6 +10,7 @@ export const mockStatutsRepository = {
     id: 1,
     ...dto,
   })),
+  save: jest.fn((entity) => Promise.resolve({ id: 1, ...entity })),
   findOne: jest.fn((criteres) => {
     const { where } = criteres;
     return Promise.resolve(statutsMock.find((c) => c.id === where.id));

@@ -3,7 +3,7 @@ import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './services/articles.service';
 import { ArticlesServiceMock } from './mocks/articles.service.mock';
 import { UsersService } from '../users/services/users.service';
-import { UsersServiceMock } from '../users/services/users.service.mock';
+import { UsersServiceMock } from '../users/mocks/users.service.mock';
 import { articlesMock } from './mocks/articles.mock';
 import { CreateArticleDto } from './dtos/create-article.dto';
 

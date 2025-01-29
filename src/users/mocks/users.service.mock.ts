@@ -1,4 +1,4 @@
-import { usersMock } from '../mocks/users.mock';
+import { usersMock } from './users.mock';
 
 /**
  * Mocked UsersService class.

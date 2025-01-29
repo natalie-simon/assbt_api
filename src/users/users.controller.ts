@@ -2,7 +2,7 @@ import { Body, Controller, Post, Get, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UsersService } from './services/users.service';
 //import { Public } from '../auth/decorators/public.decorators';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AccessTokenGuard } from 'src/auth/guards/access-token.guards';
 
 
@@ -49,6 +49,7 @@ export class UsersController {
     status: 200,
     description: 'Un tableau comportant la liste des utilisateurs',
   })
+  @ApiBearerAuth()
   getUsers() {
     return this.usersService.findAllUsers();
   }

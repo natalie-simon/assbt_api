@@ -8,7 +8,7 @@ import { mockStatutsRepository } from '../mocks/statuts.repository.mock';
 
 describe('StatutsService', () => {
   let service: StatutsService;
-  const dto = { lbl_statut: 'Accueil' };
+  const dto = { lbl_statut: 'Brouillon' };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,11 +34,33 @@ describe('StatutsService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('createStatut', () => {
+    it('should create and save a new statut', async () => {
+      const result = await service.createStatut(dto);
+      expect(mockStatutsRepository.create).toHaveBeenCalled();
+      expect(mockStatutsRepository.save).toHaveBeenCalledWith(
+        {
+          id: expect.any(Number),
+          ...dto,
+        }
+      );
+      expect(result).toEqual(statutsMock[0]);
+    });
+  });
+
   describe('findAllStatut', () => {
     it('should call findAllStatut', async () => {
       const result = await service.findAllStatut();
       expect(mockStatutsRepository.find).toHaveBeenCalled();
       expect(result).toEqual(statutsMock);
+    });
+  });
+
+  describe('findStatutById', () => {
+    it('should call findStatutById', async () => {
+      const result = await service.findStatutById(1);
+      expect(mockStatutsRepository.findOne).toHaveBeenCalled();
+      expect(result).toEqual(statutsMock.filter((s) => s.id === 1)[0]);
     });
   });
 });

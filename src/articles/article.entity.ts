@@ -51,7 +51,7 @@ export class Article {
    * @type {Statut}
    * @memberof Article
    */
-  @ManyToOne(() => Statut, (statut) => statut.articles)
+  @ManyToOne(() => Statut, (statut) => statut.articles, { nullable: false })
   @JoinColumn()
   statut: Statut;
 
@@ -61,7 +61,9 @@ export class Article {
    * @type {CategorieArticle}
    * @memberof Article
    */
-  @ManyToOne(() => CategorieArticle, (categorie) => categorie.articles)
+  @ManyToOne(() => CategorieArticle, (categorie) => categorie.articles, {
+    nullable: false,
+  })
   @JoinColumn()
   categorie: CategorieArticle;
 
