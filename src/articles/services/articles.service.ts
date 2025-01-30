@@ -5,7 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { UsersService } from '../../users/services/users.service';
 import { StatutsService } from '../../statuts/services/statuts.service';
-import { CatetogiesArticlesService } from '../../categories-articles/services/categories-articles.services';
+import { CategoriesArticlesService } from '../../categories-articles/services/categories-articles.services';
+import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 
 /**
  * Service des articles
@@ -20,9 +21,10 @@ export class ArticlesService {
    * @param articleRepository
    */
   constructor(
-    private readonly usersService: UsersService,
+    //private readonly usersService: UsersService,
     private readonly statutsService: StatutsService,
-    private readonly catetogieArticlesService: CatetogiesArticlesService,
+    private readonly catetogieArticlesService: CategoriesArticlesService,
+    private readonly usersService: UsersService,
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
   ) {}
@@ -32,7 +34,10 @@ export class ArticlesService {
    * @param createArticleDto
    * @returns
    */
-  public async createArticle(createArticleDto: CreateArticleDto) {
+  public async createArticle(
+    createArticleDto: CreateArticleDto,
+    activeUser: ActiveUserData,
+  ) {
     let statut = await this.statutsService.findStatutById(
       createArticleDto.statut,
     );
@@ -40,10 +45,13 @@ export class ArticlesService {
       await this.catetogieArticlesService.findCategorieArticleById(
         createArticleDto.categorie,
       );
+
+    let user = await this.usersService.findUserById(activeUser['sub']);
     const newArticle = this.articleRepository.create({
       ...createArticleDto,
       statut: statut,
       categorie: categorie,
+      redacteur: user,
     });
     return this.articleRepository.save(newArticle);
   }

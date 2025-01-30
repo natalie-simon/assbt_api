@@ -1,46 +1,37 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { UsersService } from '../../users/services/users.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-
+import { SigninDto } from '../dtos/signin.dto';
+import { SignInProvider } from './sign-in.provider';
 /**
- * Service de gestion de l'authentification
+ * Service de gestion des Statuts
+ * Utilisation d'une seule table Statut pour toute l'application
  */
 @Injectable()
 export class AuthService {
   /**
-   * Constructeur du service AuthService
-   * @param usersService le service des Users
-   * @param jwtService  le service de gestion du JWT
+   * service d'authentification
+   * @param usersService
    */
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService,
+    private readonly signInProvider: SignInProvider,
   ) {}
 
   /**
-   * Le service de connection & d'authentification
-   * @param email l'email du User
-   * @param pass  le mot de passe
+   * Connection d'authentification
+   * @param signinDto
    * @returns
-   * @throws UnauthorizedException
    */
-  async signIn(email: string, pass: string): Promise<{ access_token: string }> {
-    console.log(`Tentative de connexion avec l'email: ${email} ${pass}`); // Ajout du console.log à la ligne 14 //
-    const user = await this.usersService.findOneByEmail(email);
-    if (!user || !bcrypt.compareSync(pass, user.mot_de_passe)) {
-      throw new UnauthorizedException('Email ou mot de passe incorrect');
-    }
+  public async signin(signinDto: SigninDto) {
+    return await this.signInProvider.signIn(signinDto);
+  }
 
-    //const role = user?.role?.roleName ?? 'aucun';
-
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      //role: role,
-    };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+  /**
+   * Is Auth
+   * @returns 
+   */
+  public isAuht(){
+    return true;
   }
 }

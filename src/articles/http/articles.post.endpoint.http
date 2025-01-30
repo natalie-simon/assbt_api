@@ -1,0 +1,11 @@
+POST http://localhost:3000/api/articles/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTczODI1NzQ3NywiZXhwIjoxNzM4MjYxMDc3fQ.q_eB_Sj0ceNBgbjLlR8gNWYgEPorYYZKwF4DiY9bwJA
+
+{
+  "titre": "Test avec user 2 ",
+  "contenu": "<h1>Verdict</p><h1>Encore un <test>",
+  "statut": "1",
+  "categorie": "1",
+  "image": "https://wikiclic.com/wp-content/uploads/2023/05/image-libre-de-droit-wikiclic.jpg"
+}

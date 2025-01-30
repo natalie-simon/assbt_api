@@ -1,20 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CatetogiesArticlesService } from './categories-articles.services';
+import { CategoriesArticlesService } from './categories-articles.services';
 import { DataSource } from 'typeorm';
 import { CategorieArticle } from '../categorie-article.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { categoriesArticlesMock } from '../mocks/categories-articles.mock';
 import { mockCategoriesArticlesRepository } from '../mocks/categories-articles.repository.mock';
 
-describe('CatetogiesArticlesService', () => {
-  let service: CatetogiesArticlesService;
+describe('CateloriesArticlesService', () => {
+  let service: CategoriesArticlesService;
   const dto = { lbl_categorie: 'Accueil' };
-
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CatetogiesArticlesService,
+        CategoriesArticlesService,
         {
           provide: DataSource,
           useValue: {
@@ -28,7 +27,7 @@ describe('CatetogiesArticlesService', () => {
       ],
     }).compile();
 
-    service = module.get<CatetogiesArticlesService>(CatetogiesArticlesService);
+    service = module.get<CategoriesArticlesService>(CategoriesArticlesService);
   });
 
   it('should be defined', () => {

@@ -1,11 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-//import { UsersModule } from './users/users.module';
+import { UsersModule } from './users/users.module';
 import { StatutsModule } from './statuts/statuts.module';
-//import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
 import { CategoriesArticlesModule } from './categories-articles/categories-articles.modules';
+import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
+import { ConfigModule } from '@nestjs/config';
+import jwtConfig from './auth/config/jwt.config';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from './auth/guards/access-token.guard';
+import { AuthenticationGuard } from './auth/guards/authentication.guard';
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -27,12 +33,19 @@ dotenv.config();
         logging: process.env.NODE_ENV === 'development',
       }),
     }),
+    ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
     //AccueilsModule,
-    //UsersModule,
+    UsersModule,
     //AuthModule,
     StatutsModule,
     CategoriesArticlesModule,
     ArticlesModule,
+    AuthModule,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: AuthenticationGuard },
+    AccessTokenGuard,
   ],
 })
 export class AppModule {}

@@ -1,8 +1,11 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseGuards, SetMetadata } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UsersService } from './services/users.service';
-import { Public } from '../auth/decorators/public.decorators';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+//import { Public } from '../auth/decorators/public.decorators';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { AuthTypes } from 'src/auth/enums/auth-types.enum';
 
 
 /**
@@ -23,8 +26,9 @@ export class UsersController {
    * @param createUserDto La DTO correspondant à la création d'un utilisateur
    * @returns
    */
-  @Public()
+  //@Public()
   @Post('register')
+  @Auth(AuthTypes.None)
   @ApiOperation({
     summary: "Création d'un nouvel utilisateur",
     description: 'Enregistrer un nouvel utilisateur',
@@ -39,6 +43,7 @@ export class UsersController {
    * @returns
    */
   @Get()
+  @UseGuards(AccessTokenGuard)
   @ApiOperation({
     summary: 'Récupérer tout les utilisateurs',
     description: "Récupérer l'ensemble des utilisateurs",
@@ -47,7 +52,10 @@ export class UsersController {
     status: 200,
     description: 'Un tableau comportant la liste des utilisateurs',
   })
+  @ApiBearerAuth()
   getUsers() {
     return this.usersService.findAllUsers();
   }
+
 }
+

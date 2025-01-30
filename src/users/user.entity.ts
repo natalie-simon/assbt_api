@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import {
   Column,
   Entity,
@@ -15,7 +16,7 @@ import {
 })
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number
 
   @Column({
     type: 'varchar',
@@ -31,10 +32,11 @@ export class User {
     name: 'mot_de_passe',
     nullable: false,
   })
+  @Exclude()
   mot_de_passe: string;
 
   @Column({
-    default: true,
+    default: false,
   })
   est_supprime: boolean;
 

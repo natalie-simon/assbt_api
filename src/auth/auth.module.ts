@@ -1,33 +1,27 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from './services/auth.service';
+import { Module, forwardRef } from '@nestjs/common';
+import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
+import { AuthService } from './services/auth.service';
+import { BcryptProvider } from './services/bcrypt.provider';
+import { HashingProvider } from './services/hashing.provider';
+import { SignInProvider } from './services/sign-in.provider';
+import { ConfigModule } from '@nestjs/config';
+import  jwtConfig  from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './controller/auth.controller';
-import { AuthGuard } from './auth.guard';
-import * as dotenv from 'dotenv';
-import { APP_GUARD } from '@nestjs/core';
-dotenv.config();
-
-/**
- * Gestion du module Auth
- */
 @Module({
-  imports: [
-    UsersModule,
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
-    }),
-  ],
+  controllers: [AuthController],
   providers: [
     AuthService,
     {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
+      provide: HashingProvider,
+      useClass: BcryptProvider,
     },
+    SignInProvider,
   ],
-  controllers: [AuthController],
-  exports: [AuthService],
+  imports: [forwardRef(() => UsersModule),
+    ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
+  ],
+  exports: [AuthService, HashingProvider],
 })
 export class AuthModule {}

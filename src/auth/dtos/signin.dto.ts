@@ -1,40 +1,39 @@
-import { IsString, IsNotEmpty, MinLength, IsEmail } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, IsEmail } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
 /**
  * DTO pour la connexion d'un utilisateur
  */
-export class SignInDto {
+export class SigninDto {
   /**
-   * Email de l'utilisateur (User)
+   * L'adresse email de l'utilisateur
    *
    * @type {string}
-   * @memberof SignInDto
+   * @memberof SigninDto
    */
   @ApiProperty({
-    description: "L'email de l'utilisateur",
-    example: 'coucou@assbt.com',
-    })
-  @IsNotEmpty({ message: 'Le champ email doit être renseigné.' })
-  @IsEmail({}, { message: 'Le champ email doit être une adresse email.' })
+    description: 'L\'adresse email de l\'utilisateur',
+    example: 'user@example.com',
+    required: true,
+    type: String,
+  })
+  @IsEmail({}, { message: 'L\'adresse email doit être valide' })
+  @IsNotEmpty({ message: 'L\'adresse email doit être renseignée' })
   email: string;
 
   /**
-   * Mot de passe de l'utilisateur (User)
+   * Le mot de passe de l'utilisateur
    *
    * @type {string}
-   * @memberof SignInDto
+   * @memberof SigninDto
    */
   @ApiProperty({
-    description: "Le mot de passe de l'utilisateur",
-    example: 'motdepasse',
+    description: 'Le mot de passe de l\'utilisateur',
+    example: 'password',
+    required: true,
+    type: String,
   })
-  @IsString({
-    message: 'Le champ mot de passe doit être une chaîne de caractères.',
-  })
-  @IsNotEmpty({ message: 'Le champ mot de passe doit être renseigné.' })
-  @MinLength(8, {
-    message: 'Le champ mot de passe doit contenir au moins 8 caractères.',
-  })
-  password: string;
+  @IsString({ message: 'Le mot de passe doit être une chaîne de caractères' })
+  @IsNotEmpty({ message: 'Le mot de passe doit être renseigné' })
+  mot_de_passe: string;
 }

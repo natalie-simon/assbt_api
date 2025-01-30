@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createuser.dto';
-import * as bcrypt from 'bcryptjs';
+import { CreateUserProvider } from '../../auth/services/create-user.provider';
+import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
 
 /**
  * Service de gestion des utilisateurs
@@ -17,6 +18,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+
+    private readonly createUserProvider: CreateUserProvider,
+
+    private readonly findOneByEmailProvider: FindOneByEmailProvider,
   ) {}
 
   /**
@@ -25,18 +30,11 @@ export class UsersService {
    * @returns
    * @throws BadRequestException
    */
-  async createUser(createUserDto: CreateUserDto) {
+  public async createUser(createUserDto: CreateUserDto) {
     if (createUserDto.clef !== process.env.CLEF) {
       throw new BadRequestException('La clé est incorrecte, contactez le club');
     }
-    createUserDto.mot_de_passe = bcrypt.hashSync(createUserDto.mot_de_passe, 10);
-    const newUser = this.usersRepository.create(createUserDto);
-    const existingUser = await this.findOneByEmail(createUserDto.email);
-    if (existingUser) {
-      throw new BadRequestException('Cet email possède déjà un compte');
-    }
-
-    return this.usersRepository.save(newUser);
+    return this.createUserProvider.createUser(createUserDto);
   }
 
   /**
@@ -45,7 +43,7 @@ export class UsersService {
    * @returns
    * @throws BadRequestException
    */
-  findOneByEmail(email: string): Promise<User | null> {
+  public async findOneByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email },
       //relations: ['role'],
@@ -56,7 +54,25 @@ export class UsersService {
    * Service qui récupère tous les utilisateurs
    * @returns
    */
-  findAllUsers() {
+  public async findAllUsers() {
     return this.usersRepository.find(/*{ relations: ['role'] }*/);
+  }
+
+  /**
+   * Récupération d'un utilisateur par son id
+   * @param id
+   * @returns
+   */
+  public async findUserById(id: number) {
+    return this.usersRepository.findOne({ where: { id: id } });
+  }
+
+  /**
+   * Récupération d'un utilisateur
+   * @param email
+   * @returns
+   */
+  public async findOneUserByEmailProvider(email: string) {
+    return this.findOneByEmailProvider.findOneUserByEmailProvider(email);
   }
 }

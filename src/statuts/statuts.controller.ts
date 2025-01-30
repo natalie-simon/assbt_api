@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { StatutsService } from './services/statuts.service';
 import { CreateStatutDto } from './dtos/create-statut.dto';
-import { Public } from '../auth/decorators/public.decorators';
+//import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**
@@ -26,7 +26,7 @@ export class StatutsController {
    * Récupération de tout les statuts existants dans l'applications
    * @returns
    */
-  @Public()
+  //@Public()
   @Get()
   @ApiOperation({ summary: 'Liste des statuts' })
   @ApiResponse({
@@ -42,7 +42,7 @@ export class StatutsController {
    * @param createStatutDto
    * @returns
    */
-  @Public()
+  //@Public()
   @Post('create')
   @ApiOperation({ summary: 'Créer un statut' })
   @ApiResponse({ status: 201, description: 'Le Statut créé' })

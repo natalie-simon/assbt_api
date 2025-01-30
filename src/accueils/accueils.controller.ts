@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateAccueilDto } from '../accueils/dtos/accueil.dtos';
 import { AccueilsService } from '../accueils/services/accueils.service';
-import { Public } from '../auth/decorators/public.decorators';
+//import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 /**
@@ -30,7 +30,7 @@ export class AccueilsController {
    * Route pour récupérer l'ensemble des accueils
    * @returns
    */
-  @Public()
+  //@Public()
   @Get()
   @ApiOperation({ summary: 'Liste des accueils' })
   @ApiResponse({ status: 200, description: 'Un tableau comportant la liste des Accueils' })
@@ -45,7 +45,7 @@ export class AccueilsController {
    */
   @ApiOperation({ summary: 'Récupérer un accueil par son id' })
   @ApiResponse({ status: 200, description: 'Un accueil' })
-  @Public()
+  //@Public()
   @Get(':id')
   findAccueilById(@Param('id', ParseIntPipe) id: number) {
     return this.accueilsService.findAccueilById(id);

@@ -8,7 +8,7 @@ import { CreateCategorieArticleDto } from '../dtos/create-categorie-article.dto'
  * Service de gestion des Catégories d'Articles
  */
 @Injectable()
-export class CatetogiesArticlesService {
+export class CategoriesArticlesService {
   /**
    * Constructeur
    * @param categorieArticleRepository

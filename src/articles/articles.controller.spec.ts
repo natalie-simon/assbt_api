@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './services/articles.service';
-import { ArticlesServiceMock } from './services/articles.service.mock';
+import { ArticlesServiceMock } from './mocks/articles.service.mock';
 import { UsersService } from '../users/services/users.service';
-import { UsersServiceMock } from '../users/services/users.service.mock';
+import { UsersServiceMock } from '../users/mocks/users.service.mock';
 import { articlesMock } from './mocks/articles.mock';
 import { CreateArticleDto } from './dtos/create-article.dto';
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 
 describe('ArticlesController', () => {
   let controller: ArticlesController;
@@ -44,6 +45,7 @@ describe('ArticlesController', () => {
   });
 
   describe('createArticle', () => {
+    const user = { sub: 1, email: 'test@example.com' } as ActiveUserData;
     const dto = {
       titre: 'Article 1',
       contenu: "Contenu de l'article 1",
@@ -55,7 +57,7 @@ describe('ArticlesController', () => {
     } as CreateArticleDto;
 
     it('should return a new Article', () => {
-      expect(controller.createArticle(dto)).resolves.toEqual(articlesMock[0]);
+      expect(controller.createArticle(dto, user)).resolves.toEqual(articlesMock[0]);
     });
   });
 
