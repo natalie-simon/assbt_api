@@ -59,6 +59,15 @@ export class UsersService {
   }
 
   /**
+   * Récupération d'un utilisateur par son id
+   * @param id
+   * @returns
+   */
+  public async findUserById(id: number) {
+    return this.usersRepository.findOne({ where: { id: id } });
+  }
+
+  /**
    * Récupération d'un utilisateur
    * @param email
    * @returns

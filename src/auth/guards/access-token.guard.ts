@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import jwtConfig from '../config/jwt.config';
 import { Request } from 'express';
+import { REQUEST_USER_KEY } from '../constantes/auth.constants';
 
 /**
  * Guard Access Token
@@ -18,8 +19,8 @@ import { Request } from 'express';
 export class AccessTokenGuard implements CanActivate {
   /**
    * Constructeur
-   * @param jwtService 
-   * @param jwtConfiguration 
+   * @param jwtService
+   * @param jwtConfiguration
    */
   constructor(
     private readonly jwtService: JwtService,
@@ -29,21 +30,22 @@ export class AccessTokenGuard implements CanActivate {
 
   /**
    * Can Activate
-   * @param context 
-   * @returns 
+   * @param context
+   * @returns
    */
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractRequestFromHeaders(request);
-    if(!token) {
+    if (!token) {
       throw new UnauthorizedException(`Access token is missing`);
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, this.jwtConfiguration);
-      request['user'] = payload;
+      const payload = await this.jwtService.verifyAsync(
+        token,
+        this.jwtConfiguration,
+      );
+      request[REQUEST_USER_KEY] = payload;
       console.log(payload);
     } catch (error) {
       throw new UnauthorizedException(`Access token is invalid`);
@@ -54,8 +56,8 @@ export class AccessTokenGuard implements CanActivate {
 
   /**
    * Récupère le token depuis les headers
-   * @param request 
-   * @returns 
+   * @param request
+   * @returns
    */
   private extractRequestFromHeaders(request: Request): string | undefined {
     const [_, token] = request.headers['authorization']?.split(' ') ?? [];

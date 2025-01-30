@@ -1,7 +1,7 @@
-POST http://localhost:3000/auth/sign-in
+POST http://localhost:3000/api/auth/sign-in
 Content-Type: application/json
 
 {
-  "email": "atotno2@example.com",
+  "email": "test@example.com",
   "mot_de_passe": "toto123456"
 }

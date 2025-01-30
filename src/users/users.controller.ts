@@ -1,9 +1,11 @@
-import { Body, Controller, Post, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseGuards, SetMetadata } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UsersService } from './services/users.service';
 //import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AccessTokenGuard } from 'src/auth/guards/access-token.guards';
+import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { AuthTypes } from 'src/auth/enums/auth-types.enum';
 
 
 /**
@@ -26,6 +28,7 @@ export class UsersController {
    */
   //@Public()
   @Post('register')
+  @Auth(AuthTypes.None)
   @ApiOperation({
     summary: "Création d'un nouvel utilisateur",
     description: 'Enregistrer un nouvel utilisateur',

@@ -11,7 +11,7 @@ import jwtConfig from 'src/auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 
 /**
- * Gestion du module Users
+ * Gestion du module UsersF
  */
 @Module({
   imports: [

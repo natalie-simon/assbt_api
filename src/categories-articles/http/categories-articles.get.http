@@ -1,4 +1,4 @@
-GET http://localhost:3000/categories-articles
+GET http://localhost:3000/api/categories-articles
 
 /*
 GET http://localhost:3000/categories-articles/1

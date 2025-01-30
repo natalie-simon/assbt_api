@@ -16,6 +16,13 @@ export const articlesMock = [
       id: 1,
       lbl_categorie: 'Accueil',
     },
+    redacteur: {
+      id: 1,
+      email: 'test@example.com',
+      mot_de_passe:
+        '$2b$10$V9gUh3eaFEvExl5qf8jVKOXGHyRT96/91HIuJiwSWqvpPplLRKTjO',
+      est_supprime: false,
+    },
   },
   {
     id: 2,
@@ -31,6 +38,13 @@ export const articlesMock = [
       id: 1,
       lbl_categorie: 'Accueil',
     },
+    redacteur: {
+      id: 1,
+      email: 'test@example.com',
+      mot_de_passe:
+        '$2b$10$V9gUh3eaFEvExl5qf8jVKOXGHyRT96/91HIuJiwSWqvpPplLRKTjO',
+      est_supprime: false,
+    },
   },
   {
     id: 3,
@@ -45,6 +59,13 @@ export const articlesMock = [
     categorie: {
       id: 1,
       lbl_categorie: 'Accueil',
+    },
+    redacteur: {
+      id: 1,
+      email: 'test@example.com',
+      mot_de_passe:
+        '$2b$10$V9gUh3eaFEvExl5qf8jVKOXGHyRT96/91HIuJiwSWqvpPplLRKTjO',
+      est_supprime: false,
     },
   },
 ];

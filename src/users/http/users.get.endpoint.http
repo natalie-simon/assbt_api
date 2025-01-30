@@ -1,2 +1,2 @@
-GET http://localhost:3000/membres
+GET http://localhost:3000/api/membres
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsImVtYWlsIjoiYXRvdG5vMkBleGFtcGxlLmNvbSIsImlhdCI6MTczODA5MzMyOSwiZXhwIjoxNzM4MDk2OTI5fQ.l_5qOM2STABptyY7kB_kIfNfwZdWW45Cv-VT2iWzNhw

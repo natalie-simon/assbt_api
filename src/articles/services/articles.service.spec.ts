@@ -1,13 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ArticlesService } from './articles.service';
-import { Article } from '../article.entity';
 import { DataSource } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { articlesMock } from '../mocks/articles.mock';
-import { mockArticlesRepository } from '../mocks/articles.repository.mock';
+import { Article } from '../article.entity';
 import { CreateArticleDto } from '../dtos/create-article.dto';
-import { CategoriesArticlesServiceMock } from '../../categories-articles/mocks/categories-articles.service.mock';
+import { UsersService } from '../../users/services/users.service';
 import { CategoriesArticlesService } from '../../categories-articles/services/categories-articles.services';
+import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
+
+import { mockArticlesRepository } from '../mocks/articles.repository.mock';
+import { articlesMock } from '../mocks/articles.mock';
+import { CategoriesArticlesServiceMock } from '../../categories-articles/mocks/categories-articles.service.mock';
+import { ArticlesService } from './articles.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { StatutsService } from '../../statuts/services/statuts.service';
 import { StatutsServiceMock } from '../../statuts/mocks/statuts.service.mock';
 
@@ -41,6 +44,10 @@ describe('ArticleService', () => {
           useClass: StatutsServiceMock,
         },
         {
+          provide: UsersService,
+          useValue: {},
+        },
+        {
           provide: getRepositoryToken(Article),
           useValue: mockArticlesRepository,
         },
@@ -56,7 +63,8 @@ describe('ArticleService', () => {
 
   describe('createArticle', () => {
     it('should call createArticle', async () => {
-      const result = await service.createArticle(dto);
+      const userInfo = { sub: 1, email: 'test@example.com' } as ActiveUserData;
+      const result = await service.createArticle(dto, userInfo);
       expect(mockArticlesRepository.create).toHaveBeenCalled();
       expect(mockArticlesRepository.save).toHaveBeenCalled();
       expect(result).toEqual(articlesMock[0]);

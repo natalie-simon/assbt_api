@@ -80,9 +80,7 @@ export class Article {
   })
   image: string;
 
-  /*@OneToOne(() => User)
-  @JoinColumn({
-    name: 'fk_redacteur_id',
-  })
-  redacteur: User;*/
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn()
+  redacteur: User;
 }

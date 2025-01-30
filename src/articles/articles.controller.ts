@@ -10,8 +10,11 @@ import {
 
 import { ArticlesService } from './services/articles.service';
 import { CreateArticleDto } from './dtos/create-article.dto';
-//import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AuthTypes } from '../auth/enums/auth-types.enum';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { ActiveUser } from '../auth/decorators/active-user.decorator';
+import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 
 /**
  * Contrôleur des Articles
@@ -32,8 +35,12 @@ export class ArticlesController {
    */
   //@Public()
   @Get()
+  @Auth(AuthTypes.None)
   @ApiOperation({ summary: 'Liste des articles' })
-  @ApiResponse({ status: 200, description: 'Un tableau comportant la liste des Articles' })
+  @ApiResponse({
+    status: 200,
+    description: 'Un tableau comportant la liste des Articles',
+  })
   getArticles() {
     return this.articlesService.findAllArticles();
   }
@@ -47,6 +54,7 @@ export class ArticlesController {
   @ApiResponse({ status: 200, description: 'Un article' })
   //@Public()
   @Get(':id')
+  @Auth(AuthTypes.None)
   findArticleById(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.findArticleById(id);
   }
@@ -60,8 +68,11 @@ export class ArticlesController {
   @ApiOperation({ summary: 'Créer un article' })
   @ApiResponse({ status: 201, description: "L'Article créé" })
   @Post('create')
-  createArticle(@Body() createArticleDto: CreateArticleDto) {
-    return this.articlesService.createArticle(createArticleDto);
+  createArticle(
+    @Body() createArticleDto: CreateArticleDto,
+    @ActiveUser() user: ActiveUserData,
+  ) {
+    return this.articlesService.createArticle(createArticleDto, user );
   }
 
   /**
@@ -81,11 +92,16 @@ export class ArticlesController {
    * @param id
    * @returns
    */
-  @ApiOperation({ summary: "Récupération de tout les articles d'une catégorie" })
-  @ApiResponse({ status: 200, description: 'Un tableau comportant la liste des Articles' })
+  @ApiOperation({
+    summary: "Récupération de tout les articles d'une catégorie",
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Un tableau comportant la liste des Articles',
+  })
   @Get('categorie/:id')
+  @Auth(AuthTypes.None)
   public async findArticlesByCategorie(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.findArticleByCategorie(id);
   }
-
 }
