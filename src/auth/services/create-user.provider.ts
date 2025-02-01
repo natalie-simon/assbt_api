@@ -10,12 +10,15 @@ import { User } from '../../users/user.entity';
 import { HashingProvider } from './hashing.provider';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from '../../users/services/users.service';
+import { JwtService } from '@nestjs/jwt';
+import jwtConfig from '../config/jwt.config';
+import { ConfigType } from '@nestjs/config';
+import { ActiveUserData } from '../interfaces/active-user-data.interface';
 
 /**
  * Service de création d'un utilisateur
  */
 @Injectable()
-
 export class CreateUserProvider {
   /**
    * Constructeur
@@ -30,6 +33,9 @@ export class CreateUserProvider {
     private readonly hashingProvider: HashingProvider,
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
+    private readonly jwtSercice: JwtService,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
   /**
@@ -52,6 +58,18 @@ export class CreateUserProvider {
       ),
     });
 
-    return this.usersRepository.save(newUser);
+    const user = (await this.usersRepository.save(newUser)) as User;
+    const accessToken = await this.jwtSercice.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+      } as ActiveUserData,
+      {
+        secret: this.jwtConfiguration.secret,
+        expiresIn: this.jwtConfiguration.accessTokenTtl,
+      },
+    );
+
+    return { accessToken };
   }
 }

@@ -3,7 +3,7 @@ services:
   # Service pour la bdd PostgreSQL
   postgres-db:
     image: postgres:latest
-    container_name: postgres-db
+    container_name: api-postgres-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
     container_name: nestjs-api
     environment:
-      DB_HOST: postgres-db
+      DB_HOST: api-postgres-db
       DB_PORT: 5432
       DB_USERNAME: postgres
       DB_PASSWORD: admin

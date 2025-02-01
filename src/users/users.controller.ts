@@ -34,7 +34,6 @@ export class UsersController {
     description: 'Enregistrer un nouvel utilisateur',
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
-    console.log(createUserDto);
     return this.usersService.createUser(createUserDto);
   }
 

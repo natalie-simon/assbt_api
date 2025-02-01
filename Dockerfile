@@ -5,7 +5,7 @@ FROM node:22.8 AS build
 WORKDIR /app
 
 # Copie des fichiers
-COPY package*.json ./
+COPY package.json ./
 
 #Installation des dépendances
 RUN npm install
