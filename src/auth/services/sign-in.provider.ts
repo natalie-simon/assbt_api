@@ -55,7 +55,7 @@ export class SignInProvider {
     }
 
     if (!isEqual) {
-      throw new UnauthorizedException('Mot de passe incorrect');
+      throw new UnauthorizedException();
     }
 
     const accessToken = await this.jwtSercice.signAsync(

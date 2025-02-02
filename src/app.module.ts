@@ -12,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication.guard';
+import { MailModule } from './mail/mail.module';
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -42,6 +43,7 @@ dotenv.config();
     CategoriesArticlesModule,
     ArticlesModule,
     AuthModule,
+    MailModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },

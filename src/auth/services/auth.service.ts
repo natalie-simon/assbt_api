@@ -29,9 +29,9 @@ export class AuthService {
 
   /**
    * Is Auth
-   * @returns 
+   * @returns
    */
-  public isAuht(){
+  public isAuht() {
     return true;
   }
 }

@@ -14,6 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
+import { MailService } from 'src/mail/services/mail.service';
 
 /**
  * Service de création d'un utilisateur
@@ -36,6 +37,7 @@ export class CreateUserProvider {
     private readonly jwtSercice: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -59,6 +61,13 @@ export class CreateUserProvider {
     });
 
     const user = (await this.usersRepository.save(newUser)) as User;
+
+    try {
+      await this.mailService.sendInscriptionNouveauMembre(user);
+    } catch (error) {
+      console.error(error);
+    }
+
     const accessToken = await this.jwtSercice.signAsync(
       {
         sub: user.id,
