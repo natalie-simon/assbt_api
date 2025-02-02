@@ -14,7 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
-import { MailService } from 'src/mail/services/mail.service';
+import { MailService } from '../../mail/services/mail.service';
 
 /**
  * Service de création d'un utilisateur

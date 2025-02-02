@@ -21,7 +21,6 @@ export class ArticlesService {
    * @param articleRepository
    */
   constructor(
-    //private readonly usersService: UsersService,
     private readonly statutsService: StatutsService,
     private readonly catetogieArticlesService: CategoriesArticlesService,
     private readonly usersService: UsersService,

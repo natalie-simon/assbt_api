@@ -3,9 +3,9 @@ import { CreateUserDto } from './dtos/createuser.dto';
 import { UsersService } from './services/users.service';
 //import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
-import { Auth } from 'src/auth/decorators/auth.decorator';
-import { AuthTypes } from 'src/auth/enums/auth-types.enum';
+import { AccessTokenGuard } from '../auth/guards/access-token.guard';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { AuthTypes } from '../auth/enums/auth-types.enum';
 
 
 /**

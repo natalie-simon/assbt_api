@@ -36,13 +36,14 @@ describe('ArticleService', () => {
           },
         },
         {
-          provide: CategoriesArticlesService,
-          useClass: CategoriesArticlesServiceMock,
-        },
-        {
           provide: StatutsService,
           useClass: StatutsServiceMock,
         },
+        {
+          provide: CategoriesArticlesService,
+          useClass: CategoriesArticlesServiceMock,
+        },
+
         {
           provide: UsersService,
           useValue: {},
