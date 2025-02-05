@@ -23,12 +23,11 @@ jobs:
       - name: Debug SSH
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          cd ~/assbt-api/
           echo "Utilisateur actuel: $(whoami)"
-          echo "Répertoire home: $HOME"
-          echo "Dossier assbt-api existe ?"
-          ls -ld ~/assbt-api
-          echo "Contenu du dossier home"
-          ls -la ~/
+          echo "Répertoire actuel: "
+          ls
+          echo "fin du test"
           EOF
 
       - name: Deploy to EC2
