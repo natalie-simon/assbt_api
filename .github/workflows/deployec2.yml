@@ -16,7 +16,7 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_PUBLIC_IP }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_PRIVATE }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
 
