@@ -20,6 +20,17 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
 
+      - name: Debug SSH
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          echo "Utilisateur actuel: $(whoami)"
+          echo "Répertoire home: $HOME"
+          echo "Dossier assbt-api existe ?"
+          ls -ld ~/assbt-api
+          echo "Contenu du dossier home"
+          ls -la ~/
+          EOF
+
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
