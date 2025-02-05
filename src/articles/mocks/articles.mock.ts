@@ -20,7 +20,7 @@ export const articlesMock = [
       id: 1,
       email: 'test@example.com',
       mot_de_passe:
-        '$2b$10$V9gUh3eaFEvExl5qf8jVKOXGHyRT96/91HIuJiwSWqvpPplLRKTjO',
+        '$2a$10$ytMTED6Uqu./t6.gNEifTOHBZLanPWyU3BbUTVRxcp6K9yzQb0y9W',
       est_supprime: false,
     },
   },

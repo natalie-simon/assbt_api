@@ -13,6 +13,7 @@ import { ArticlesService } from './articles.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { StatutsService } from '../../statuts/services/statuts.service';
 import { StatutsServiceMock } from '../../statuts/mocks/statuts.service.mock';
+import { UsersServiceMock } from '../../users/mocks/users.service.mock';
 
 describe('ArticleService', () => {
   let service: ArticlesService;
@@ -46,7 +47,7 @@ describe('ArticleService', () => {
 
         {
           provide: UsersService,
-          useValue: {},
+          useClass: UsersServiceMock,
         },
         {
           provide: getRepositoryToken(Article),

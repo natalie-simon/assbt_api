@@ -4,6 +4,14 @@ import { usersMock } from './users.mock';
  * Mocked UsersService class.
  */
 export class UsersServiceMock {
+
+  /**
+   * Mocked findUserById method.
+   *
+   * @memberof UsersServiceMock
+   */
+  
+  findUserById = jest.fn().mockResolvedValue(usersMock[0]);
   /**
    * Mocked findAllUsers method.
    *
