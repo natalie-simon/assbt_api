@@ -1,0 +1,31 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            cd ~/assbt-api
+            git pull origin develop
+            npm install
+            npm run build
+            pm2 restart all
+          EOF
