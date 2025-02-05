@@ -23,11 +23,12 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Charge NVM
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            export PATH=$NVM_DIR/versions/node/v22.13.1/bin:$PATH
             cd ~/assbt-api/
             git pull origin develop
-            echo "debut ls"
-            ls
-            echo "fin du test"
             npm install
             npm run build
             pm2 restart all
