@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesArticlesService } from './categories-articles.services';
 import { DataSource } from 'typeorm';
-import { CategorieArticle } from '../categorie-article.entity';
+import { CategorieArticle } from '../../database/core/categorie-article.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { categoriesArticlesMock } from '../mocks/categories-articles.mock';
 import { mockCategoriesArticlesRepository } from '../mocks/categories-articles.repository.mock';

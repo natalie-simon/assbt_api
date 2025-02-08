@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StatutsController } from './statuts.controller';
 import { StatutsService } from './services/statuts.service';
-import { Statut } from './statut.entity';
+import { Statut } from '../database/core/statut.entity';
 
 /**
  * Gestion du module Statuts

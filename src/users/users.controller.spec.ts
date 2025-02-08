@@ -9,6 +9,7 @@ import { JwtServiceMock } from './mocks/jwt.service.mocks';
 import { AccessTokenGuardMock } from '../auth/mocks/access-token.guard.mock';
 import jwtConfig from '../auth/config/jwt.config';
 import { jwtConfigMock } from '../auth/mocks/jwt-config.mock';
+import { usersMock } from './mocks/users.mock';
 
 
 describe('UsersController', () => {
@@ -44,4 +45,10 @@ describe('UsersController', () => {
     expect(controller).toBeDefined();
   });
 
-})
+  describe('getUsers', () => {
+    it('should return an array of Users', () => {
+      expect(controller.getUsers()).resolves.toEqual(usersMock);
+    });
+  });
+
+});

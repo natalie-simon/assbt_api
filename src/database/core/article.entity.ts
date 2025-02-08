@@ -5,9 +5,9 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Statut } from '../statuts/statut.entity';
-import { CategorieArticle } from '../categories-articles/categorie-article.entity';
-import { User } from '../users/user.entity';
+import { Statut } from './statut.entity';
+import { CategorieArticle } from './categorie-article.entity';
+import { User } from './user.entity';
 
 /**
  * Entité Article

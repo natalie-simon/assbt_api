@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CategorieArticle } from '../categorie-article.entity';
+import { CategorieArticle } from '../../database/core/categorie-article.entity';
 import { Repository } from 'typeorm';
 import { CreateCategorieArticleDto } from '../dtos/create-categorie-article.dto';
 

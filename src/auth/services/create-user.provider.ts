@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from '../../users/dtos/createuser.dto';
 import { Repository } from 'typeorm';
-import { User } from '../../users/user.entity';
+import { User } from '../../database/core/user.entity';
 import { HashingProvider } from './hashing.provider';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from '../../users/services/users.service';

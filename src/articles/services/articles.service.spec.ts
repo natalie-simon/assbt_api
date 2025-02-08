@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { Article } from '../article.entity';
+import { Article } from '../../database/core/article.entity';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { UsersService } from '../../users/services/users.service';
 import { CategoriesArticlesService } from '../../categories-articles/services/categories-articles.services';

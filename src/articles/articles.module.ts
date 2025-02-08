@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './services/articles.service';
-import { Article } from './article.entity';
+import { Article } from '../database/core/article.entity';
 import { UsersModule } from '../users/users.module';
 import { StatutsModule } from '../statuts/statuts.module';
 import { CategoriesArticlesModule } from '../categories-articles/categories-articles.modules';

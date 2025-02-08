@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StatutsService } from './statuts.service';
 import { DataSource } from 'typeorm';
-import { Statut } from '../statut.entity';
+import { Statut } from '../../database/core/statut.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { statutsMock } from '../mocks/statuts.mock';
 import { mockStatutsRepository } from '../mocks/statuts.repository.mock';

@@ -4,7 +4,7 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
 } from 'typeorm';
-import { Article } from '../articles/article.entity';
+import { Article } from './article.entity';
 
 /**
  * Entité représentant un statut dans l'application.
