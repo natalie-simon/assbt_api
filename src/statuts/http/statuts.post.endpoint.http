@@ -1,6 +1,6 @@
 POST http://localhost:3000/api/statuts/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTczODI1NzQ3NywiZXhwIjoxNzM4MjYxMDc3fQ.q_eB_Sj0ceNBgbjLlR8gNWYgEPorYYZKwF4DiY9bwJA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTczOTAxMTgxNCwiZXhwIjoxNzM5MDE1NDE0fQ.z9A8fa8wzDUkKX4_ExLJc9Kr3o5-yCUzxl1P8trgkB0
 {
   "lbl_statut": "Brouillon"
 }

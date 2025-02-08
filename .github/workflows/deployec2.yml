@@ -51,3 +51,26 @@ jobs:
             npm run build
             pm2 restart all
           EOF
+      - name: Send success email
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: ${{secrets.SMTP_ADRESS}}
+          server_port: ${{secrets.SMTP_PORT}}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Déploiement réussi pour le moter API sur AWS EC2"
+          body: "Le déploiement de l'API sur AWS EC2 a été effectué avec succès."
+          to: ybah2201@gmail.com
+          from: ybah2201@gmail.com
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: ${{secrets.SMTP_ADRESS}}
+          server_port: ${{secrets.SMTP_PORT}}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Echec de déploiement pour le moter API sur AWS EC2"
+          body: "Le déploiement de l'API sur AWS EC2 a échoué."
+          to: ybah2201@gmail.com
+          from: ybah2201@gmail.com
