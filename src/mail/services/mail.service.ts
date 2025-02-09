@@ -30,4 +30,20 @@ export class MailService {
       },
     });
   }
+
+  public async sendMailReinitialisationMDP(
+    user: User,
+    accessToken: string,
+  ): Promise<void> {
+    await this.mailerService.sendMail({
+      to: user.email,
+      from: process.env.MAIL_ADMIN,
+      subject: 'Réinitialisation de votre mot de passe',
+      template: './reinitialisationMDP',
+      context: {
+        email: user.email,
+        token: accessToken,
+      },
+    });
+  }
 }

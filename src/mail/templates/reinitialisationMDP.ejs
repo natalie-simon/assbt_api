@@ -1,0 +1,12 @@
+<h1>Les Bulleurs Toulonnais</h1>
+
+<p>Mail de réinitialisation du mot de passe </p>
+
+<%= email %>
+
+<a href="http://localhost:5173?token=<%= encodeURIComponent(token) %>" target="_blank">
+  Cliquez ici pour réinitialiser votre mot de passe
+</a>
+
+
+<p>Ce lien expire dans une heure</p>
