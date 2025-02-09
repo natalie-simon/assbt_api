@@ -18,9 +18,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-
     private readonly createUserProvider: CreateUserProvider,
-
     private readonly findOneByEmailProvider: FindOneByEmailProvider,
   ) {}
 
@@ -56,6 +54,16 @@ export class UsersService {
    */
   public async findAllUsers() {
     return this.usersRepository.find(/*{ relations: ['role'] }*/);
+  }
+
+  /**
+   * Mise à jour d'un utilisateur
+   * @param user
+   * @returns
+   */
+  public async update(user: User){
+    console.log(user);
+    return this.usersRepository.save(user);
   }
 
   /**
