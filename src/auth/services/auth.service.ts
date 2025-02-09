@@ -8,10 +8,13 @@ import { UsersService } from '../../users/services/users.service';
 import { SigninDto } from '../dtos/signin.dto';
 import { SignInProvider } from './sign-in.provider';
 import { ForgotPasswordDto } from '../dtos/forgotpassword.dto';
-import { MailService } from 'src/mail/services/mail.service';
+import { MailService } from '../../mail/services/mail.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import jwtConfig from '../config/jwt.config';
+import { ChangePasswordDto } from '../dtos/changePassword.dto';
+import { ActiveUserData } from '../interfaces/active-user-data.interface';
+import { HashingProvider } from './hashing.provider';
 
 /**
  * Service de gestion des Statuts
@@ -27,6 +30,8 @@ export class AuthService {
   constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => HashingProvider))
+    private readonly hashingProvider: HashingProvider,
     private readonly signInProvider: SignInProvider,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
@@ -43,6 +48,11 @@ export class AuthService {
     return await this.signInProvider.signIn(signinDto);
   }
 
+  /**
+   * Envoie du mail de réinitialisation du mot de passe
+   * @param forgotPasswordDto
+   * @returns
+   */
   public async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     let user = await this.usersService.findOneByEmail(forgotPasswordDto.email);
     if (!user) {
@@ -62,12 +72,42 @@ export class AuthService {
 
     try {
       await this.mailService.sendMailReinitialisationMDP(user, accessToken);
-      return true;
+      return { message: 'Un email pour réinitialiser votre mot de passe vient de vous être envoyé.' };
     } catch (err) {
       console.log(err);
       throw new BadRequestException("Erreur lors de l'envoi de l'email.");
     }
   }
+
+  /**
+   * Mise à jour du mot de passe
+   * @param changePasswordDto
+   * @param userData
+   * @returns
+   */
+  public async updatePassword(
+    changePasswordDto: ChangePasswordDto,
+    userData: ActiveUserData,
+  ) {
+    const user = await this.usersService.findOneByEmail(userData.email);
+    const mot_de_passe = await this.hashingProvider.hashPassword(
+      changePasswordDto.nouveau_mdp,
+    );
+      (user.mot_de_passe = mot_de_passe);
+    await this.usersService.update(user);
+
+        try {
+          await this.mailService.sendMailMotDePasseModifie(user);
+          return {
+            message:
+              'Votre mot de passe a bien été modifié.',
+          };
+        } catch (err) {
+          console.log(err);
+          throw new BadRequestException("Erreur lors de l'envoi de l'email.");
+        }
+  }
+
   /**
    * Is Auth
    * @returns

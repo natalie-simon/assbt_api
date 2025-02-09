@@ -57,6 +57,16 @@ export class UsersService {
   }
 
   /**
+   * Mise à jour d'un utilisateur
+   * @param user
+   * @returns
+   */
+  public async update(user: User){
+    console.log(user);
+    return this.usersRepository.save(user);
+  }
+
+  /**
    * Récupération d'un utilisateur par son id
    * @param id
    * @returns
