@@ -48,6 +48,7 @@ export class MailService {
       context: {
         email: user.email,
         token: accessToken,
+        url: process.env.URL_FRONT,
       },
     });
   }
