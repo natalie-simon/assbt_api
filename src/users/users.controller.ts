@@ -4,8 +4,8 @@ import { UsersService } from './services/users.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
-import { RoleTypes } from 'src/auth/enums/role-types.enum';
-import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RoleTypes } from '../auth/enums/role-types.enum';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 
 /**

@@ -4,8 +4,8 @@ import { CreateRoleDto } from './dtos/create-role.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RoleTypes } from '../auth/enums/role-types.enum';
-import { AuthTypes } from 'src/auth/enums/auth-types.enum';
-import { Auth } from 'src/auth/decorators/auth.decorator';
+import { AuthTypes } from '../auth/enums/auth-types.enum';
+import { Auth } from '../auth/decorators/auth.decorator';
 
 
 /**
