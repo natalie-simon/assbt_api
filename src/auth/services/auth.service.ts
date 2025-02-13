@@ -63,6 +63,7 @@ export class AuthService {
       {
         sub: user.id,
         email: user.email,
+        role: user
       },
       {
         secret: this.jwtConfiguration.secret,

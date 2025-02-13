@@ -44,7 +44,7 @@ export class UsersService {
   public async findOneByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email },
-      //relations: ['role'],
+      relations: ['role'],
     });
   }
 
@@ -53,7 +53,7 @@ export class UsersService {
    * @returns
    */
   public async findAllUsers() {
-    return this.usersRepository.find(/*{ relations: ['role'] }*/);
+    return this.usersRepository.find({ relations: ['role'] });
   }
 
   /**
@@ -62,7 +62,6 @@ export class UsersService {
    * @returns
    */
   public async update(user: User){
-    console.log(user);
     return this.usersRepository.save(user);
   }
 

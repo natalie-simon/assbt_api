@@ -13,6 +13,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { MailModule } from './mail/mail.module';
+import { RolesModule } from './roles/roles.module';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -43,9 +45,11 @@ dotenv.config();
     ArticlesModule,
     AuthModule,
     MailModule,
+    RolesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },
+    { provide: APP_GUARD, useClass: RolesGuard},
     AccessTokenGuard,
   ],
 })

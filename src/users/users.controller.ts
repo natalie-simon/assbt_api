@@ -1,11 +1,11 @@
 import { Body, Controller, Post, Get, UseGuards, SetMetadata } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createuser.dto';
 import { UsersService } from './services/users.service';
-//import { Public } from '../auth/decorators/public.decorators';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
+import { RoleTypes } from 'src/auth/enums/role-types.enum';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 
 /**
@@ -42,7 +42,8 @@ export class UsersController {
    * @returns
    */
   @Get()
-  @UseGuards(AccessTokenGuard)
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.Admin)
   @ApiOperation({
     summary: 'Récupérer tout les utilisateurs',
     description: "Récupérer l'ensemble des utilisateurs",

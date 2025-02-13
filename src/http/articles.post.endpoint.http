@@ -1,6 +1,6 @@
 POST http://localhost:3000/api/articles/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTczOTAxMTgxNCwiZXhwIjoxNzM5MDE1NDE0fQ.z9A8fa8wzDUkKX4_ExLJc9Kr3o5-yCUzxl1P8trgkB0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwiaWF0IjoxNzM5Mzg1MjY5LCJleHAiOjE3MzkzODg4Njl9.RstivUM84AaGwjSx0D9D44iF82HQpwt-o90XHGt8o6M
 
 {
   "titre": "Test avec user 2 ",

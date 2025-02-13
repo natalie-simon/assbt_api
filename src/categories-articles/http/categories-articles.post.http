@@ -1,6 +1,0 @@
-POST http://localhost:3000/api/categories-articles/create
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsImlhdCI6MTczOTAxMTgxNCwiZXhwIjoxNzM5MDE1NDE0fQ.z9A8fa8wzDUkKX4_ExLJc9Kr3o5-yCUzxl1P8trgkB0
-{
-  "lbl_categorie": "Accueil"
-}

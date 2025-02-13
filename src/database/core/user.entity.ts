@@ -6,6 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Role } from './role.entity';
 //import { Role } from '../models/role.entity';
 
 /**
@@ -40,7 +41,7 @@ export class User {
   })
   est_supprime: boolean;
 
-  /*@ManyToOne(() => Role)
-  @JoinColumn({ name: 'role_id' })
-  role: Role;*/
+  @ManyToOne(() => Role)
+  @JoinColumn()
+  role: Role;
 }

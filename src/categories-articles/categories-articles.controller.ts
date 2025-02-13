@@ -3,16 +3,21 @@ import {
   Get,
   Post,
   Body,
+  UseGuards,
 } from "@nestjs/common";
 import { CategoriesArticlesService } from './services/categories-articles.services';
 import { CreateCategorieArticleDto } from "./dtos/create-categorie-article.dto";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
-
+import { Roles } from "../auth/decorators/roles.decorator";
+import { RoleTypes } from "../auth/enums/role-types.enum";
+import { AuthTypes } from "../auth/enums/auth-types.enum";
+import { Auth } from "../auth/decorators/auth.decorator";
 
 /**
  * Controller des catégories d'articles
  */
 @Controller('categories-articles')
+@Roles(RoleTypes.Admin)
 @ApiTags('categories-articles')
 export class CategoriesArticlesController {
   /**
@@ -29,6 +34,8 @@ export class CategoriesArticlesController {
    */
   //@Public()
   @Get()
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.Admin, RoleTypes.Redac)
   @ApiOperation({ summary: "Liste des catégories d'articles" })
   @ApiResponse({
     status: 200,
@@ -45,6 +52,8 @@ export class CategoriesArticlesController {
    */
   //@Public()
   @Post('create')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.Admin)
   @ApiOperation({ summary: "Créer une catégorie d'articles" })
   @ApiResponse({ status: 201, description: "La catégorie d'articles créée" })
   createCategorieArticle(

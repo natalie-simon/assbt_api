@@ -62,6 +62,7 @@ export class SignInProvider {
       {
         sub: user.id,
         email: user.email,
+        role: user.role,
       } as ActiveUserData,
       {
         secret: this.jwtConfiguration.secret,
