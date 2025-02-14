@@ -10,6 +10,7 @@ import { AccessTokenGuardMock } from '../auth/mocks/access-token.guard.mock';
 import jwtConfig from '../auth/config/jwt.config';
 import { jwtConfigMock } from '../auth/mocks/jwt-config.mock';
 import { usersMock } from './mocks/users.mock';
+import { CreateUserDto } from './dtos/createuser.dto';
 
 
 describe('UsersController', () => {
@@ -44,6 +45,19 @@ describe('UsersController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  describe('registerUser', () => {
+    const dto = {
+      email: 'test@example.com',
+      mot_de_passe:
+        '$2a$10$ytMTED6Uqu./t6.gNEifTOHBZLanPWyU3BbUTVRxcp6K9yzQb0y9W',
+      clef: process.env.CLEF,
+    } as CreateUserDto;
+
+    it('should return a new User', () => {
+      expect(controller.registerUser(dto)).resolves.toEqual(usersMock[0]);
+    });
+  })
 
   describe('getUsers', () => {
     it('should return an array of Users', () => {
