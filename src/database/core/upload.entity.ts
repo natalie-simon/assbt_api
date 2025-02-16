@@ -8,8 +8,17 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+/**
+ * Entité définissant la table upload
+ */
 @Entity()
 export class Upload {
+
+  /**
+   * Identifiant de l'upload
+   * @type {number}
+   * @memberof Upload
+   */
   @PrimaryGeneratedColumn()
   id: number;
 

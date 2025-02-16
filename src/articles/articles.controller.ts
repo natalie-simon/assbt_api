@@ -6,17 +6,21 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 
 import { ArticlesService } from './services/articles.service';
 import { CreateArticleDto } from './dtos/create-article.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiHeaders } from '@nestjs/swagger';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { RoleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadService } from '../uploads/services/upload.service';
 
 /**
  * Contrôleur des Articles
@@ -31,6 +35,7 @@ export class ArticlesController {
    */
   constructor(
     private readonly articlesService: ArticlesService,
+    private readonly uploadService: UploadService,
   ) {}
 
   /**
@@ -71,14 +76,22 @@ export class ArticlesController {
    */
   //@Public()
   @Post('create')
+  @UseInterceptors(FileInterceptor('fichier'))
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.Admin)
+  @ApiHeaders([
+    { name: 'Content-Type', description: 'multipart/form-data' },
+    { name: 'Authorization', description: 'Bearer Token' },
+  ])
   @ApiOperation({ summary: 'Créer un article' })
   @ApiResponse({ status: 201, description: "L'Article créé" })
-  createArticle(
+  public async createArticle(
     @Body() createArticleDto: CreateArticleDto,
+    @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
   ) {
+    const imageUrl = await this.uploadService.uploadFile(file);
+    createArticleDto.image = imageUrl.url;
     return this.articlesService.createArticle(createArticleDto, user);
   }
 

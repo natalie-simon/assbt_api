@@ -20,7 +20,9 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
 
-
+/**
+ * Chargement des variables d'environnement
+ */
 const ENV = process.env.NODE_ENV;
 
 /**

@@ -1,4 +1,6 @@
-// auth.service.mock.ts
+/**
+ * Mocks the AuthService class.
+ */
 export const mockAuthService = {
   signin: jest.fn(),
   forgotPassword: jest.fn(),

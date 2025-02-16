@@ -1,35 +1,62 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3 } from 'aws-sdk';
+//import { S3 } from 'aws-sdk';
 import { v4 as uuid4 } from 'uuid';
 import * as path from 'path';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
+/**
+ * Service permettant d'uploader un fichier sur AWS S3
+ */
 @Injectable()
 export class UploadToAwsProvider {
-  constructor(private readonly configService: ConfigService) {}
-  public async uploadFile(file: Express.Multer.File) {
-    const s3 = new S3();
-
-    try {
-      const uploadResult = await s3
-        .upload({
-          Bucket: this.configService.get('appConfig.awsBucketName'),
-          Key: this.generateFileName(file),
-          Body: file.buffer,
-          ContentType: file.mimetype,
-        })
-        .promise();
-
-      return uploadResult.Key;
-    } catch (error) {
-      console.error(error);
-      throw new RequestTimeoutException("Erreur lors de l'upload du fichier");
-    }
-
-    // upload le fichier
-    // nouvelle entrée dans la bdd
+  /**
+   * Client AWS S3
+   *
+   * @private
+   * @type {S3Client}
+   * @memberof UploadToAwsProvider
+   */
+  private s3Client: S3Client;
+  /**
+   * Constructeur
+   * @param configService
+   */
+  constructor(private readonly configService: ConfigService) {
+    this.s3Client = new S3Client({
+      region: this.configService.get('appConfig.awsRegion'),
+    });
   }
 
+  /**
+   * Méthode pour uploader un fichier sur AWS S3
+   * @param file
+   * @returns
+   */
+  public async uploadFile(file: Express.Multer.File) {
+    const bucketName = this.configService.get('appConfig.awsBucketName');
+    const fileName = this.generateFileName(file);
+
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    try {
+      const uploadResult = await this.s3Client.send(command);
+      return fileName;
+    } catch (error) {
+      throw new RequestTimeoutException("Erreur lors de l'upload du fichier");
+    }
+  }
+
+  /**
+   * Méthode pour générer un nom de fichier unique
+   * @param file
+   * @returns
+   */
   private generateFileName(file: Express.Multer.File): string {
     let name = file.originalname.split('.')[0].replace(/\s/g, '').trimEnd();
     let extension = path.extname(file.originalname);
