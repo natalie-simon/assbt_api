@@ -1,6 +1,5 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-//import { S3 } from 'aws-sdk';
 import { v4 as uuid4 } from 'uuid';
 import * as path from 'path';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
