@@ -29,7 +29,9 @@ export class ArticlesController {
    * Constructeur
    * @param articlesService
    */
-  constructor(private readonly articlesService: ArticlesService) {}
+  constructor(
+    private readonly articlesService: ArticlesService,
+  ) {}
 
   /**
    * Récupération de tout les articles existants dans l'applications

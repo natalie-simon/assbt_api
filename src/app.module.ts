@@ -6,7 +6,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { CategoriesArticlesModule } from './categories-articles/categories-articles.modules';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import jwtConfig from './auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
@@ -15,22 +15,29 @@ import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { MailModule } from './mail/mail.module';
 import { RolesModule } from './roles/roles.module';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { UploadsModule } from './uploads/uploads.module';
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
+import environnementValidation from './config/environnement.validation';
 
-// Charger les variables d'environnement
-dotenv.config();
+
+const ENV = process.env.NODE_ENV;
+
 /**
  * Gestion du module principal de l'application
  */
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT),
-        username: process.env.DB_USERNAME,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
+        host: configService.get('database.host'),
+        port: configService.get('database.port'),
+        username: configService.get('database.username'),
+        password: configService.get('database.password'),
+        database: configService.get('database.name'),
         autoLoadEntities: true,
         synchronize: false,
         entities: [__dirname + '/database/core/**/*.entity{.ts,.js}'],
@@ -39,6 +46,12 @@ dotenv.config();
     }),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: !ENV ? '.env' : `.env.${ENV}`,
+      load: [appConfig, databaseConfig],
+      validationSchema: environnementValidation,
+    }),
     UsersModule,
     StatutsModule,
     CategoriesArticlesModule,
@@ -46,6 +59,7 @@ dotenv.config();
     AuthModule,
     MailModule,
     RolesModule,
+    UploadsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },
