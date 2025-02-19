@@ -49,6 +49,8 @@ jobs:
             git pull origin develop
             npm install
             npm run build
+            npm run migration:generate
+            npm run migration:run
             pm2 restart all
           EOF
       - name: Send success email
