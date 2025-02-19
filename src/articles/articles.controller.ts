@@ -17,10 +17,11 @@ import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
-import { RoleTypes } from '../auth/enums/role-types.enum';
+import { roleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../uploads/services/upload.service';
+import { categorieArticleTypes } from './enums/categorie-article-types.enum';
 
 /**
  * Contrôleur des Articles
@@ -45,7 +46,7 @@ export class ArticlesController {
   //@Public()
   @Get()
   @Auth(AuthTypes.Bearer)
-  @Roles(RoleTypes.Admin)
+  @Roles(roleTypes.ADMIN)
   @ApiOperation({ summary: 'Liste des articles' })
   @ApiResponse({
     status: 200,
@@ -62,7 +63,7 @@ export class ArticlesController {
    */
   @Get(':id')
   @Auth(AuthTypes.Bearer)
-  @Roles(RoleTypes.Admin)
+  @Roles(roleTypes.ADMIN)
   @ApiOperation({ summary: 'Récupérer un article par son id' })
   @ApiResponse({ status: 200, description: 'Un article' })
   findArticleById(@Param('id', ParseIntPipe) id: number) {
@@ -78,7 +79,7 @@ export class ArticlesController {
   @Post('create')
   @UseInterceptors(FileInterceptor('fichier'))
   @Auth(AuthTypes.Bearer)
-  @Roles(RoleTypes.Admin)
+  @Roles(roleTypes.ADMIN)
   @ApiHeaders([
     { name: 'Content-Type', description: 'multipart/form-data' },
     { name: 'Authorization', description: 'Bearer Token' },
@@ -90,9 +91,8 @@ export class ArticlesController {
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
   ) {
-    const imageUrl = await this.uploadService.uploadFile(file);
-    createArticleDto.image = imageUrl.url;
-    return this.articlesService.createArticle(createArticleDto, user);
+    const image = await this.uploadService.uploadFile(file);
+    return this.articlesService.createArticle(createArticleDto, user, image);
   }
 
   /**
@@ -112,7 +112,7 @@ export class ArticlesController {
    * @param id
    * @returns
    */
-  @Get('categorie/:id')
+  @Get('categorie/:categorie')
   @Auth(AuthTypes.None)
   @ApiOperation({
     summary: "Récupération de tout les articles d'une catégorie",
@@ -121,7 +121,7 @@ export class ArticlesController {
     status: 200,
     description: 'Un tableau comportant la liste des Articles',
   })
-  public async findArticlesByCategorie(@Param('id', ParseIntPipe) id: number) {
-    return this.articlesService.findArticleByCategorie(id);
+  public async findArticlesByCategorie(@Param('categorie') categorie: categorieArticleTypes) {
+    return this.articlesService.findArticleByCategorie(categorie);
   }
 }

@@ -5,10 +5,10 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Statut } from './statut.entity';
-import { CategorieArticle } from './categorie-article.entity';
 import { User } from './user.entity';
-
+import { Upload } from './upload.entity';
+import { categorieArticleTypes } from '../../articles/enums/categorie-article-types.enum';
+import { statutArticleTypes } from '../../articles/enums/statut-article-types.enum';
 /**
  * Entité Article
  */
@@ -51,9 +51,12 @@ export class Article {
    * @type {Statut}
    * @memberof Article
    */
-  @ManyToOne(() => Statut, (statut) => statut.articles, { nullable: false })
-  @JoinColumn()
-  statut: Statut;
+  @Column({
+    type: 'enum',
+    enum: statutArticleTypes,
+    nullable: false,
+  })
+  statut: string;
 
   /**
    * Catégorie de l'article
@@ -61,24 +64,16 @@ export class Article {
    * @type {CategorieArticle}
    * @memberof Article
    */
-  @ManyToOne(() => CategorieArticle, (categorie) => categorie.articles, {
+  @Column({
+    type: 'enum',
+    enum: categorieArticleTypes,
     nullable: false,
   })
-  @JoinColumn()
-  categorie: CategorieArticle;
+  categorie: string;
 
-  /**
-   * Url de l'image liée à l'article
-   *
-   * @type {string}
-   * @memberof Article
-   */
-  @Column({
-    type: 'text',
-    name: 'image',
-    nullable: true,
-  })
-  image: string;
+  @ManyToOne(() => Upload, { nullable: true })
+  @JoinColumn()
+  image: Upload;
 
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn()

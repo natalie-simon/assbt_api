@@ -2,7 +2,7 @@ POST http://localhost:3000/api/membres/register
 Content-Type: application/json
 
 {
-  "email":"ybah2201@gmail.com",
-  "mot_de_passe": "toto123456",
+  "email":"admin@test.com",
+  "mot_de_passe": "1234567890",
   "clef": "totototo"
 }

@@ -3,27 +3,26 @@ import { DataSource } from 'typeorm';
 import { Article } from '../../database/core/article.entity';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { UsersService } from '../../users/services/users.service';
-import { CategoriesArticlesService } from '../../categories-articles/services/categories-articles.services';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 
 import { mockArticlesRepository } from '../mocks/articles.repository.mock';
 import { articlesMock } from '../mocks/articles.mock';
-import { CategoriesArticlesServiceMock } from '../../categories-articles/mocks/categories-articles.service.mock';
 import { ArticlesService } from './articles.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { StatutsService } from '../../statuts/services/statuts.service';
-import { StatutsServiceMock } from '../../statuts/mocks/statuts.service.mock';
 import { UsersServiceMock } from '../../users/mocks/users.service.mock';
+import { Upload } from '../../database/core/upload.entity';
 
 describe('ArticleService', () => {
   let service: ArticlesService;
   const dto = {
     titre: 'Voir un titre',
     contenu: 'toto123456',
-    categorie: 1,
-    statut: 1,
-    image:
-      'https://image.over-blog.com/O1chlSo4u_D7uD0qC9z-9lzHTHg=/filters:no_upscale()/image%2F1438473%2F20201007%2Fob_f4e04f_diver.jpg',
+    image: 1,
+    categorie: 'accueil',
+    statut: 'publie',
+    redacteur: {
+      email: 'test@example.com',
+    },
   } as CreateArticleDto;;
 
   beforeEach(async () => {
@@ -36,15 +35,6 @@ describe('ArticleService', () => {
             find: jest.fn().mockReturnValue(articlesMock),
           },
         },
-        {
-          provide: StatutsService,
-          useClass: StatutsServiceMock,
-        },
-        {
-          provide: CategoriesArticlesService,
-          useClass: CategoriesArticlesServiceMock,
-        },
-
         {
           provide: UsersService,
           useClass: UsersServiceMock,
@@ -66,7 +56,10 @@ describe('ArticleService', () => {
   describe('createArticle', () => {
     it('should call createArticle', async () => {
       const userInfo = { sub: 1, email: 'test@example.com' } as ActiveUserData;
-      const result = await service.createArticle(dto, userInfo);
+      const upload = {
+        url: 'https://d3vv71s67qf4h4.cloudfront.net/connexion_bulleurs-1739980811134-572aefb0-c2c1-46a7-bf22-bbf1065673f4.png',
+      } as Upload;
+      const result = await service.createArticle(dto, userInfo, upload);
       expect(mockArticlesRepository.create).toHaveBeenCalled();
       expect(mockArticlesRepository.save).toHaveBeenCalled();
       expect(result).toEqual(articlesMock[0]);

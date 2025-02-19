@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { roleTypes } from '../../auth/enums/role-types.enum';
 import {
   Column,
   Entity,
@@ -6,8 +7,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Role } from './role.entity';
-//import { Role } from '../models/role.entity';
 
 /**
  * Entité représentant un utilisateur dans l'application.
@@ -41,7 +40,11 @@ export class User {
   })
   est_supprime: boolean;
 
-  @ManyToOne(() => Role)
-  @JoinColumn()
-  role: Role;
+  @Column({
+    type: 'enum',
+    enum: roleTypes,
+    default: roleTypes.USER,
+    nullable: false,
+  })
+  role: string;
 }

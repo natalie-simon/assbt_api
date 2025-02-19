@@ -1,4 +1,3 @@
-import { CreateCategorieArticleDto } from 'src/categories-articles/dtos/create-categorie-article.dto';
 import { fileTypes } from '../../uploads/enums/file-types.enum';
 import {
   Column,

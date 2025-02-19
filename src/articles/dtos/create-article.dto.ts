@@ -1,6 +1,8 @@
-import { IsNotEmpty, MaxLength, IsString, IsInt, IsUrl, IsOptional } from "class-validator";
+import { IsNotEmpty, MaxLength, IsString, IsInt, IsUrl, IsOptional, IsEnum } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from 'class-transformer';
+import { categorieArticleTypes } from "../enums/categorie-article-types.enum";
+import { statutArticleTypes } from "../enums/statut-article-types.enum";
 
 /**
  * DTO pour la création d'un article
@@ -48,15 +50,14 @@ export class CreateArticleDto {
    */
   @ApiProperty({
     description: "Le statut de l'article",
-    example: 1,
+    example: 'brouillon',
     required: true,
-    type: 'integer',
-    maxLength: 2,
+    type: 'string',
+    maxLength: 10,
   })
-  @IsInt({ message: 'Le statut doit être un nombre entier' })
-  @Transform(({ value }) => parseInt(value))
-  @IsNotEmpty({ message: "Le statut de l'article doit être renseigné" })
-  statut: number;
+  @IsEnum(statutArticleTypes, { message: 'Le statut doit être une des valeurs autorisées ' })
+  @IsNotEmpty({ message: "Le statut de l'article doit être renseigné." })
+  statut: string;
 
   /**
    * La catégorie de l'article (id)
@@ -66,30 +67,29 @@ export class CreateArticleDto {
    */
   @ApiProperty({
     description: "La catégorie de l'article",
-    example: 1,
+    example: 'accueil',
     required: true,
-    type: 'integer',
-    maxLength: 2,
+    type: 'string',
+    maxLength: 10,
   })
-  @IsInt({ message: 'La catégorie doit être un nombre entier' })
-  @Transform(({ value }) => parseInt(value))
+  @IsEnum(categorieArticleTypes, { message: 'La categorie doit être une des valeurs autorisées.' })
   @IsNotEmpty({ message: "La catégorie de l'article doit être renseignée" })
-  categorie: number;
+  categorie: string;
 
   /**
    * L'url de l'image de l'article
    *
-   * @type {string}
+   * @type {number}
    * @memberof CreateArticleDto
    */
   @ApiProperty({
     description: "L'url de l'image de l'article",
-    example: 'https://www.example.com/image.jpg',
+    example: 1,
     required: false,
-    type: String,
+    type: 'integer',
   })
-  @IsUrl({}, { message: 'L\'url de l\'image doit être une url valide' })
+  @IsInt({ message: "L'identifiant de l'image doit être un entier" })
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
-  image: string;
-
+  image: number;
 }

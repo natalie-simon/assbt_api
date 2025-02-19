@@ -35,7 +35,7 @@ export class UploadService {
    * @param file
    * @returns
    */
-  public async uploadFile(file: Express.Multer.File) {
+  public async uploadFile(file: Express.Multer.File): Promise<Upload> {
     if (
       !['image/gif', 'image/jpg', 'image/jpeg', 'image/png'].includes(
         file.mimetype,

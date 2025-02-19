@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { StatutsModule } from './statuts/statuts.module';
 import { ArticlesModule } from './articles/articles.module';
-import { CategoriesArticlesModule } from './categories-articles/categories-articles.modules';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,7 +11,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { MailModule } from './mail/mail.module';
-import { RolesModule } from './roles/roles.module';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { UploadsModule } from './uploads/uploads.module';
 import appConfig from './config/app.config';
@@ -55,12 +52,9 @@ const ENV = process.env.NODE_ENV;
       validationSchema: environnementValidation,
     }),
     UsersModule,
-    StatutsModule,
-    CategoriesArticlesModule,
     ArticlesModule,
     AuthModule,
     MailModule,
-    RolesModule,
     UploadsModule,
   ],
   providers: [

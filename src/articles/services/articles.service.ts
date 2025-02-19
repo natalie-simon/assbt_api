@@ -4,9 +4,10 @@ import { Article } from '../../database/core/article.entity';
 import { Repository } from 'typeorm';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { UsersService } from '../../users/services/users.service';
-import { StatutsService } from '../../statuts/services/statuts.service';
-import { CategoriesArticlesService } from '../../categories-articles/services/categories-articles.services';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
+import { Upload } from '../../database/core/upload.entity';
+import { ArticleStandardDto } from '../dtos/article-standard.dto';
+import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
 
 /**
  * Service des articles
@@ -16,13 +17,10 @@ export class ArticlesService {
   /**
    * Constructeur
    * @param usersService
-   * @param statutsService
    * @param catetogieArticlesService
    * @param articleRepository
    */
   constructor(
-    private readonly statutsService: StatutsService,
-    private readonly catetogieArticlesService: CategoriesArticlesService,
     private readonly usersService: UsersService,
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
@@ -36,23 +34,27 @@ export class ArticlesService {
   public async createArticle(
     createArticleDto: CreateArticleDto,
     activeUser: ActiveUserData,
+    image: Upload,
   ) {
-    let statut = await this.statutsService.findStatutById(
-      createArticleDto.statut,
-    );
-    let categorie =
-      await this.catetogieArticlesService.findCategorieArticleById(
-        createArticleDto.categorie,
-      );
 
     let user = await this.usersService.findUserById(activeUser['sub']);
     const newArticle = this.articleRepository.create({
       ...createArticleDto,
-      statut: statut,
-      categorie: categorie,
       redacteur: user,
+      image: image,
     });
-    return this.articleRepository.save(newArticle);
+
+    const savedArticle = await this.articleRepository.save(newArticle);
+
+    return new ArticleStandardDto({
+      ...savedArticle,
+      image: {
+        url: image.url,
+      },
+      redacteur: {
+        email: user.email,
+      },
+    });
   }
 
   /**
@@ -61,7 +63,20 @@ export class ArticlesService {
    */
   public async findAllArticles() {
     return await this.articleRepository.find({
-      relations: ['statut', 'categorie' /*, 'redacteur'*/],
+      relations: ['statut', 'image'],
+      select: {
+        id: true,
+        titre: true,
+        contenu: true,
+        statut: true,
+        categorie:true,
+        image: {
+          url: true,
+        },
+        redacteur: {
+          id: true,
+        },
+      },
     });
   }
 
@@ -81,10 +96,23 @@ export class ArticlesService {
    * @param categorieId
    * @returns
    */
-  public async findArticleByCategorie(categorieId: number) {
+  public async findArticleByCategorie(categorie: categorieArticleTypes) {
     return await this.articleRepository.find({
-      relations: ['statut', 'categorie' /*, 'redacteur'*/],
-      where: { categorie: { id: categorieId } },
+      relations: ['image', 'redacteur'],
+      select: {
+        id: true,
+        titre: true,
+        contenu: true,
+        statut: true,
+        categorie: true,
+        image: {
+          url: true,
+        },
+        redacteur: {
+          email: true,
+        },
+      },
+      where: { categorie: categorie},
     });
   }
 

@@ -4,7 +4,7 @@ import { UsersService } from './services/users.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
-import { RoleTypes } from '../auth/enums/role-types.enum';
+import { roleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 
 
@@ -43,7 +43,7 @@ export class UsersController {
    */
   @Get()
   @Auth(AuthTypes.Bearer)
-  @Roles(RoleTypes.Admin)
+  @Roles(roleTypes.ADMIN)
   @ApiOperation({
     summary: 'Récupérer tout les utilisateurs',
     description: "Récupérer l'ensemble des utilisateurs",

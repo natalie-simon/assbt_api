@@ -32,8 +32,8 @@ export class ArticlesServiceMock {
    *
    * @memberof ArticlesServiceMock
    */
-  findArticleByCategorie = jest.fn((categorieId: number) =>
+  findArticleByCategorie = jest.fn((categorie: string) =>
     Promise.resolve(articlesMock.filter(
-      article => article.categorie.id === categorieId))
+      article => article.categorie === categorie))
   );
 }

@@ -1,11 +1,11 @@
 POST http://localhost:3000/api/articles/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwiaWF0IjoxNzM5Mzg1MjY5LCJleHAiOjE3MzkzODg4Njl9.RstivUM84AaGwjSx0D9D44iF82HQpwt-o90XHGt8o6M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM5OTQ4NDc2LCJleHAiOjE3Mzk5NTIwNzZ9.8Dto3GrA1HhNZP5ZX_c7Q2qY66227N7_PII4JoD25-QeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM5OTQ4NTI1LCJleHAiOjE3Mzk5NTIxMjV9.lX2gpZW0SSfS47YgtSJrmgh_zRnrAs2rEm4t3qZoSMw
 
 {
   "titre": "Test avec user 2 ",
   "contenu": "<h1>Verdict</p><h1>Encore un <test>",
   "statut": "1",
-  "categorie": "1",
-  "image": "https://wikiclic.com/wp-content/uploads/2023/05/image-libre-de-droit-wikiclic.jpg"
+  "categorie": "Accueil",
+  "image": 1
 }

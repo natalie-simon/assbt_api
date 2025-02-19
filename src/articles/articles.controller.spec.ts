@@ -9,6 +9,7 @@ import { CreateArticleDto } from './dtos/create-article.dto';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { UploadServiceMock } from '../uploads/mocks/upload.service.mock';
 import { UploadService } from '../uploads/services/upload.service';
+import { categorieArticleTypes } from './enums/categorie-article-types.enum';
 
 describe('ArticlesController', () => {
   let controller: ArticlesController;
@@ -55,12 +56,10 @@ describe('ArticlesController', () => {
     const dto = {
       titre: 'Article 1',
       contenu: "Contenu de l'article 1",
-      //redacteur: 1,
-      statut: 1,
-      categorie: 1,
-      image:
-        'https://www.neozone.org/blog/wp-content/uploads/2022/12/invention-innovation-bouteille-plongee-avelo-001.jpg',
-    } as CreateArticleDto;
+      statut: 'brouillon',
+      categorie: 'accueil',
+      image: 1
+        } as CreateArticleDto;
 
     it('should return a new Article', () => {
       //expect(controller.createArticle(dto, user)).resolves.toEqual(articlesMock[0]);
@@ -69,11 +68,11 @@ describe('ArticlesController', () => {
 
   describe('findArticleByCategorie', () => {
     it('should return an array of Articles', () => {
-      const categorieId = 1;
+      const categorie = 'accueil';
       const response = articlesMock.filter(
-        (article) => article.categorie.id === categorieId,
+        (article) => article.categorie === categorie,
       );
-      expect(controller.findArticlesByCategorie(categorieId)).resolves.toEqual(
+      expect(controller.findArticlesByCategorie(categorieArticleTypes.ACCUEIL)).resolves.toEqual(
         response,
       );
     });
