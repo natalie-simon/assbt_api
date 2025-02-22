@@ -8,6 +8,7 @@ import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface
 import { Upload } from '../../database/core/upload.entity';
 import { ArticleStandardDto } from '../dtos/article-standard.dto';
 import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
+import { statutArticleTypes } from '../enums/statut-article-types.enum';
 
 /**
  * Service des articles
@@ -34,7 +35,7 @@ export class ArticlesService {
   public async createArticle(
     createArticleDto: CreateArticleDto,
     activeUser: ActiveUserData,
-    image: Upload,
+    image: Upload | null,
   ) {
 
     let user = await this.usersService.findUserById(activeUser['sub']);
@@ -49,7 +50,7 @@ export class ArticlesService {
     return new ArticleStandardDto({
       ...savedArticle,
       image: {
-        url: image.url,
+        url: image?.url,
       },
       redacteur: {
         email: user.email,
@@ -93,7 +94,7 @@ export class ArticlesService {
 
   /**
    * Récupération de tous les articles d'une catégorie
-   * @param categorieId
+   * @param categorie
    * @returns
    */
   public async findArticleByCategorie(categorie: categorieArticleTypes) {
@@ -112,7 +113,7 @@ export class ArticlesService {
           email: true,
         },
       },
-      where: { categorie: categorie},
+      where: { categorie: categorie, statut: statutArticleTypes.PUBLIE },
     });
   }
 

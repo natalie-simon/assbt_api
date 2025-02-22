@@ -22,6 +22,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../uploads/services/upload.service';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
+import { Upload } from 'src/database/core/upload.entity';
 
 /**
  * Contrôleur des Articles
@@ -91,7 +92,11 @@ export class ArticlesController {
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
   ) {
-    const image = await this.uploadService.uploadFile(file);
+
+    let image = null as Upload | null;
+    if(file) {
+      image = await this.uploadService.uploadFile(file);
+    }
     return this.articlesService.createArticle(createArticleDto, user, image);
   }
 
@@ -115,7 +120,7 @@ export class ArticlesController {
   @Get('categorie/:categorie')
   @Auth(AuthTypes.None)
   @ApiOperation({
-    summary: "Récupération de tout les articles d'une catégorie",
+    summary: "Récupération de tout les articles d'une catégorie qui sont au statut 'publie'",
   })
   @ApiResponse({
     status: 200,

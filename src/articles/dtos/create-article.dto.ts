@@ -45,7 +45,7 @@ export class CreateArticleDto {
   /**
    * Le statut de l'article (id)
    *
-   * @type {number}
+   * @type {string}
    * @memberof CreateArticleDto
    */
   @ApiProperty({
@@ -62,7 +62,7 @@ export class CreateArticleDto {
   /**
    * La catégorie de l'article (id)
    *
-   * @type {number}
+   * @type {string}
    * @memberof CreateArticleDto
    */
   @ApiProperty({
@@ -75,21 +75,4 @@ export class CreateArticleDto {
   @IsEnum(categorieArticleTypes, { message: 'La categorie doit être une des valeurs autorisées.' })
   @IsNotEmpty({ message: "La catégorie de l'article doit être renseignée" })
   categorie: string;
-
-  /**
-   * L'url de l'image de l'article
-   *
-   * @type {number}
-   * @memberof CreateArticleDto
-   */
-  @ApiProperty({
-    description: "L'url de l'image de l'article",
-    example: 1,
-    required: false,
-    type: 'integer',
-  })
-  @IsInt({ message: "L'identifiant de l'image doit être un entier" })
-  @Transform(({ value }) => parseInt(value))
-  @IsOptional()
-  image: number;
 }
