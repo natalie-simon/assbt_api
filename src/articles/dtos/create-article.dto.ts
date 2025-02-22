@@ -52,7 +52,7 @@ export class CreateArticleDto {
     description: "Le statut de l'article",
     example: 'brouillon',
     required: true,
-    type: 'string',
+    type: String,
     maxLength: 10,
   })
   @IsEnum(statutArticleTypes, { message: 'Le statut doit être une des valeurs autorisées ' })
@@ -69,7 +69,7 @@ export class CreateArticleDto {
     description: "La catégorie de l'article",
     example: 'accueil',
     required: true,
-    type: 'string',
+    type: String,
     maxLength: 10,
   })
   @IsEnum(categorieArticleTypes, { message: 'La categorie doit être une des valeurs autorisées.' })
@@ -88,8 +88,7 @@ export class CreateArticleDto {
     required: false,
     type: 'integer',
   })
-  @IsInt({ message: "L'identifiant de l'image doit être un entier" })
-  @Transform(({ value }) => parseInt(value))
+  @IsString({ message: "L'identifiant de l'image doit être un entier" })
   @IsOptional()
   image: number;
 }
