@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { roleTypes } from '../../auth/enums/role-types.enum';
+import { RoleTypes } from '../../auth/enums/role-types.enum';
 import {
   Column,
   Entity,
@@ -42,8 +42,8 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: roleTypes,
-    default: roleTypes.USER,
+    enum: RoleTypes,
+    default: RoleTypes.USER,
     nullable: false,
   })
   role: string;

@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Param,
-  Delete,
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
@@ -17,7 +16,7 @@ import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
-import { roleTypes } from '../auth/enums/role-types.enum';
+import { RoleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../uploads/services/upload.service';
@@ -47,7 +46,7 @@ export class ArticlesController {
   //@Public()
   @Get()
   @Auth(AuthTypes.Bearer)
-  @Roles(roleTypes.ADMIN)
+  @Roles(RoleTypes.ADMIN)
   @ApiOperation({ summary: 'Liste des articles' })
   @ApiResponse({
     status: 200,
@@ -64,7 +63,7 @@ export class ArticlesController {
    */
   @Get(':id')
   @Auth(AuthTypes.Bearer)
-  @Roles(roleTypes.ADMIN)
+  @Roles(RoleTypes.ADMIN)
   @ApiOperation({ summary: 'Récupérer un article par son id' })
   @ApiResponse({ status: 200, description: 'Un article' })
   findArticleById(@Param('id', ParseIntPipe) id: number) {
@@ -78,9 +77,9 @@ export class ArticlesController {
    */
   //@Public()
   @Post('create')
-  @UseInterceptors(FileInterceptor('fichier'))
   @Auth(AuthTypes.Bearer)
-  @Roles(roleTypes.ADMIN)
+  @Roles(RoleTypes.ADMIN)
+  @UseInterceptors(FileInterceptor('fichier'))
   @ApiHeaders([
     { name: 'Content-Type', description: 'multipart/form-data' },
     { name: 'Authorization', description: 'Bearer Token' },
@@ -92,9 +91,8 @@ export class ArticlesController {
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
   ) {
-
     let image = null as Upload | null;
-    if(file) {
+    if (file) {
       image = await this.uploadService.uploadFile(file);
     }
     return this.articlesService.createArticle(createArticleDto, user, image);
@@ -120,13 +118,16 @@ export class ArticlesController {
   @Get('categorie/:categorie')
   @Auth(AuthTypes.None)
   @ApiOperation({
-    summary: "Récupération de tout les articles d'une catégorie qui sont au statut 'publie'",
+    summary:
+      "Récupération de tout les articles d'une catégorie qui sont au statut 'publie'",
   })
   @ApiResponse({
     status: 200,
     description: 'Un tableau comportant la liste des Articles',
   })
-  public async findArticlesByCategorie(@Param('categorie') categorie: categorieArticleTypes) {
+  public async findArticlesByCategorie(
+    @Param('categorie') categorie: categorieArticleTypes,
+  ) {
     return this.articlesService.findArticleByCategorie(categorie);
   }
 }

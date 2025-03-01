@@ -1,7 +1,7 @@
 /**
  * Enumération des Roles
  */
-export enum roleTypes {
+export enum RoleTypes {
   USER = 'User',
   ADMIN = 'Admin',
   REDAC = 'Redacteur',

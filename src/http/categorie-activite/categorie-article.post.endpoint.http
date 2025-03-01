@@ -1,0 +1,25 @@
+POST http://localhost:3000/api/categories-activites/create
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary
+
+--WebKitFormBoundary
+Content-Disposition: form-data; name="fichier"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./images/image1.png
+--WebKitFormBoundary
+Content-Disposition: form-data; name="lbl_categorie"
+
+balbl
+--WebKitFormBoundary
+Content-Disposition: form-data; name="couleur"
+
+22FF55
+--WebKitFormBoundary
+Content-Disposition: form-data; name="statut"
+
+publie
+--WebKitFormBoundary
+Content-Disposition: form-data; name="categorie"
+
+accueil
+--WebKitFormBoundary--

@@ -1,6 +1,5 @@
-import { IsNotEmpty, MaxLength, IsString, IsInt, IsUrl, IsOptional, IsEnum } from "class-validator";
+import { IsNotEmpty, MaxLength, IsString, IsEnum } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Transform } from 'class-transformer';
 import { categorieArticleTypes } from "../enums/categorie-article-types.enum";
 import { statutArticleTypes } from "../enums/statut-article-types.enum";
 
