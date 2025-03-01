@@ -2,6 +2,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  LoggerService,
   RequestTimeoutException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 /**
  * Service de gestion de la connexion
@@ -32,6 +34,8 @@ export class SignInProvider {
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly hashingProvider: HashingProvider,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   /**
@@ -55,6 +59,7 @@ export class SignInProvider {
     }
 
     if (!isEqual) {
+      this.logger.log(`Erreur de connexion : ${user.email}`);
       throw new UnauthorizedException();
     }
 
@@ -69,6 +74,8 @@ export class SignInProvider {
         expiresIn: this.jwtConfiguration.accessTokenTtl,
       },
     );
+
+    this.logger.log(`Le membre : ${user.email} s'est connecté.`);
 
     return { accessToken };
   }

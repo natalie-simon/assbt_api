@@ -13,6 +13,7 @@ import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { MailModule } from './mail/mail.module';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { UploadsModule } from './uploads/uploads.module';
+import { LoggerModule } from './logger/logger.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
@@ -56,6 +57,7 @@ const ENV = process.env.NODE_ENV;
     AuthModule,
     MailModule,
     UploadsModule,
+    LoggerModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },

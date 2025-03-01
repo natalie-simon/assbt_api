@@ -64,7 +64,7 @@ export class ArticlesService {
    */
   public async findAllArticles() {
     return await this.articleRepository.find({
-      relations: ['statut', 'image'],
+      relations: ['image'],
       select: {
         id: true,
         titre: true,

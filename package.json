@@ -42,6 +42,7 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "joi": "^17.13.3",
+    "nest-winston": "^1.10.2",
     "nodemailer": "^6.10.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -51,7 +52,8 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
     "uuid": "^11.0.5",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "winston-papertrail": "^1.0.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

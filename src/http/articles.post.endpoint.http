@@ -1,11 +1,26 @@
-POST http://localhost:3000/api/articles/create
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM5OTQ4NDc2LCJleHAiOjE3Mzk5NTIwNzZ9.8Dto3GrA1HhNZP5ZX_c7Q2qY66227N7_PII4JoD25-QeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM5OTQ4NTI1LCJleHAiOjE3Mzk5NTIxMjV9.lX2gpZW0SSfS47YgtSJrmgh_zRnrAs2rEm4t3qZoSMw
+POST https://testassbtapi.nataliesimon.fr/api/articles/create
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJyb2xlIjoiQWRtaW4iLCJpYXQiOjE3NDAyNDM5NTIsImV4cCI6MTc0MDI0NzU1Mn0.Q67m3BcCsxWA66FHW8wzwsmODj1c5FDtZMjKRa8c8jQ
 
-{
-  "titre": "Test avec user 2 ",
-  "contenu": "<h1>Verdict</p><h1>Encore un <test>",
-  "statut": "1",
-  "categorie": "Accueil",
-  "image": 1
-}
+--WebKitFormBoundary
+Content-Disposition: form-data; name="fichier"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./images/image1.png
+--WebKitFormBoundary
+Content-Disposition: form-data; name="titre"
+
+Test avec user 2
+--WebKitFormBoundary
+Content-Disposition: form-data; name="contenu"
+
+<h1>Verdict</p><h1>Encore un <test>
+--WebKitFormBoundary
+Content-Disposition: form-data; name="statut"
+
+publie
+--WebKitFormBoundary
+Content-Disposition: form-data; name="categorie"
+
+accueil
+--WebKitFormBoundary--
