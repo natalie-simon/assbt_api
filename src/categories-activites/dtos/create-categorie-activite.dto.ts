@@ -1,7 +1,9 @@
 import { IsNotEmpty, MaxLength, IsString, IsBoolean, IsOptional } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-
+/**
+ * DTO de création d'une catégorie d'activité
+ */
 export class CreateCategorieActiviteDto {
   /**
    * Le nom de la catégorie
@@ -23,6 +25,12 @@ export class CreateCategorieActiviteDto {
   })
   lbl_categorie: string;
 
+  /**
+   * La catégorie nécessite-t-elle du matériel ?
+   *
+   * @type {boolean}
+   * @memberof CreateCategorieActiviteDto
+   */
   @ApiProperty({
     description:
       'La catégorie nécessite-t-elle du matériel (faux par défaut) ?',
@@ -34,6 +42,12 @@ export class CreateCategorieActiviteDto {
   @IsBoolean({ message: 'Le champ doit être un booléen' })
   avec_equipement: boolean;
 
+  /**
+   * La couleur de la catégorie (héxadécimal)
+   *
+   * @type {string}
+   * @memberof CreateCategorieActiviteDto
+   */
   @ApiProperty({
     description: 'La couleur de la catégorie (héxadécimal)',
     example: '#000000',
@@ -45,6 +59,12 @@ export class CreateCategorieActiviteDto {
   @MaxLength(6, { message: 'La couleur ne doit pas dépasser 6 caractères' })
   couleur: string;
 
+  /**
+   * Faut-il activer les notifications pour cette catégorie ?
+   *
+   * @type {boolean}
+   * @memberof CreateCategorieActiviteDto
+   */
   @ApiProperty({
     description:
       'Faut-il activer les notifications pour cette catégorie (vrai par défaut) ?',

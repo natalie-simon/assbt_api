@@ -9,6 +9,7 @@ import { User } from './user.entity';
 import { Upload } from './upload.entity';
 import { categorieArticleTypes } from '../../articles/enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../../articles/enums/statut-article-types.enum';
+
 /**
  * Entité Article
  */
@@ -71,10 +72,22 @@ export class Article {
   })
   categorie: string;
 
+  /**
+   * L'image de l'article
+   *
+   * @type {Date}
+   * @memberof Article
+   */
   @ManyToOne(() => Upload, { nullable: true })
   @JoinColumn()
   image: Upload;
 
+  /**
+   * L'auteur de l'article
+   *
+   * @type {User}
+   * @memberof Article
+   */
   @ManyToOne(() => User, { nullable: false })
   @JoinColumn()
   redacteur: User;

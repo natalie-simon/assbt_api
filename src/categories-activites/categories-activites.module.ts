@@ -12,5 +12,6 @@ import { Upload } from '../database/core/upload.entity';
   controllers: [CategorieActiviteController],
   providers: [CategorieActiviteService, UploadService, UploadToAwsProvider],
   imports: [TypeOrmModule.forFeature([CategorieActivite, Upload])],
+  exports: [CategorieActiviteService],
 })
 export class CategoriesActivitesModule {}

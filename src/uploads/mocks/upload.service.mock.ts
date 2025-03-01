@@ -1,3 +1,6 @@
+/**
+ * Mock du service d'upload
+ */
 export class UploadServiceMock {
   /**
    * Upload d'un fichier

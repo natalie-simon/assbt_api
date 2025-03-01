@@ -15,6 +15,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { UploadsModule } from './uploads/uploads.module';
 import { LoggerModule } from './logger/logger.module';
 import { CategoriesActivitesModule } from './categories-activites/categories-activites.module';
+import { ActivitesModule } from './activites/activites.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
@@ -60,6 +61,7 @@ const ENV = process.env.NODE_ENV;
     UploadsModule,
     LoggerModule,
     CategoriesActivitesModule,
+    ActivitesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },

@@ -1,16 +1,39 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
+/**
+ * Migration de la table membre
+ */
 export class Migration1739945298999 implements MigrationInterface {
-    name = 'Migration1739945298999'
+  /**
+   * nom de la migration
+   *
+   * @memberof Migration1739945298999
+   */
+  name = 'Migration1739945298999';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "membre" RENAME COLUMN "type" TO "role"`);
-        await queryRunner.query(`ALTER TYPE "public"."membre_type_enum" RENAME TO "membre_role_enum"`);
-    }
+  /**
+   * Up
+   * @param queryRunner
+   */
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "membre" RENAME COLUMN "type" TO "role"`,
+    );
+    await queryRunner.query(
+      `ALTER TYPE "public"."membre_type_enum" RENAME TO "membre_role_enum"`,
+    );
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TYPE "public"."membre_role_enum" RENAME TO "membre_type_enum"`);
-        await queryRunner.query(`ALTER TABLE "membre" RENAME COLUMN "role" TO "type"`);
-    }
-
+  /**
+   * Down
+   * @param queryRunner
+   */
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TYPE "public"."membre_role_enum" RENAME TO "membre_type_enum"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "membre" RENAME COLUMN "role" TO "type"`,
+    );
+  }
 }
