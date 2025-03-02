@@ -85,4 +85,5 @@ export class Activite {
   @ManyToOne(() => CategorieActivite, { nullable: false })
   @JoinColumn()
   categorie: CategorieActivite;
+
 }

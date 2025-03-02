@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateActiviteDto } from '../dtos/create-activite.dto';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { CategorieActiviteService } from '../../categories-activites/services/categorie-activite.service';
+import { plainToInstance } from 'class-transformer';
+import { ActiviteAgendaDto } from '../dtos/activite-agenda.dto';
 
 /**
  * Service de l'activité
@@ -24,6 +26,20 @@ export class ActiviteService {
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
   ) {}
+
+  /**
+   * Récupération de toutes les activites
+   * @returns
+   */
+  public async findAllActivites() {
+    const activites =  await this.activiteRepository.find({
+      relations: ['categorie'],
+    });
+
+    console.log(activites);
+
+    return plainToInstance(ActiviteAgendaDto, activites, { excludeExtraneousValues: true });
+  }
 
   /**
    * Création d'une activité

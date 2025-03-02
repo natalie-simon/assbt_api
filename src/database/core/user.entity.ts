@@ -4,8 +4,6 @@ import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
 
 /**
@@ -47,4 +45,5 @@ export class User {
     nullable: false,
   })
   role: string;
+
 }

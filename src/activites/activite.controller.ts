@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateActiviteDto } from './dtos/create-activite.dto';
 import { ActiviteService } from './services/activite.service';
@@ -19,6 +19,21 @@ export class ActiviteController {
    * @param activiteService
    */
   constructor(private readonly activiteService: ActiviteService) {}
+
+  /**
+   * Récupération de toutes les activités
+   * @returns
+   */
+  @Get()
+  @Auth(AuthTypes.None)
+  @ApiOperation({ summary: 'Récupération de toutes les activités' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste de toutes les activités',
+  })
+  public async findAllActivites() {
+    return this.activiteService.findAllActivites();
+  }
 
   /**
    * Création d'une activité
