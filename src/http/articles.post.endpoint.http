@@ -1,6 +1,7 @@
-POST https://testassbtapi.nataliesimon.fr/api/articles/create
+POST http://localhost:3000/api/articles/create
 Content-Type: multipart/form-data; boundary=WebKitFormBoundary
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJyb2xlIjoiQWRtaW4iLCJpYXQiOjE3NDAyNDM5NTIsImV4cCI6MTc0MDI0NzU1Mn0.Q67m3BcCsxWA66FHW8wzwsmODj1c5FDtZMjKRa8c8jQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJyb2xlIjoiQWRtaW4iLCJpYXQiOjE3NDA5MzQ2NjgsImV4cCI6MTc0MDkzODI2OH0.INDCIynndNeJQpblj_GDDZJLuk3yZ3kIKstGlawxvEM
+
 
 --WebKitFormBoundary
 Content-Disposition: form-data; name="fichier"; filename="test.jpg"
@@ -10,11 +11,11 @@ Content-Type: image/jpeg
 --WebKitFormBoundary
 Content-Disposition: form-data; name="titre"
 
-Test avec user 2
+Vente d'un ponney
 --WebKitFormBoundary
 Content-Disposition: form-data; name="contenu"
 
-<h1>Verdict</p><h1>Encore un <test>
+<h1>Verdict</p><h1>Déjà pratiqué le sport aquatique <test>
 --WebKitFormBoundary
 Content-Disposition: form-data; name="statut"
 
@@ -22,5 +23,5 @@ publie
 --WebKitFormBoundary
 Content-Disposition: form-data; name="categorie"
 
-accueil
+annonce
 --WebKitFormBoundary--

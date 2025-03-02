@@ -11,7 +11,12 @@ import {
 
 import { ArticlesService } from './services/articles.service';
 import { CreateArticleDto } from './dtos/create-article.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiHeaders } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiHeaders,
+} from '@nestjs/swagger';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
@@ -128,6 +133,6 @@ export class ArticlesController {
   public async findArticlesByCategorie(
     @Param('categorie') categorie: categorieArticleTypes,
   ) {
-    return this.articlesService.findArticleByCategorie(categorie);
+    return this.articlesService.findArticlePublieByCategorie(categorie);
   }
 }

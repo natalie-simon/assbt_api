@@ -5,7 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { AccessTokenGuard } from './access-token.guard';
 import { AuthTypes } from '../enums/auth-types.enum';
 import { AUTH_TYPE_KEY } from '../constantes/auth.constants';
@@ -45,8 +44,8 @@ export class AuthenticationGuard implements CanActivate {
   };
   /**
    * Constructeur
-   * @param reflector 
-   * @param accessTokenGuard 
+   * @param reflector
+   * @param accessTokenGuard
    */
   constructor(
     private readonly reflector: Reflector,

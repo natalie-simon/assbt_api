@@ -20,12 +20,14 @@ export class ActiviteController {
    */
   constructor(private readonly activiteService: ActiviteService) {}
 
+
   /**
    * Récupération de toutes les activités
    * @returns
    */
   @Get()
-  @Auth(AuthTypes.None)
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
   @ApiOperation({ summary: 'Récupération de toutes les activités' })
   @ApiResponse({
     status: 200,
