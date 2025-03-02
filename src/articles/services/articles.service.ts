@@ -97,7 +97,7 @@ export class ArticlesService {
    * @param categorie
    * @returns
    */
-  public async findArticleByCategorie(categorie: categorieArticleTypes) {
+  public async findArticlePublieByCategorie(categorie: categorieArticleTypes) {
     return await this.articleRepository.find({
       relations: ['image', 'redacteur'],
       select: {

@@ -14,6 +14,9 @@ import { MailModule } from './mail/mail.module';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { UploadsModule } from './uploads/uploads.module';
 import { LoggerModule } from './logger/logger.module';
+import { CategoriesActivitesModule } from './categories-activites/categories-activites.module';
+import { ActivitesModule } from './activites/activites.module';
+import { InscriptionsModule } from './inscriptions/inscriptions.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
@@ -39,7 +42,7 @@ const ENV = process.env.NODE_ENV;
         password: configService.get('database.password'),
         database: configService.get('database.name'),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
         entities: [__dirname + '/database/core/**/*.entity{.ts,.js}'],
         logging: process.env.NODE_ENV === 'development',
       }),
@@ -58,6 +61,9 @@ const ENV = process.env.NODE_ENV;
     MailModule,
     UploadsModule,
     LoggerModule,
+    CategoriesActivitesModule,
+    ActivitesModule,
+    InscriptionsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },
