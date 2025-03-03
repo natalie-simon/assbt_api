@@ -1,4 +1,4 @@
-GET http://localhost:3000/api/categories-articles
+POST https://testassbtapi.nataliesimon.fr/api/categories-articles
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwicm9sZSI6eyJpZCI6MSwicm9sZSI6IkFkbWluIn0sImlhdCI6MTczOTM5MDY2NSwiZXhwIjoxNzM5Mzk0MjY1fQ.w9ufK3Vi4kI09U5GVjSly-k9LHdntxnMVmULC5aCVq0
 
 /*

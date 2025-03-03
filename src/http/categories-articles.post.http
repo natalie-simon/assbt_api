@@ -1,6 +1,6 @@
-POST http://localhost:3000/api/categories-articles/create
+POST https://testassbtapi.nataliesimon.fr/api/categories-activites/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwiaWF0IjoxNzM5Mzg1MjY5LCJleHAiOjE3MzkzODg4Njl9.RstivUM84AaGwjSx0D9D44iF82HQpwt-o90XHGt8o6M
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AdGVzdC5jb20iLCJyb2xlIjoiQWRtaW4iLCJpYXQiOjE3NDA5NDU0MDQsImV4cCI6MTc0MDk0OTAwNH0.PapPbHN9QSa_VCYPFFpDesgfZ2Gbd3sEKJE4n-x3h5g
 {
   "lbl_categorie": "Accueil"
 }

@@ -123,7 +123,7 @@ export class ArticlesService {
    * @param createArticleDto
    * @returns
    */
-  deleteArticleById(id: number) {
+  /*deleteArticleById(id: number) {
     return this.articleRepository.delete(id);
-  }
+  }*/
 }

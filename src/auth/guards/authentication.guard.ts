@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { AccessTokenGuard } from './access-token.guard';
 import { AuthTypes } from '../enums/auth-types.enum';
 import { AUTH_TYPE_KEY } from '../constantes/auth.constants';
+import { CONDITIONAL_AUTH_KEY } from '../decorators/conditional-auth.decorator';
 /**
  * Guard pour l'authentification
  *
@@ -58,13 +59,23 @@ export class AuthenticationGuard implements CanActivate {
    * @returns
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    /**
-     * Récupération des types d'authentification
-     */
-    const authTypes = this.reflector.getAllAndOverride(AUTH_TYPE_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]) ?? [AuthenticationGuard.defaultAuthType];
+    const request = context.switchToHttp().getRequest();
+
+    const conditionalAuthFn = this.reflector.getAllAndOverride<
+      ((req: Request) => AuthTypes) | undefined
+    >(CONDITIONAL_AUTH_KEY, [context.getHandler(), context.getClass()]);
+
+    let authTypes: AuthTypes[];
+
+    if (conditionalAuthFn) {
+      const dynamicAuthType = conditionalAuthFn(request);
+      authTypes = [dynamicAuthType];
+    } else {
+      authTypes = this.reflector.getAllAndOverride(AUTH_TYPE_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]) ?? [AuthenticationGuard.defaultAuthType];
+    }
 
     /**
      * Récupération des différents guards

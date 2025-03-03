@@ -11,6 +11,7 @@ import { ArticlesService } from './articles.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersServiceMock } from '../../users/mocks/users.service.mock';
 import { Upload } from '../../database/core/upload.entity';
+import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
 
 describe('ArticleService', () => {
   let service: ArticlesService;
@@ -69,6 +70,22 @@ describe('ArticleService', () => {
   describe('findAllArticles', () => {
     it('should call findAllArticles', async () => {
       const result = await service.findAllArticles();
+      expect(mockArticlesRepository.find).toHaveBeenCalled();
+      expect(result).toEqual(articlesMock);
+    });
+  });
+
+  describe('findArticleById', () => {
+    it('should call findArticleById', async () => {
+      const result = await service.findArticleById(1);
+      expect(mockArticlesRepository.findOne).toHaveBeenCalled();
+      expect(result).toEqual(articlesMock[0]);
+    });
+  });
+
+  describe('findArticleByCategorie', () => {
+    it('should call findArticleByCategorie', async () => {
+      const result = await service.findArticlePublieByCategorie(categorieArticleTypes.ACCUEIL);
       expect(mockArticlesRepository.find).toHaveBeenCalled();
       expect(result).toEqual(articlesMock);
     });
