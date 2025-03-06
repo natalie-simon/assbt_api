@@ -27,7 +27,7 @@ export class ActiviteController {
    */
   @Get()
   @Auth(AuthTypes.Bearer)
-  @Roles(RoleTypes.ADMIN)
+  @Roles(RoleTypes.USER, RoleTypes.ADMIN)
   @ApiOperation({ summary: 'Récupération de toutes les activités' })
   @ApiResponse({
     status: 200,
