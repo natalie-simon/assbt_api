@@ -2,10 +2,10 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateActiviteDto } from './dtos/create-activite.dto';
 import { ActiviteService } from './services/activite.service';
-import { AuthTypes } from 'src/auth/enums/auth-types.enum';
-import { Auth } from 'src/auth/decorators/auth.decorator';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { RoleTypes } from 'src/auth/enums/role-types.enum';
+import { AuthTypes } from '../auth/enums/auth-types.enum';
+import { Auth } from '../auth/decorators/auth.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RoleTypes } from '../auth/enums/role-types.enum';
 
 /**
  * Contrôleur des Activités

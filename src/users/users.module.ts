@@ -5,9 +5,9 @@ import { UsersService } from "./services/users.service";
 import { User } from '../database/core/user.entity';
 import { CreateUserProvider } from '../auth/services/create-user.provider';
 import { AuthModule } from '../auth/auth.module';
-import { FindOneByEmailProvider } from 'src/auth/services/find-one-by-email.provider';
+import { FindOneByEmailProvider } from '../auth/services/find-one-by-email.provider';
 import { ConfigModule } from '@nestjs/config';
-import jwtConfig from 'src/auth/config/jwt.config';
+import jwtConfig from '../auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 
 /**

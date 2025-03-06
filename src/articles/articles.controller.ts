@@ -26,7 +26,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../uploads/services/upload.service';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
-import { Upload } from 'src/database/core/upload.entity';
+import { Upload } from '../database/core/upload.entity';
+import { ConditionalAuth } from '../auth/decorators/conditional-auth.decorator';
 
 /**
  * Contrôleur des Articles
@@ -121,7 +122,12 @@ export class ArticlesController {
    * @returns
    */
   @Get('categorie/:categorie')
-  @Auth(AuthTypes.None)
+  @ConditionalAuth((req) => {
+    const categorieSansAuth = 'accueil'; // Modifier selon besoin
+    return req.params?.categorie === categorieSansAuth
+      ? AuthTypes.None
+      : AuthTypes.Bearer;
+  })
   @ApiOperation({
     summary:
       "Récupération de tout les articles d'une catégorie qui sont au statut 'publie'",
@@ -136,3 +142,4 @@ export class ArticlesController {
     return this.articlesService.findArticlePublieByCategorie(categorie);
   }
 }
+
