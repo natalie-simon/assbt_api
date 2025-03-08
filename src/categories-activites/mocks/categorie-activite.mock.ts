@@ -31,8 +31,7 @@ export const CategoriesActiviteMock: CategorieActivite[] = [
 ];
 
 // Mock d'une seule catégorie d'activité (pour les tests ciblés)
-export const mockCategorieActivite: CategorieActivite =
-  mockCategoriesActivite[0];
+export const mockCategorieActivite: CategorieActivite = CategoriesActiviteMock[0];
 
 // Mock d'un DTO de création de catégorie d'activité
 export const mockCreateCategorieActiviteDto: CreateCategorieActiviteDto = {
