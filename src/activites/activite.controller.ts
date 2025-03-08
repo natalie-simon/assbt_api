@@ -14,8 +14,8 @@ import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RoleTypes } from '../auth/enums/role-types.enum';
-import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
-import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ActiveUser } from '../auth/decorators/active-user.decorator';
+import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { InscriptionActiviteDto } from './dtos/inscription-activite.dto';
 
 /**

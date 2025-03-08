@@ -1,34 +1,35 @@
 import { Upload } from '../../database/core/upload.entity';
 
-/**
- * Mock de données d'uploads pour les tests
- */
-export const uploadsMocks = [
-  {
-    id: 1,
-    originalname: 'image1.jpg',
-    filename: 'image1.jpg',
-    mimetype: 'image/jpeg',
-    size: 1000,
-    url: '/uploads/image1.jpg',
-    dateCreation: new Date('2023-01-01'),
-  },
-  {
-    id: 2,
-    originalname: 'image2.jpg',
-    filename: 'image2.jpg',
-    mimetype: 'image/jpeg',
-    size: 2000,
-    url: '/uploads/image2.jpg',
-    dateCreation: new Date('2023-01-02'),
-  },
-  {
-    id: 3,
-    originalname: 'document.pdf',
-    filename: 'document.pdf',
-    mimetype: 'application/pdf',
-    size: 3000,
-    url: '/uploads/document.pdf',
-    dateCreation: new Date('2023-01-03'),
-  },
-];
+// Mock d'un fichier uploadé
+export const mockUploadedFile: Express.Multer.File = {
+  fieldname: 'fichier',
+  originalname: 'test-image.jpg',
+  encoding: '7bit',
+  mimetype: 'image/jpeg',
+  buffer: Buffer.from('test image content'),
+  size: 1024,
+  destination: '',
+  filename: '',
+  path: '',
+  stream: null,
+};
+
+// Mock d'une entité Upload
+export const mockUpload: Upload = {
+  id: 1,
+  nom: 'test-image.jpg',
+  type: 'image/jpeg',
+  size: 1024,
+  mime: 'image/jpeg',
+  url: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg',
+  createDate: new Date(),
+  updateDate: new Date(),
+};
+
+// Mock du service Upload
+export const mockUploadService = {
+  uploadFile: jest.fn().mockResolvedValue(mockUpload),
+  uploadAws: jest.fn().mockResolvedValue({
+    path: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg',
+  }),
+};

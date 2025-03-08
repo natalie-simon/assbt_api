@@ -1,11 +1,12 @@
 import { Article } from '../../database/core/article.entity';
 import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../enums/statut-article-types.enum';
+import { fileTypes } from '../../uploads/enums/file-types.enum';
 
 /**
  * Mock de données d'articles pour les tests
  */
-export const articlesMocks = [
+export const articlesMock = [
   {
     id: 1,
     titre: 'Article 1',
@@ -14,12 +15,13 @@ export const articlesMocks = [
     categorie: categorieArticleTypes.ACCUEIL,
     image: {
       id: 1,
-      originalname: 'image1.jpg',
-      filename: 'image1.jpg',
-      mimetype: 'image/jpeg',
-      size: 1000,
+      nom: 'image1',
       url: '/uploads/image1.jpg',
-      dateCreation: new Date('2023-01-01'),
+      type: fileTypes.IMAGE,
+      mime: 'image/jpeg',
+      size: 1000,
+      createDate: new Date('2023-01-01'),
+      updateDate: new Date('2023-01-01'),
     },
     redacteur: {
       id: 1,
@@ -38,12 +40,13 @@ export const articlesMocks = [
     categorie: categorieArticleTypes.ACCUEIL,
     image: {
       id: 2,
-      originalname: 'image2.jpg',
-      filename: 'image2.jpg',
-      mimetype: 'image/jpeg',
-      size: 2000,
+      nom: 'image2',
       url: '/uploads/image2.jpg',
-      dateCreation: new Date('2023-01-02'),
+      type: fileTypes.IMAGE,
+      mime: 'image/jpeg',
+      size: 2000,
+      createDate: new Date('2023-01-02'),
+      updateDate: new Date('2023-01-02'),
     },
     redacteur: {
       id: 1,
@@ -59,15 +62,16 @@ export const articlesMocks = [
     titre: 'Article 3',
     contenu: "Contenu de l'article 3",
     statut: statutArticleTypes.PUBLIE,
-    categorie: categorieArticleTypes.EVENEMENT,
+    categorie: categorieArticleTypes.ANNONCE,
     image: {
       id: 3,
-      originalname: 'image3.jpg',
-      filename: 'image3.jpg',
-      mimetype: 'image/jpeg',
-      size: 3000,
+      nom: 'image3',
       url: '/uploads/image3.jpg',
-      dateCreation: new Date('2023-01-03'),
+      type: fileTypes.IMAGE,
+      mime: 'image/jpeg',
+      size: 3000,
+      createDate: new Date('2023-01-03'),
+      updateDate: new Date('2023-01-03'),
     },
     redacteur: {
       id: 2,
@@ -83,7 +87,7 @@ export const articlesMocks = [
 /**
  * Mock de données d'articles standardisés pour les tests
  */
-export const articlesStandardMocks = [
+export const articlesStandardMock = [
   {
     id: 1,
     titre: 'Article 1',
@@ -115,7 +119,7 @@ export const articlesStandardMocks = [
     titre: 'Article 3',
     contenu: "Contenu de l'article 3",
     statut: statutArticleTypes.PUBLIE,
-    categorie: categorieArticleTypes.EVENEMENT,
+    categorie: categorieArticleTypes.INFOS,
     image: {
       url: '/uploads/image3.jpg',
     },

@@ -1,35 +1,32 @@
 import { usersMock } from './users.mock';
 
 /**
- * Mocked UsersService class.
+ * Mock du service Users pour les tests
  */
 export class UsersServiceMock {
   /**
-   * Mocked findUserById method.
-   *
-   * @memberof UsersServiceMock
+   * Récupère un utilisateur par son ID
+   * @param id ID de l'utilisateur
+   * @returns Utilisateur trouvé ou null
    */
-  createUser = jest.fn().mockResolvedValue(usersMock[0]);
+  async findUserById(id: number) {
+    return usersMock.find((user) => user.id === id) || null;
+  }
 
   /**
-   * Mocked findOneByEmail method.
-   *
-   * @memberof UsersServiceMock
+   * Récupère un utilisateur par son email
+   * @param email Email de l'utilisateur
+   * @returns Utilisateur trouvé ou null
    */
-  findOneByEmail = jest.fn().mockResolvedValue(usersMock[0]);
-
+  async findUserByEmail(email: string) {
+    return usersMock.find((user) => user.email === email) || null;
+  }
 
   /**
-   * Mocked findUserById method.
-   *
-   * @memberof UsersServiceMock
+   * Récupère tous les utilisateurs actifs
+   * @returns Tableau d'utilisateurs non supprimés
    */
-
-  findUserById = jest.fn().mockResolvedValue(usersMock[0]);
-  /**
-   * Mocked findAllUsers method.
-   *
-   * @memberof UsersServiceMock
-   */
-  findAllUsers = jest.fn().mockResolvedValue(usersMock);
+  async findAllUsers() {
+    return usersMock.filter((user) => !user.est_supprime);
+  }
 }

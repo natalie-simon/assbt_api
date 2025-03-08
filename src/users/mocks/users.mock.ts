@@ -1,10 +1,9 @@
-import { User } from '../../database/core/user.entity';
 import { RoleTypes } from '../../auth/enums/role-types.enum';
 
 /**
  * Mock de données utilisateurs pour les tests
  */
-export const usersMocks = [
+export const usersMock = [
   {
     id: 1,
     email: 'admin@example.com',

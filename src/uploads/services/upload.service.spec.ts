@@ -107,4 +107,77 @@ describe('UploadService', () => {
       expect(result).toEqual(mockUpload);
     });
   });
+
+  it('should throw ConflictException when upload fails', async () => {
+  // Arrange
+  const file = {
+    mimetype: 'image/png',
+    size: 1024,
+  } as Express.Multer.File;
+
+  const errorMessage = 'Upload failed';
+  mockUploadToAwsProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
+  
+  // Spy on console.log
+  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+  // Act & Assert
+  await expect(service.uploadFile(file)).rejects.toThrow(
+    ConflictException,
+  );
+  
+  expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+  expect(consoleLogSpy).toHaveBeenCalled();
+  
+  // Restore console.log
+  consoleLogSpy.mockRestore();
+});
+
+  it('should throw ConflictException when upload fails', async () => {
+  // Arrange
+  const file = {
+    mimetype: 'image/png',
+    size: 1024,
+  } as Express.Multer.File;
+
+  const errorMessage = 'Upload failed';
+  mockUploadToAwsProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
+  
+  // Spy on console.log
+  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+  // Act & Assert
+  await expect(service.uploadFile(file)).rejects.toThrow(
+    ConflictException,
+  );
+  
+  expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+  expect(consoleLogSpy).toHaveBeenCalled();
+  
+  // Restore console.log
+  consoleLogSpy.mockRestore();
+});
+
+it('should throw ConflictException when upload fails', async () => {
+  // Arrange
+  const file = {
+    mimetype: 'image/png',
+    size: 1024,
+  } as Express.Multer.File;
+
+  const errorMessage = 'Upload failed';
+  mockUploadToAwsProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
+
+  // Spy on console.log
+  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+  // Act & Assert
+  await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
+
+  expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+  expect(consoleLogSpy).toHaveBeenCalled();
+
+  // Restore console.log
+  consoleLogSpy.mockRestore();
+});
 });
