@@ -2,16 +2,48 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ActiviteController } from './activite.controller';
 import { ActiviteService } from './services/activite.service';
 import { CreateActiviteDto } from './dtos/create-activite.dto';
+import { ActiviteServiceMock } from './mocks/activite.service.mock';
+import {
+  mockActivites,
+  mockCreateActiviteDto,
+  mockNewActivite,
+  mockActiveUser,
+  mockInscriptionActiviteDto,
+  mockMembreActivite,
+} from './mocks/activites.mock';
 
+// Mock des décorateurs
+jest.mock(
+  '../auth/decorators/active-user.decorator',
+  () => ({
+    ActiveUser:
+      () => (target: any, key: string, descriptor: PropertyDescriptor) =>
+        descriptor,
+  }),
+  { virtual: true },
+);
+
+jest.mock(
+  '../auth/decorators/auth.decorator',
+  () => ({
+    Auth: () => (target: any, key: string, descriptor: PropertyDescriptor) =>
+      descriptor,
+  }),
+  { virtual: true },
+);
+
+jest.mock(
+  '../auth/decorators/roles.decorator',
+  () => ({
+    Roles: () => (target: any, key: string, descriptor: PropertyDescriptor) =>
+      descriptor,
+  }),
+  { virtual: true },
+);
 
 describe('ActiviteController', () => {
   let controller: ActiviteController;
   let activiteService: ActiviteService;
-
-  const mockActiviteService = {
-    findAllActivites: jest.fn(),
-    createActivite: jest.fn(),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -19,7 +51,7 @@ describe('ActiviteController', () => {
       providers: [
         {
           provide: ActiviteService,
-          useValue: mockActiviteService,
+          useClass: ActiviteServiceMock,
         },
       ],
     }).compile();
@@ -32,107 +64,90 @@ describe('ActiviteController', () => {
     expect(controller).toBeDefined();
   });
 
-  /*describe('findAllActivites', () => {
-    it('should call activiteService.findAllActivites', async () => {
-      await controller.findAllActivites();
+  describe('findAllActivites', () => {
+    it('should return an array of activites', async () => {
+      // Arrange
+      jest
+        .spyOn(activiteService, 'findAllActivites')
+        .mockResolvedValue(mockActivites);
+
+      // Act
+      const result = await controller.findAllActivites();
+
+      // Assert
+      expect(result).toEqual(mockActivites);
       expect(activiteService.findAllActivites).toHaveBeenCalled();
     });
-
-    it('should have the correct decorators', () => {
-      const getDecorator = Reflect.getMetadata(
-        '__path__',
-        controller.findAllActivites,
-      );
-      expect(getDecorator).toBe('/');
-
-      const authDecorator = Reflect.getMetadata(
-        '__auth__',
-        controller.findAllActivites,
-      );
-      expect(authDecorator).toBe(AuthTypes.Bearer);
-
-      const rolesDecorator = Reflect.getMetadata(
-        '__roles__',
-        controller.findAllActivites,
-      );
-      expect(rolesDecorator).toEqual([RoleTypes.ADMIN]);
-
-      const apiOperationDecorator = Reflect.getMetadata(
-        '__apiOperation__',
-        controller.findAllActivites,
-      );
-      expect(apiOperationDecorator).toEqual({
-        summary: 'Récupération de toutes les activités',
-      });
-
-      const apiResponseDecorator = Reflect.getMetadata(
-        '__apiResponse__',
-        controller.findAllActivites,
-      );
-      expect(apiResponseDecorator).toEqual([
-        { status: 200, description: 'Liste de toutes les activités' },
-      ]);
-    });
-  });*/
+  });
 
   describe('createActivite', () => {
     it('should call activiteService.createActivite with the provided DTO', async () => {
-      const createActiviteDto: CreateActiviteDto = {
-        titre: 'Titre activité',
-        contenu: "Le contenu de l'activité",
-        date_heure_debut: new Date(),
-        date_heure_fin: new Date(),
-        categorie: 1
-      };
-      await controller.createActivite(createActiviteDto);
+      // Arrange
+      const createActiviteDto: CreateActiviteDto = mockCreateActiviteDto;
+      jest
+        .spyOn(activiteService, 'createActivite')
+        .mockResolvedValue(mockNewActivite);
+
+      // Act
+      const result = await controller.createActivite(createActiviteDto);
+
+      // Assert
       expect(activiteService.createActivite).toHaveBeenCalledWith(
         createActiviteDto,
       );
+      expect(result).toEqual(mockNewActivite);
     });
+  });
 
-    /*it('should have the correct decorators', () => {
-      const postDecorator = Reflect.getMetadata(
-        '__path__',
-        controller.createActivite,
-      );
-      expect(postDecorator).toBe('create');
+  describe('inscriptionActivite', () => {
+    it('should call activiteService.inscriptionActivite with the provided id, DTO and user', async () => {
+      // Arrange
+      const activiteId = 1;
+      const inscriptionDto = mockInscriptionActiviteDto;
+      const user = mockActiveUser;
+      jest
+        .spyOn(activiteService, 'inscriptionActivite')
+        .mockResolvedValue(mockMembreActivite);
 
-      const authDecorator = Reflect.getMetadata(
-        '__auth__',
-        controller.createActivite,
+      // Act
+      const result = await controller.inscriptionActivite(
+        activiteId,
+        inscriptionDto,
+        user,
       );
-      expect(authDecorator).toBe(AuthTypes.Bearer);
 
-      const rolesDecorator = Reflect.getMetadata(
-        '__roles__',
-        controller.createActivite,
+      // Assert
+      expect(activiteService.inscriptionActivite).toHaveBeenCalledWith(
+        activiteId,
+        inscriptionDto,
+        user,
       );
-      expect(rolesDecorator).toEqual([RoleTypes.ADMIN]);
+      expect(result).toEqual(mockMembreActivite);
+    });
+  });
 
-      const apiOperationDecorator = Reflect.getMetadata(
-        '__apiOperation__',
-        controller.createActivite,
-      );
-      expect(apiOperationDecorator).toEqual({
-        summary: "Création d'une activité",
+  describe('desinscriptionActivite', () => {
+    it('should call activiteService.desinscriptionActivite with the provided id and user', async () => {
+      // Arrange
+      const activiteId = 1;
+      const user = mockActiveUser;
+      jest.spyOn(activiteService, 'desinscriptionActivite').mockResolvedValue({
+        success: true,
+        message: 'Désinscription effectuée avec succès',
       });
 
-      const apiResponseDecorator = Reflect.getMetadata(
-        '__apiResponse__',
-        controller.createActivite,
-      );
-      expect(apiResponseDecorator).toEqual([
-        { status: 201, description: "L'activité a été créée avec succès" },
-      ]);
+      // Act
+      const result = await controller.desinscriptionActivite(activiteId, user);
 
-      const bodyDecorator = Reflect.getMetadata(
-        '__routeArguments__',
-        controller.createActivite,
+      // Assert
+      expect(activiteService.desinscriptionActivite).toHaveBeenCalledWith(
+        activiteId,
+        user,
       );
-      const bodyParam = bodyDecorator.find(
-        (param: any) => param.type === 'body',
-      );
-      expect(bodyParam).toBeDefined();
-    });*/
+      expect(result).toEqual({
+        success: true,
+        message: 'Désinscription effectuée avec succès',
+      });
+    });
   });
 });

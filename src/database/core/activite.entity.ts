@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { CategorieActivite } from './categorie_activite.entity';
+import { MembreActivite } from './membre_activite.entity';
 
 /**
  * Entité Activite
@@ -85,5 +87,8 @@ export class Activite {
   @ManyToOne(() => CategorieActivite, { nullable: false })
   @JoinColumn()
   categorie: CategorieActivite;
+
+  @OneToMany(() => MembreActivite, (membreActivite) => membreActivite.activite)
+  participants: MembreActivite[];
 
 }

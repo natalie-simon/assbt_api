@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FindOneByEmailProvider } from './find-one-by-email.provider';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../database/core/user.entity';
+import { User } from '../../database/core/membre.entity';
 import { RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 
 describe('FindOneByEmailProvider', () => {

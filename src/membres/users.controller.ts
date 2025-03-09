@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Get, UseGuards, SetMetadata } from '@nestjs/common';
-import { CreateUserDto } from './dtos/createuser.dto';
-import { UsersService } from './services/users.service';
+import { CreateUserDto } from './dtos/createMembre.dto';
+import { MembresService } from './services/membres.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
@@ -19,7 +19,7 @@ export class UsersController {
    * Constructeur
    * @param usersService Le service UsersService
    */
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly membreService: MembresService) {}
 
   /**
    * Route pour la création d'un nouvel utilisateur
@@ -34,7 +34,7 @@ export class UsersController {
     description: 'Enregistrer un nouvel utilisateur',
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.createUser(createUserDto);
+    return this.membreService.createUser(createUserDto);
   }
 
   /**
@@ -54,7 +54,7 @@ export class UsersController {
   })
   @ApiBearerAuth()
   getUsers() {
-    return this.usersService.findAllUsers();
+    return this.membreService.findAllUsers();
   }
 
 }

@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { AuthController } from './auth.controller';
-import { UsersModule } from '../users/users.module';
+import { MembresModule } from '../membres/membres.module';
 import { AuthService } from './services/auth.service';
 import { BcryptProvider } from './services/bcrypt.provider';
 import { HashingProvider } from './services/hashing.provider';
@@ -18,7 +18,7 @@ import { JwtModule } from '@nestjs/jwt';
     },
     SignInProvider,
   ],
-  imports: [forwardRef(() => UsersModule),
+  imports: [forwardRef(() => MembresModule),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],

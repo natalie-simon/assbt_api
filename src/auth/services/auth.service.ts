@@ -4,7 +4,7 @@ import {
   Injectable,
   forwardRef,
 } from '@nestjs/common';
-import { UsersService } from '../../users/services/users.service';
+import { MembresService } from '../../membres/services/membres.service';
 import { SigninDto } from '../dtos/signin.dto';
 import { SignInProvider } from './sign-in.provider';
 import { ForgotPasswordDto } from '../dtos/forgotpassword.dto';
@@ -28,8 +28,8 @@ export class AuthService {
    * @param signInProvider
    */
   constructor(
-    @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => MembresService))
+    private readonly usersService: MembresService,
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
     private readonly signInProvider: SignInProvider,

@@ -3,8 +3,10 @@ import { RoleTypes } from '../../auth/enums/role-types.enum';
 import {
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { MembreActivite } from './membre_activite.entity';
 
 /**
  * Entité représentant un utilisateur dans l'application.
@@ -45,5 +47,8 @@ export class User {
     nullable: false,
   })
   role: string;
+
+  @OneToMany(()=> MembreActivite, (membreActivite) => membreActivite.membre)
+  inscriptions: MembreActivite[];
 
 }

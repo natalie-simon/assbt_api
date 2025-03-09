@@ -12,7 +12,7 @@ import { SigninDto } from '../dtos/signin.dto';
 import { ForgotPasswordDto } from '../dtos/forgotpassword.dto';
 import { ChangePasswordDto } from '../dtos/changePassword.dto';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
-import { User } from '../../database/core/user.entity';
+import { User } from '../../database/core/membre.entity';
 import { usersMock } from '../../users/mocks/users.mock'; // <--- Add this line
 import { UsersServiceMock } from '../../users/mocks/users.service.mock'; // <--- Add this line
 

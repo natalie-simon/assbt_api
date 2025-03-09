@@ -4,12 +4,12 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { CreateUserDto } from '../../users/dtos/createuser.dto';
+import { CreateUserDto } from '../../membres/dtos/createMembre.dto';
 import { Repository } from 'typeorm';
-import { User } from '../../database/core/user.entity';
+import { User } from '../../database/core/membre.entity';
 import { HashingProvider } from './hashing.provider';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersService } from '../../users/services/users.service';
+import { MembresService } from '../../membres/services/membres.service';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
@@ -32,8 +32,8 @@ export class CreateUserProvider {
     private readonly usersRepository: Repository<User>,
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
+    @Inject(forwardRef(() => MembresService))
+    private readonly membresService: MembresService,
     private readonly jwtSercice: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
@@ -46,7 +46,7 @@ export class CreateUserProvider {
    * @returns
    */
   public async createUser(createUserDto: CreateUserDto) {
-    const existingUser = await this.userService.findOneByEmail(
+    const existingUser = await this.membresService.findOneByEmail(
       createUserDto.email,
     );
     if (existingUser) {

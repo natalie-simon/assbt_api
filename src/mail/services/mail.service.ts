@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
-import { User } from '../../database/core/user.entity';
+import { User } from '../../database/core/membre.entity';
 import * as dotenv from 'dotenv';
 dotenv.config();
 

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
+import { MembresModule } from './membres/membres.module';
 import { ArticlesModule } from './articles/articles.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
@@ -16,7 +16,6 @@ import { UploadsModule } from './uploads/uploads.module';
 import { LoggerModule } from './logger/logger.module';
 import { CategoriesActivitesModule } from './categories-activites/categories-activites.module';
 import { ActivitesModule } from './activites/activites.module';
-import { InscriptionsModule } from './inscriptions/inscriptions.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
@@ -55,7 +54,7 @@ const ENV = process.env.NODE_ENV;
       load: [appConfig, databaseConfig],
       validationSchema: environnementValidation,
     }),
-    UsersModule,
+    MembresModule,
     ArticlesModule,
     AuthModule,
     MailModule,
@@ -63,7 +62,6 @@ const ENV = process.env.NODE_ENV;
     LoggerModule,
     CategoriesActivitesModule,
     ActivitesModule,
-    InscriptionsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },
