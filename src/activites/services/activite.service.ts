@@ -15,6 +15,7 @@ import { ActiviteAgendaDto } from '../dtos/activite-agenda.dto';
 import { InscriptionActiviteDto } from '../dtos/inscription-activite.dto';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { MembreActivite } from '../../database/core/membre_activite.entity';
+import { MembresService } from '../../membres/services/membres.service';
 
 /**
  * Service de l'activité
@@ -35,6 +36,7 @@ export class ActiviteService {
     private readonly categorieActiviteService: CategorieActiviteService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
+    private readonly membresService: MembresService,
   ) {}
 
   /**
@@ -86,7 +88,7 @@ export class ActiviteService {
   public async inscriptionActivite(
     id: number,
     inscriptionActiviteDto: InscriptionActiviteDto,
-    user: ActiveUserData,
+    activeUser: ActiveUserData,
   ): Promise<MembreActivite> {
     const activite = await this.activiteRepository.findOne({
       where: { id: id },
@@ -95,8 +97,10 @@ export class ActiviteService {
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
     }
+
+    let membre = await this.membresService.findUserById(activeUser['sub']);
     const isInscrit = await this.membreActiviteRepository.findOne({
-      where: { activite, membre_id: user.sub },
+      where: { activite, membre },
     });
 
     if (isInscrit) {
@@ -104,12 +108,12 @@ export class ActiviteService {
     }
 
     const nouvelleInscription = this.membreActiviteRepository.create({
-      membre_id: user.sub,
+      membre: membre,
       activite: activite,
       observations: inscriptionActiviteDto.observations,
     });
     this.logger.log(
-      `Le membre ${user.email} s'est inscrit à l'activité ${activite.titre} - ${activite.date_heure_debut}`,
+      `Le membre ${activeUser.email} s'est inscrit à l'activité ${activite.titre} - ${activite.date_heure_debut}`,
     );
 
     return this.membreActiviteRepository.save(nouvelleInscription);
@@ -122,7 +126,7 @@ export class ActiviteService {
    */
   public async desinscriptionActivite(
     id: number,
-    user: ActiveUserData,
+    activeUser: ActiveUserData,
   ): Promise<{ success: boolean; message: string }> {
     const activite = await this.activiteRepository.findOne({
       where: { id: id },
@@ -132,8 +136,9 @@ export class ActiviteService {
       throw new BadRequestException('Activité non trouvée');
     }
 
+    let membre = await this.membresService.findUserById(activeUser['sub']);
     const inscription = await this.membreActiviteRepository.findOne({
-      where: { activite: activite, membre_id: user.sub },
+      where: { activite: activite, membre: membre },
     });
 
     if (!inscription) {
@@ -141,7 +146,9 @@ export class ActiviteService {
     }
 
     await this.membreActiviteRepository.remove(inscription);
-    this.logger.log(`Le membre ${user.email} s'est désinscrit de l'activité ${activite.titre} - ${activite.date_heure_debut}`);
+    this.logger.log(
+      `Le membre ${activeUser.email} s'est désinscrit de l'activité ${activite.titre} - ${activite.date_heure_debut}`,
+    );
     return {
       success: true,
       message: 'Désinscription effectuée avec succès',

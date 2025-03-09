@@ -4,6 +4,7 @@ import { MembreActivite } from '../../database/core/membre_activite.entity';
 import { CreateActiviteDto } from '../dtos/create-activite.dto';
 import { InscriptionActiviteDto } from '../dtos/inscription-activite.dto';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
+import { membresMock } from '../../membres/mocks/membres.mock';
 
 // Mock d'une catégorie d'activité
 export const mockCategorieActivite: CategorieActivite = {
@@ -72,10 +73,8 @@ export const mockInscriptionActiviteDto: InscriptionActiviteDto = {
 export const mockMembreActivite: MembreActivite = {
   id: 1,
   observations: 'Besoin de matériel spécifique',
-  membre: null, // Normalement ce serait l'objet utilisateur complet
-  membre_id: 1,
+  membre: membresMock[0],
   activite: mockActivites[0],
-  activite_id: 1,
   dateInscription: new Date(),
 };
 

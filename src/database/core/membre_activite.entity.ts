@@ -41,8 +41,6 @@ export class MembreActivite {
    */
   @ManyToOne(() => User, (membre) => membre.inscriptions)
   membre: User;
-  @Column()
-  membre_id: number;
 
   /**
    * Activité inscrite
@@ -51,10 +49,7 @@ export class MembreActivite {
    * @memberof MembreActivite
    */
   @ManyToOne(() => Activite, (activite) => activite.participants)
-  @JoinColumn({ name: 'activite_id' })
   activite: Activite;
-  @Column()
-  activite_id: number;
 
   /**
    * Date d'inscription
