@@ -1,11 +1,11 @@
 import { CreateUserDto } from "../dtos/createMembre.dto";
-import { usersMock } from "./users.mock";
+import { membresMock } from "./membres.mock";
 
 /**
  * Mock du repository des utilisateurs
  */
-export const usersMockRepository = {
-  find: jest.fn().mockResolvedValue(usersMock),
+export const membresMockRepository = {
+  find: jest.fn().mockResolvedValue(membresMock),
   create: jest.fn((dto: CreateUserDto) => ({
     id: 1,
     ...dto,

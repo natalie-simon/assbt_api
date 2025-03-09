@@ -3,7 +3,7 @@ import { RoleTypes } from '../../auth/enums/role-types.enum';
 /**
  * Mock de données utilisateurs pour les tests
  */
-export const usersMock = [
+export const membresMock = [
   {
     id: 1,
     email: 'admin@example.com',

@@ -1,16 +1,16 @@
-import { usersMock } from './users.mock';
+import { membresMock } from './membres.mock';
 
 /**
  * Mock du service Users pour les tests
  */
-export class UsersServiceMock {
+export class MembresServiceMock {
   /**
    * Récupère un utilisateur par son ID
    * @param id ID de l'utilisateur
    * @returns Utilisateur trouvé ou null
    */
   async findUserById(id: number) {
-    return usersMock.find((user) => user.id === id) || null;
+    return membresMock.find((user) => user.id === id) || null;
   }
 
   /**
@@ -19,7 +19,7 @@ export class UsersServiceMock {
    * @returns Utilisateur trouvé ou null
    */
   async findUserByEmail(email: string) {
-    return usersMock.find((user) => user.email === email) || null;
+    return membresMock.find((user) => user.email === email) || null;
   }
 
   /**
@@ -27,6 +27,6 @@ export class UsersServiceMock {
    * @returns Tableau d'utilisateurs non supprimés
    */
   async findAllUsers() {
-    return usersMock.filter((user) => !user.est_supprime);
+    return membresMock.filter((user) => !user.est_supprime);
   }
 }

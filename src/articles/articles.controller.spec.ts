@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './services/articles.service';
 import { ArticlesServiceMock } from './mocks/articles.service.mock';
-import { UsersService } from '../users/services/users.service';
-import { UsersServiceMock } from '../users/mocks/users.service.mock';
+import { MembresService } from '../membres/services/membres.service';
+import { MembresServiceMock } from '../membres/mocks/membres.service.mock';
 import { articlesMock, articlesStandardMock } from './mocks/articles.mock';
 import { CreateArticleDto } from './dtos/create-article.dto';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
@@ -11,7 +11,6 @@ import { UploadService } from '../uploads/services/upload.service';
 import { UploadServiceMock } from '../uploads/mocks/upload.service.mock';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
 import { statutArticleTypes } from './enums/statut-article-types.enum';
-import { NotFoundException } from '@nestjs/common';
 import { fileTypes } from '../uploads/enums/file-types.enum';
 import { Upload } from '../database/core/upload.entity';
 import { Article } from '../database/core/article.entity';
@@ -30,8 +29,8 @@ describe('ArticlesController', () => {
           useClass: ArticlesServiceMock,
         },
         {
-          provide: UsersService,
-          useClass: UsersServiceMock,
+          provide: MembresService,
+          useClass: MembresServiceMock,
         },
         {
           provide: UploadService,

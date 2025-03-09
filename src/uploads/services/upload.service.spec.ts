@@ -109,75 +109,77 @@ describe('UploadService', () => {
   });
 
   it('should throw ConflictException when upload fails', async () => {
-  // Arrange
-  const file = {
-    mimetype: 'image/png',
-    size: 1024,
-  } as Express.Multer.File;
+    // Arrange
+    const file = {
+      mimetype: 'image/png',
+      size: 1024,
+    } as Express.Multer.File;
 
-  const errorMessage = 'Upload failed';
-  mockUploadToAwsProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
-  
-  // Spy on console.log
-  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    const errorMessage = 'Upload failed';
+    mockUploadToAwsProvider.uploadFile.mockRejectedValue(
+      new Error(errorMessage),
+    );
 
-  // Act & Assert
-  await expect(service.uploadFile(file)).rejects.toThrow(
-    ConflictException,
-  );
-  
-  expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
-  expect(consoleLogSpy).toHaveBeenCalled();
-  
-  // Restore console.log
-  consoleLogSpy.mockRestore();
-});
+    // Spy on console.log
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    // Act & Assert
+    await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
+
+    expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+    expect(consoleLogSpy).toHaveBeenCalled();
+
+    // Restore console.log
+    consoleLogSpy.mockRestore();
+  });
 
   it('should throw ConflictException when upload fails', async () => {
-  // Arrange
-  const file = {
-    mimetype: 'image/png',
-    size: 1024,
-  } as Express.Multer.File;
+    // Arrange
+    const file = {
+      mimetype: 'image/png',
+      size: 1024,
+    } as Express.Multer.File;
 
-  const errorMessage = 'Upload failed';
-  mockUploadToAwsProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
-  
-  // Spy on console.log
-  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    const errorMessage = 'Upload failed';
+    mockUploadToAwsProvider.uploadFile.mockRejectedValue(
+      new Error(errorMessage),
+    );
 
-  // Act & Assert
-  await expect(service.uploadFile(file)).rejects.toThrow(
-    ConflictException,
-  );
-  
-  expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
-  expect(consoleLogSpy).toHaveBeenCalled();
-  
-  // Restore console.log
-  consoleLogSpy.mockRestore();
-});
+    // Spy on console.log
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
-it('should throw ConflictException when upload fails', async () => {
-  // Arrange
-  const file = {
-    mimetype: 'image/png',
-    size: 1024,
-  } as Express.Multer.File;
+    // Act & Assert
+    await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
 
-  const errorMessage = 'Upload failed';
-  mockUploadToAwsProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
+    expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+    expect(consoleLogSpy).toHaveBeenCalled();
 
-  // Spy on console.log
-  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    // Restore console.log
+    consoleLogSpy.mockRestore();
+  });
 
-  // Act & Assert
-  await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
+  it('should throw ConflictException when upload fails', async () => {
+    // Arrange
+    const file = {
+      mimetype: 'image/png',
+      size: 1024,
+    } as Express.Multer.File;
 
-  expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
-  expect(consoleLogSpy).toHaveBeenCalled();
+    const errorMessage = 'Upload failed';
+    mockUploadToAwsProvider.uploadFile.mockRejectedValue(
+      new Error(errorMessage),
+    );
 
-  // Restore console.log
-  consoleLogSpy.mockRestore();
-});
+    // Spy on console.log
+    const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+
+    // Act & Assert
+    await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
+
+    expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+    expect(consoleLogSpy).toHaveBeenCalled();
+
+    // Restore console.log
+    consoleLogSpy.mockRestore();
+  });
 });

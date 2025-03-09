@@ -3,14 +3,14 @@ import { ArticlesService } from './articles.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Article } from '../../database/core/article.entity';
 import { Repository } from 'typeorm';
-import { UsersService } from '../../users/services/users.service';
-import { UsersServiceMock } from '../../users/mocks/users.service.mock';
+import { MembresService } from '../../membres/services/membres.service';
+import { MembresServiceMock } from '../../membres/mocks/membres.service.mock';
 import { articlesMock } from '../mocks/articles.mock';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../enums/statut-article-types.enum';
-import { usersMock } from '../../users/mocks/users.mock';
-import { uploadsMock } from '../../uploads/mocks/uploads.mock';
+import { membresMock } from '../../membres/mocks/membres.mock';
+import { mockUploadedFile } from '../../uploads/mocks/uploads.mock';
 import { NotFoundException } from '@nestjs/common';
 import { ArticleStandardDto } from '../dtos/article-standard.dto';
 
@@ -18,7 +18,7 @@ type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 describe('ArticlesService', () => {
   let service: ArticlesService;
-  let usersService: UsersService;
+  let usersService: MembresService;
   let articleRepository: MockRepository<Article>;
 
   beforeEach(async () => {
@@ -38,14 +38,14 @@ describe('ArticlesService', () => {
           useValue: articleRepository,
         },
         {
-          provide: UsersService,
-          useClass: UsersServiceMock,
+          provide: MembresService,
+          useClass: MembresServiceMock,
         },
       ],
     }).compile();
 
     service = module.get<ArticlesService>(ArticlesService);
-    usersService = module.get<UsersService>(UsersService);
+    usersService = module.get<MembresService>(MembresService);
   });
 
   it('should be defined', () => {
@@ -170,8 +170,8 @@ describe('ArticlesService', () => {
       };
 
       const user = { sub: 1, email: 'admin@example.com' };
-      const foundUser = usersMock[0];
-      const image = uploadsMock[0];
+      const foundUser = membresMock[0];
+      const image = mockUploadedFile[0];
 
       jest.spyOn(usersService, 'findUserById').mockResolvedValue(foundUser);
 
@@ -309,7 +309,7 @@ describe('ArticlesService', () => {
       };
 
       const user = { sub: 1, email: 'admin@example.com' };
-      const foundUser = usersMock[0];
+      const foundUser = membresMock[0];
 
       jest.spyOn(usersService, 'findUserById').mockResolvedValue(foundUser);
 
