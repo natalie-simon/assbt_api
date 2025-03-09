@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Article } from '../../database/core/article.entity';
 import { Repository } from 'typeorm';
 import { CreateArticleDto } from '../dtos/create-article.dto';
-import { UsersService } from '../../users/services/users.service';
+import { MembresService } from '../../membres/services/membres.service';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { Upload } from '../../database/core/upload.entity';
 import { ArticleStandardDto } from '../dtos/article-standard.dto';
@@ -22,7 +22,7 @@ export class ArticlesService {
    * @param articleRepository
    */
   constructor(
-    private readonly usersService: UsersService,
+    private readonly membresService: MembresService,
     @InjectRepository(Article)
     private readonly articleRepository: Repository<Article>,
   ) {}
@@ -38,7 +38,7 @@ export class ArticlesService {
     image: Upload | null,
   ) {
 
-    let user = await this.usersService.findUserById(activeUser['sub']);
+    let user = await this.membresService.findUserById(activeUser['sub']);
     const newArticle = this.articleRepository.create({
       ...createArticleDto,
       redacteur: user,

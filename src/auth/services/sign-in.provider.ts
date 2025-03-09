@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { SigninDto } from '../dtos/signin.dto';
-import { UsersService } from '../../users/services/users.service';
+import { MembresService } from '../../membres/services/membres.service';
 import { HashingProvider } from './hashing.provider';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
@@ -28,8 +28,8 @@ export class SignInProvider {
    * @param hashingProvider
    */
   constructor(
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
+    @Inject(forwardRef(() => MembresService))
+    private readonly membreService: MembresService,
     private readonly jwtSercice: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
@@ -44,7 +44,7 @@ export class SignInProvider {
    * @returns
    */
   public async signIn(signinDto: SigninDto) {
-    let user = await this.userService.findOneByEmail(signinDto.email);
+    let user = await this.membreService.findOneByEmail(signinDto.email);
     let isEqual: boolean = false;
 
     try {

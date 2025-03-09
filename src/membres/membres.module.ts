@@ -1,8 +1,8 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
-import { UsersService } from "./services/users.service";
-import { User } from '../database/core/user.entity';
+import { MembresService } from "./services/membres.service";
+import { User } from '../database/core/membre.entity';
 import { CreateUserProvider } from '../auth/services/create-user.provider';
 import { AuthModule } from '../auth/auth.module';
 import { FindOneByEmailProvider } from '../auth/services/find-one-by-email.provider';
@@ -21,7 +21,7 @@ import { JwtModule } from '@nestjs/jwt';
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [UsersController],
-  providers: [UsersService, CreateUserProvider, FindOneByEmailProvider],
-  exports: [UsersService],
+  providers: [MembresService, CreateUserProvider, FindOneByEmailProvider],
+  exports: [MembresService],
 })
-export class UsersModule {}
+export class MembresModule {}

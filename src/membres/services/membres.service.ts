@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../database/core/user.entity';
+import { User } from '../../database/core/membre.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '../dtos/createuser.dto';
+import { CreateUserDto } from '../dtos/createMembre.dto';
 import { CreateUserProvider } from '../../auth/services/create-user.provider';
 import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
 
@@ -10,7 +10,7 @@ import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.pr
  * Service de gestion des utilisateurs
  */
 @Injectable()
-export class UsersService {
+export class MembresService {
   /**
    * Constructeur du service UsersService
    * @param usersRepository le repository des Users

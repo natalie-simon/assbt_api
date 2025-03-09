@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
+import { MembresModule } from './membres/membres.module';
 import { ArticlesModule } from './articles/articles.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
@@ -54,7 +54,7 @@ const ENV = process.env.NODE_ENV;
       load: [appConfig, databaseConfig],
       validationSchema: environnementValidation,
     }),
-    UsersModule,
+    MembresModule,
     ArticlesModule,
     AuthModule,
     MailModule,

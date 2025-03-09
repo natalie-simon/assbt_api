@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './membre.entity';
 import { Upload } from './upload.entity';
 import { categorieArticleTypes } from '../../articles/enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../../articles/enums/statut-article-types.enum';

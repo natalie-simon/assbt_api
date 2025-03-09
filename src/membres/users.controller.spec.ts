@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
-import { UsersService } from './services/users.service';
+import { UsersService } from './services/membres.service';
 import { UsersServiceMock } from './mocks/users.service.mock';
 import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 import { Auth } from '../auth/decorators/auth.decorator';
@@ -10,7 +10,7 @@ import { AccessTokenGuardMock } from '../auth/mocks/access-token.guard.mock';
 import jwtConfig from '../auth/config/jwt.config';
 import { jwtConfigMock } from '../auth/mocks/jwt-config.mock';
 import { usersMock } from './mocks/users.mock';
-import { CreateUserDto } from './dtos/createuser.dto';
+import { CreateUserDto } from './dtos/createMembre.dto';
 
 
 describe('UsersController', () => {
