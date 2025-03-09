@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateActiviteDto } from './dtos/create-activite.dto';
@@ -44,6 +45,28 @@ export class ActiviteController {
   })
   public async findAllActivites() {
     return this.activiteService.findAllActivites();
+  }
+
+  /**
+   * Récupération d'une activité avec filtres possibles
+   * @param id
+   * @param participants
+   * @returns
+   */
+  @Get(':id')
+  @Auth(AuthTypes.Bearer)
+  @ApiOperation({
+    summary: "Récupération d'une activité avec filtres possibles",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Détails de l'activité",
+  })
+  public async findOneActiviteWithFilters(
+    @Param('id') id: number,
+    @Query('participants') participants?: boolean,
+  ) {
+    return this.activiteService.findOneActiviteWithFilters(id, participants);
   }
 
   /**

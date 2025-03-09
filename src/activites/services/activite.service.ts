@@ -54,6 +54,29 @@ export class ActiviteService {
   }
 
   /**
+   * Récupération d'une activité avec filtres possibles
+   * @param id
+   * @param participants
+   * @returns
+   */
+  public async findOneActiviteWithFilters(id: number, participants?: boolean) {
+    const relations = participants
+      ? ['categorie', 'participants', 'participants.membre']
+      : ['categorie'];
+
+    const activite = await this.activiteRepository.findOne({
+      where: { id: id },
+      relations: relations,
+    });
+
+    if (!activite) {
+      throw new BadRequestException('Activité non trouvée');
+    }
+
+    return activite;
+  }
+
+  /**
    * Création d'une activité
    * @param createActiviteDto
    * @returns
