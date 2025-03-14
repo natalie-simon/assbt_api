@@ -59,14 +59,37 @@ export class ActiviteService {
    * @param participants
    * @returns
    */
-  public async findOneActiviteWithFilters(id: number, participants?: boolean) {
+  public async findOneActiviteWithFilters(id: number, participants?: boolean): Promise<Activite> {
     const relations = participants
-      ? ['categorie', 'participants', 'participants.membre']
+      ? ['categorie', 'participants', 'participants.membre', 'participants.membre.profil']
       : ['categorie'];
 
     const activite = await this.activiteRepository.findOne({
       where: { id: id },
       relations: relations,
+      select: {
+        id: true,
+        titre: true,
+        contenu: true,
+        date_heure_debut: true,
+        date_heure_fin: true,
+        categorie: {
+          lbl_categorie: true,
+          couleur: true,
+          avec_equipement: true,
+        },
+        participants: {
+          observations: true,
+          dateInscription: true,
+          membre: {
+            id: true,
+            profil: {
+              nom: true,
+              prenom: true,
+            }
+          }
+        }
+      }
     });
 
     if (!activite) {

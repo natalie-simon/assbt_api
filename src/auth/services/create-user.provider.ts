@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from '../../membres/dtos/createMembre.dto';
 import { Repository } from 'typeorm';
-import { User } from '../../database/core/membre.entity';
+import { Membre } from '../../database/core/membre.entity';
 import { HashingProvider } from './hashing.provider';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MembresService } from '../../membres/services/membres.service';
@@ -28,8 +28,8 @@ export class CreateUserProvider {
    * @param userService
    */
   constructor(
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Membre)
+    private readonly usersRepository: Repository<Membre>,
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
     @Inject(forwardRef(() => MembresService))
@@ -60,7 +60,7 @@ export class CreateUserProvider {
       ),
     });
 
-    const user = (await this.usersRepository.save(newUser)) as User;
+    const user = (await this.usersRepository.save(newUser)) as Membre;
 
     try {
       await this.mailService.sendInscriptionNouveauMembre(user);

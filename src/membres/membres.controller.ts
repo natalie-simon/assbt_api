@@ -1,12 +1,27 @@
-import { Body, Controller, Post, Get, UseGuards, SetMetadata } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  UseGuards,
+  SetMetadata,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { CreateUserDto } from './dtos/createMembre.dto';
 import { MembresService } from './services/membres.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { RoleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
-
+import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { ActiveUser } from '../auth/decorators/active-user.decorator';
 
 /**
  * Users controller
@@ -14,10 +29,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
  */
 @Controller('membres')
 @ApiTags('membres')
-export class UsersController {
+export class MembresController {
   /**
    * Constructeur
-   * @param usersService Le service UsersService
+   * @param membreService Le service UsersService
    */
   constructor(private readonly membreService: MembresService) {}
 
@@ -57,5 +72,23 @@ export class UsersController {
     return this.membreService.findAllUsers();
   }
 
+  /**
+   * Route de récupération du profil de l'utilisateur connecté avec filtres possibles
+   * @param activeUser
+   * @param activites
+   * @returns
+   */
+  @Get('infos')
+  @Auth(AuthTypes.Bearer)
+  @ApiOperation({ summary: 'Récupérer un utilisateur par son id' })
+  @ApiResponse({ status: 200, description: 'Un utilisateur' })
+  public async findUserByIdWithFilters(
+    @ActiveUser() activeUser: ActiveUserData,
+    @Query('activites') activites?: boolean,
+  ) {
+    return this.membreService.findProfileByUserIdWithFilters(
+      activeUser.sub,
+      activites,
+    );
+  }
 }
-

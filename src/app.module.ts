@@ -19,6 +19,7 @@ import { ActivitesModule } from './activites/activites.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
+import { MongooseModule } from '@nestjs/mongoose';
 
 /**
  * Chargement des variables d'environnement
@@ -46,6 +47,13 @@ const ENV = process.env.NODE_ENV;
         logging: process.env.NODE_ENV === 'development',
       }),
     }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forRoot({
@@ -65,7 +73,7 @@ const ENV = process.env.NODE_ENV;
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },
-    { provide: APP_GUARD, useClass: RolesGuard},
+    { provide: APP_GUARD, useClass: RolesGuard },
     AccessTokenGuard,
   ],
 })

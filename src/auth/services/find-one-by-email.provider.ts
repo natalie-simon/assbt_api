@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { User } from '../../database/core/membre.entity';
+import { Membre } from '../../database/core/membre.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
 /**
@@ -17,8 +17,8 @@ export class FindOneByEmailProvider {
    * @param userRespository
    */
   constructor(
-    @InjectRepository(User)
-    private readonly userRespository: Repository<User>,
+    @InjectRepository(Membre)
+    private readonly userRespository: Repository<Membre>,
   ) {}
 
   /**
@@ -27,7 +27,7 @@ export class FindOneByEmailProvider {
    * @returns
    */
   public async findOneUserByEmailProvider(email: string) {
-    let user: User | undefined = undefined;
+    let user: Membre | undefined = undefined;
 
     try {
       user = await this.userRespository.findOneBy({ email });

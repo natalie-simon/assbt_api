@@ -11,6 +11,7 @@ export const membresMock = [
     est_supprime: false,
     role: RoleTypes.ADMIN,
     inscriptions: [],
+    profil: null,
   },
   {
     id: 2,
@@ -19,6 +20,7 @@ export const membresMock = [
     est_supprime: false,
     role: RoleTypes.USER,
     inscriptions: [],
+    profil: null,
   },
   {
     id: 3,
@@ -27,5 +29,6 @@ export const membresMock = [
     est_supprime: true,
     role: RoleTypes.USER,
     inscriptions: [],
+    profil: null,
   },
 ];

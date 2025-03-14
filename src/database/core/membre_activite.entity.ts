@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './membre.entity';
+import { Membre } from './membre.entity';
 import { Activite } from './activite.entity';
 
 /**
@@ -39,8 +39,8 @@ export class MembreActivite {
    * @type {User}
    * @memberof Membre
    */
-  @ManyToOne(() => User, (membre) => membre.inscriptions)
-  membre: User;
+  @ManyToOne(() => Membre, (membre) => membre.inscriptions)
+  membre: Membre;
 
   /**
    * Activité inscrite

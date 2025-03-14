@@ -3,20 +3,23 @@ import { RoleTypes } from '../../auth/enums/role-types.enum';
 import {
   Column,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { MembreActivite } from './membre_activite.entity';
+import { Profil } from './profil.entity';
 
 /**
  * Entité représentant un utilisateur dans l'application.
  */
-@Entity('membre',{
+@Entity('membre', {
   schema: 'public',
 })
-export class User {
+export class Membre {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column({
     type: 'varchar',
@@ -48,7 +51,10 @@ export class User {
   })
   role: string;
 
-  @OneToMany(()=> MembreActivite, (membreActivite) => membreActivite.membre)
+  @OneToMany(() => MembreActivite, (membreActivite) => membreActivite.membre)
   inscriptions: MembreActivite[];
 
+  @OneToOne(() => Profil, (profil) => profil.membre)
+  @JoinColumn()
+  profil: Profil;
 }

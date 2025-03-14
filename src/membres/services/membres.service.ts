@@ -1,10 +1,12 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../../database/core/membre.entity';
+import { Membre } from '../../database/core/membre.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createMembre.dto';
 import { CreateUserProvider } from '../../auth/services/create-user.provider';
 import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
+import { Profil } from '../../database/core/profil.entity';
+import { QueryExpressionMap } from 'typeorm/query-builder/QueryExpressionMap';
 
 /**
  * Service de gestion des utilisateurs
@@ -16,8 +18,10 @@ export class MembresService {
    * @param usersRepository le repository des Users
    */
   constructor(
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Membre)
+    private readonly usersRepository: Repository<Membre>,
+    @InjectRepository(Profil)
+    private readonly profilRepository: Repository<Profil>,
     private readonly createUserProvider: CreateUserProvider,
     private readonly findOneByEmailProvider: FindOneByEmailProvider,
   ) {}
@@ -41,7 +45,7 @@ export class MembresService {
    * @returns
    * @throws BadRequestException
    */
-  public async findOneByEmail(email: string): Promise<User | null> {
+  public async findOneByEmail(email: string): Promise<Membre | null> {
     return this.usersRepository.findOne({
       where: { email },
     });
@@ -60,7 +64,7 @@ export class MembresService {
    * @param user
    * @returns
    */
-  public async update(user: User){
+  public async update(user: Membre) {
     return this.usersRepository.save(user);
   }
 
@@ -78,7 +82,32 @@ export class MembresService {
    * @param email
    * @returns
    */
-  public async findOneUserByEmailProvider(email: string) {
+  public async findOneUserByEmailProvider(
+    email: string,
+  ): Promise<Membre | null> {
     return this.findOneByEmailProvider.findOneUserByEmailProvider(email);
+  }
+
+  public async findProfileByUserIdWithFilters(id: number, activites: boolean) {
+    const now = new Date().toISOString();
+
+    const query = await this.usersRepository
+      .createQueryBuilder('membre')
+      .select(['membre.id']) // Ne garde que l'ID du membre
+      .leftJoinAndSelect('membre.profil', 'profil');
+
+    if (activites) {
+      query
+        .leftJoinAndSelect('membre.inscriptions', 'inscriptions') // Inscriptions complètes
+        .leftJoinAndSelect('inscriptions.activite', 'activite');
+    }
+
+    query.where('membre.id = :id', { id });
+
+    if (activites) {
+      query.andWhere('activite.date_heure_debut > :now', { now });
+    }
+
+    return query.getOne();
   }
 }
