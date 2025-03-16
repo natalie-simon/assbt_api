@@ -72,7 +72,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
-            cd /app/bulleurs-toulonnais/
+            cd /apps/bulleurs-toulonnais/
             chmod +x deploy.sh
             ./deploy.sh test develop
           EOF
