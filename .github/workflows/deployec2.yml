@@ -5,6 +5,10 @@ on:
     branches:
       - develop    # Uniquement la branche develop
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
