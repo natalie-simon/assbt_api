@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from './mail.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { User } from '../../database/core/membre.entity';
+import { Membre } from '../../database/core/membre.entity';
 
 describe('MailService', () => {
   let mailService: MailService;
@@ -26,7 +26,7 @@ describe('MailService', () => {
 
   describe('sendInscriptionNouveauMembre', () => {
     it('should call sendMail with correct parameters', async () => {
-      const user = new User();
+      const user = new Membre();
       user.email = 'newmember@example.com';
 
       await mailService.sendInscriptionNouveauMembre(user);
@@ -45,7 +45,7 @@ describe('MailService', () => {
 
   describe('sendMailReinitialisationMDP', () => {
     it('should call sendMail with correct parameters', async () => {
-      const user = new User();
+      const user = new Membre();
       user.email = 'user@example.com';
       const accessToken = 'mock-token';
 
@@ -67,7 +67,7 @@ describe('MailService', () => {
 
   describe('sendMailMotDePasseModifie', () => {
     it('should call sendMail with correct parameters', async () => {
-      const user = new User();
+      const user = new Membre();
       user.email = 'user@example.com';
 
       await mailService.sendMailMotDePasseModifie(user);
