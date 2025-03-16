@@ -1,6 +1,8 @@
 import { Upload } from '../../database/core/upload.entity';
 
-// Mock d'un fichier uploadé pour référence
+/**
+ * Mock d'un fichier uploadé pour référence
+ */
 export const mockUploadedFile: Express.Multer.File = {
   fieldname: 'fichier',
   originalname: 'test-image.jpg',
@@ -14,7 +16,9 @@ export const mockUploadedFile: Express.Multer.File = {
   stream: null,
 };
 
-// Mock d'une entité Upload pour référence
+/**
+ * Mock d'une entité Upload pour référence
+ */
 export const mockUpload: Upload = {
   id: 1,
   nom: 'test-image.jpg',
@@ -26,11 +30,19 @@ export const mockUpload: Upload = {
   updateDate: new Date(),
 };
 
+/**
+ * Mock du service d'upload
+ */
 export class UploadServiceMock {
   uploadFile(file: Express.Multer.File): Promise<Upload> {
     return Promise.resolve(mockUpload);
   }
 
+  /**
+   * Mock upload vers AWS
+   * @param file 
+   * @returns 
+   */
   uploadAws(file: Express.Multer.File): Promise<{ path: string }> {
     return Promise.resolve({
       path: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg',

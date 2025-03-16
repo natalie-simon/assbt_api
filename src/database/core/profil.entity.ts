@@ -9,10 +9,17 @@ import {
 import { Upload } from './upload.entity';
 import { Membre } from './membre.entity';
 
+/**
+ * Entité Profil
+ */
 @Entity('profil', {
   schema: 'public',
 })
 export class Profil {
+  /**
+
+  
+   */
   @PrimaryGeneratedColumn()
   id: number;
 

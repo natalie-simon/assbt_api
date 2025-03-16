@@ -1,24 +1,59 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
+/**
+ * Définition du schéma de la collection des logs
+ */
 export type Logdocument = Log & Document;
 
+/**
+ * Définition de la classe Log
+ */
 @Schema({ timestamps: true })
 export class Log {
+  /**
+   * Niveau de log
+   *
+   * @type {string}
+   * @memberof Log
+   */
   @Prop({ required: true })
   level: string;
 
+  /**
+   * Message
+   *
+   * @type {string}
+   * @memberof Log
+   */
   @Prop({ required: true })
   message: string;
 
-  /*@Prop({ required: true })
-  meta?: Record<string, any>;*/
+  /**
+   * Métadonnées
+   *
+   * @type {Record<string, any>}
+   * @memberof Log
+   */
+  @Prop({ type: MongooseSchema.Types.Mixed, required: true })
+  metadata: Record<string, any>;
 
+  /**
+   * Timestamp
+   *
+   * @type {Date}
+   * @memberof Log
+   */
   @Prop({ required: true })
   timestamp: Date;
 }
 
+/**
+ * Créez le schéma pour la collection des logs
+ */
 export const LogSchema = SchemaFactory.createForClass(Log);
 
-// Exportez à la fois la classe et le schéma
+/**
+ * Exportez à la fois la classe et le schéma
+ */
 export { LogSchema as logSchema };
