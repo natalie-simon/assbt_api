@@ -1,6 +1,10 @@
 import { Upload } from '../../database/core/upload.entity';
 
-// Mock d'un fichier uploadé
+
+
+/**
+ *  Mock d'un fichier uploadé
+ */
 export const mockUploadedFile: Express.Multer.File = {
   fieldname: 'fichier',
   originalname: 'test-image.jpg',
@@ -14,7 +18,9 @@ export const mockUploadedFile: Express.Multer.File = {
   stream: null,
 };
 
-// Mock d'une entité Upload
+/**
+ * Mock d'une entité Upload
+ */
 export const mockUpload: Upload = {
   id: 1,
   nom: 'test-image.jpg',
@@ -26,7 +32,9 @@ export const mockUpload: Upload = {
   updateDate: new Date(),
 };
 
-// Mock du service Upload
+/**
+ * Mock du service Upload
+ */
 export const mockUploadService = {
   uploadFile: jest.fn().mockResolvedValue(mockUpload),
   uploadAws: jest.fn().mockResolvedValue({

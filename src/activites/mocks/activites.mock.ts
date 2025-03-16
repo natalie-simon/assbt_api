@@ -6,7 +6,9 @@ import { InscriptionActiviteDto } from '../dtos/inscription-activite.dto';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { membresMock } from '../../membres/mocks/membres.mock';
 
-// Mock d'une catégorie d'activité
+/**
+ * Mock d'une catégorie d'activité
+ */
 export const mockCategorieActivite: CategorieActivite = {
   id: 1,
   lbl_categorie: 'Sport',
@@ -16,7 +18,9 @@ export const mockCategorieActivite: CategorieActivite = {
   image: null,
 };
 
-// Mock des activités
+/**
+ * Mock des activités
+ */
 export const mockActivites: Activite[] = [
   {
     id: 1,
@@ -38,7 +42,9 @@ export const mockActivites: Activite[] = [
   },
 ];
 
-// Mock d'un DTO de création d'activité
+/**
+ * Mock d'un DTO de création d'activité
+ */
 export const mockCreateActiviteDto: CreateActiviteDto = {
   titre: 'Nouvelle activité',
   contenu: 'Contenu de la nouvelle activité',
@@ -47,7 +53,9 @@ export const mockCreateActiviteDto: CreateActiviteDto = {
   categorie: 1,
 };
 
-// Mock d'une activité nouvellement créée
+/**
+ * Mock d'une activité nouvellement créée
+ */
 export const mockNewActivite: Activite = {
   id: 3,
   titre: 'Nouvelle activité',
@@ -58,18 +66,24 @@ export const mockNewActivite: Activite = {
   participants: [],
 };
 
-// Mock d'un utilisateur actif
+/**
+ *  Mock d'un utilisateur actif
+ */
 export const mockActiveUser: ActiveUserData = {
   sub: 1,
   email: 'user@example.com',
 };
 
-// Mock d'un DTO d'inscription à une activité
+/**
+ * Mock d'un DTO d'inscription à une activité
+ */
 export const mockInscriptionActiviteDto: InscriptionActiviteDto = {
   observations: 'Besoin de matériel spécifique',
 };
 
-// Mock d'une inscription d'utilisateur à une activité
+/**
+ * Mock d'une inscription d'utilisateur à une activité
+ */
 export const mockMembreActivite: MembreActivite = {
   id: 1,
   observations: 'Besoin de matériel spécifique',
@@ -78,7 +92,9 @@ export const mockMembreActivite: MembreActivite = {
   dateInscription: new Date(),
 };
 
-// Mock des activités avec leurs participants
+/**
+ * Mock des activités avec participants
+ */
 export const mockActivitesAvecParticipants: Activite[] = [
   {
     ...mockActivites[0],

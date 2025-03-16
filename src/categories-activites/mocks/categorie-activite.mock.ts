@@ -2,7 +2,9 @@ import { CategorieActivite } from '../../database/core/categorie_activite.entity
 import { CreateCategorieActiviteDto } from '../../categories-activites/dtos/create-categorie-activite.dto';
 import { CategorieActiviteDto } from '../../categories-activites/dtos/categorie-activite.dto';
 
-// Mock des catégories d'activités
+/**
+ * Mock des catégories d'activités
+ */
 export const CategoriesActiviteMock: CategorieActivite[] = [
   {
     id: 1,
@@ -30,10 +32,14 @@ export const CategoriesActiviteMock: CategorieActivite[] = [
   },
 ];
 
-// Mock d'une seule catégorie d'activité (pour les tests ciblés)
+/**
+ * Mock d'une catégorie d'activité
+ */
 export const mockCategorieActivite: CategorieActivite = CategoriesActiviteMock[0];
 
-// Mock d'un DTO de création de catégorie d'activité
+/**
+ * Mock d'un DTO de création de catégorie d'activité
+ */
 export const mockCreateCategorieActiviteDto: CreateCategorieActiviteDto = {
   lbl_categorie: 'Nouvelle Catégorie',
   avec_equipement: true,
@@ -41,7 +47,9 @@ export const mockCreateCategorieActiviteDto: CreateCategorieActiviteDto = {
   avec_notification: true,
 };
 
-// Mock de DTO de catégorie d'activité (pour les retours des contrôleurs)
+/**
+ * Mock d'un DTO de catégorie d'activité
+ */
 export const mockCategorieActiviteDto: CategorieActiviteDto = {
   id: 1,
   lbl_categorie: 'Sport',
@@ -49,7 +57,9 @@ export const mockCategorieActiviteDto: CategorieActiviteDto = {
   couleur: 'FF5733',
 };
 
-// Mock des DTOs de catégories
+/**
+ * Mock des DTOs de catégories d'activités
+ */
 export const mockCategoriesActiviteDto: CategorieActiviteDto[] = [
   mockCategorieActiviteDto,
   {

@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MembresModule } from './membres/membres.module';
 import { ArticlesModule } from './articles/articles.module';
 import { AuthModule } from './auth/auth.module';
-import * as dotenv from 'dotenv';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import jwtConfig from './auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
@@ -20,6 +19,8 @@ import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
 import { MongooseModule } from '@nestjs/mongoose';
+import mailConfig from './config/mail.config';
+import loggerConfig from './config/logger.config';
 
 /**
  * Chargement des variables d'environnement
@@ -59,7 +60,7 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, mailConfig, loggerConfig],
       validationSchema: environnementValidation,
     }),
     MembresModule,
