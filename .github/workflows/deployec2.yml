@@ -67,7 +67,7 @@ jobs:
         run: |
           scp -i ~/.ssh/id_rsa ./deploy/docker-compose.yml ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/
           scp -i ~/.ssh/id_rsa ./deploy/deploy.sh ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/
-          scp -i ~/.ssh/id_rsa ./deploy/.env.test ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/.env
+          # scp -i ~/.ssh/id_rsa ./deploy/.env.test ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/.env
 
       - name: Deploy to EC2
         run: |

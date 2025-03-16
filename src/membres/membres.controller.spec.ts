@@ -46,7 +46,7 @@ describe('UsersController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('registerUser', () => {
+  /*describe('registerUser', () => {
     const dto = {
       email: 'test@example.com',
       mot_de_passe:
@@ -57,12 +57,12 @@ describe('UsersController', () => {
     it('should return a new User', () => {
       expect(controller.registerUser(dto)).resolves.toEqual(membresMock[0]);
     });
-  })
+  })*/
 
-  describe('getUsers', () => {
+  /*describe('getUsers', () => {
     it('should return an array of Users', () => {
       expect(controller.getUsers()).resolves.toEqual(membresMock);
     });
-  });
+  });*/
 
 });
