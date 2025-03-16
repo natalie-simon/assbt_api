@@ -1,9 +1,9 @@
-name: CI/CD Docker Dev Deployment
+name: CI/CD Docker Dev Deployment debug
 
 on:
   push:
     branches:
-      - develop    # Uniquement la branche develop
+      - develop # Uniquement la branche develop
   workflow_dispatch: # Pour pouvoir déclencher manuellement
 
 permissions:
@@ -70,7 +70,7 @@ jobs:
         run: |
           # Create all directories needed with one command
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "sudo mkdir -p /home/ubuntu/apps/bulleurs-toulonnais && sudo chown -R ubuntu:ubuntu /home/ubuntu/apps"
-          
+
           # Check if the directory was created successfully
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "ls -la /home/ubuntu/apps/bulleurs-toulonnais"
 
@@ -80,14 +80,14 @@ jobs:
           # Configuration de base
           NODE_ENV=test
           LISTEN_PORT=3000
-          
+
           # Configuration de la base de données
           DB_HOST=postgres-db
           DB_PORT=5432
           DB_USERNAME=postgres
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_NAME=assbt_api_test
-          
+
           # Configuration du déploiement
           GITHUB_REPOSITORY=${{ github.repository }}
           EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}
@@ -99,18 +99,18 @@ jobs:
         run: |
           # Create a deploy directory locally to organize files
           mkdir -p deploy_files
-          
+
           # Copy the necessary files to this directory
           cp ./deploy/docker-compose.yml deploy_files/
           cp ./deploy/deploy.sh deploy_files/
           cp ./.env deploy_files/
-          
+
           # Make the deployment script executable
           chmod +x deploy_files/deploy.sh
-          
+
           # Copy all files at once
           scp -r -i ~/.ssh/id_rsa deploy_files/* ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
-          
+
           # Verify files were copied
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} "ls -la /home/ubuntu/apps/bulleurs-toulonnais/"
 
