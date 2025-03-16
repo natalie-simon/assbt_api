@@ -2,32 +2,32 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FindOneByEmailProvider } from './find-one-by-email.provider';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../database/core/membre.entity';
+import { Membre } from '../../database/core/membre.entity';
 import { RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 
 describe('FindOneByEmailProvider', () => {
   let provider: FindOneByEmailProvider;
-  let userRepository: Repository<User>;
+  let userRepository: Repository<Membre>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FindOneByEmailProvider,
         {
-          provide: getRepositoryToken(User),
+          provide: getRepositoryToken(Membre),
           useClass: Repository,
         },
       ],
     }).compile();
 
     provider = module.get<FindOneByEmailProvider>(FindOneByEmailProvider);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    userRepository = module.get<Repository<Membre>>(getRepositoryToken(Membre));
   });
 
   describe('findOneUserByEmailProvider', () => {
     it('should return a user if found', async () => {
       const email = 'test@example.com';
-      const user = new User();
+      const user = new Membre();
       user.email = email;
 
       jest.spyOn(userRepository, 'findOneBy').mockResolvedValue(user);

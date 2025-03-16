@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { UsersService } from '../../users/services/users.service';
+import { MembresService } from '../../membres/services/membres.service';
 import { SignInProvider } from './sign-in.provider';
 import { HashingProvider } from './hashing.provider';
 import { MailService } from '../../mail/services/mail.service';
@@ -12,9 +12,9 @@ import { SigninDto } from '../dtos/signin.dto';
 import { ForgotPasswordDto } from '../dtos/forgotpassword.dto';
 import { ChangePasswordDto } from '../dtos/changePassword.dto';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
-import { User } from '../../database/core/membre.entity';
-import { usersMock } from '../../users/mocks/users.mock'; // <--- Add this line
-import { UsersServiceMock } from '../../users/mocks/users.service.mock'; // <--- Add this line
+import { Membre } from '../../database/core/membre.entity';
+import { membresMock } from '../../membres/mocks/membres.mock'; // <--- Add this line
+import { MembresServiceMock } from '../../membres/mocks/membres.service.mock'; // <--- Add this line
 
 const mockSignInProvider = {
   signIn: jest.fn(),
@@ -41,8 +41,8 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         {
-          provide: UsersService,
-          useClass: UsersServiceMock,
+          provide: MembresService,
+          useClass: MembresServiceMock,
         },
         {
           provide: SignInProvider,
