@@ -65,14 +65,14 @@ jobs:
 
       - name: Copy deployment files to EC2
         run: |
-          scp -i ~/.ssh/id_rsa ./deploy/docker-compose.yml ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/app/bulleurs-toulonnais/
-          scp -i ~/.ssh/id_rsa ./deploy/deploy.sh ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/app/bulleurs-toulonnais/
-          scp -i ~/.ssh/id_rsa ./deploy/.env.test ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/app/bulleurs-toulonnais/.env.test
+          scp -i ~/.ssh/id_rsa ./deploy/docker-compose.yml ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/
+          scp -i ~/.ssh/id_rsa ./deploy/deploy.sh ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/
+          scp -i ~/.ssh/id_rsa ./deploy/.env.test ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/apps/bulleurs-toulonnais/.env
 
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
-            cd /app/bulleurs-toulonnais/
+            cd /apps/bulleurs-toulonnais/
             chmod +x deploy.sh
             ./deploy.sh test develop
           EOF
