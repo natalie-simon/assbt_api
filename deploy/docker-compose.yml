@@ -3,9 +3,7 @@ services:
   # Service pour la bdd PostgreSQL
   postgres-db:
     image: postgres:latest
-    container_name: api-postgres-db-test
-    env_file:
-      - .env.test
+    container_name: api-postgres-db
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -13,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data-test:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
       interval: 10s
@@ -22,24 +20,29 @@ services:
 
   # Service pour l'API NestJs
   nestjs-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nestjs-api-test
+    image: ghcr.io/${GITHUB_REPOSITORY}-api:${TAG}
+    container_name: nestjs-api
     env_file:
-      - .env.test
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      - ./.env
     ports:
       - "${LISTEN_PORT}:${LISTEN_PORT}"
     depends_on:
       postgres-db:
         condition: service_healthy
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/www:/var/www/html
+    depends_on:
+      - nestjs-api
+    restart: always
 
 volumes:
   postgres-data-test:
