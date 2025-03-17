@@ -1,9 +1,11 @@
-#version: "3.8"
+version: "3.8"
 services:
   # Service pour la bdd PostgreSQL
   postgres-db:
     image: postgres:latest
-    container_name: api-postgres-db
+    container_name: api-postgres-db-test
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -11,7 +13,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data-test:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
       interval: 10s
@@ -21,18 +23,26 @@ services:
   # Service pour l'API NestJs
   nestjs-api:
     image: ghcr.io/${GITHUB_REPOSITORY}-api:${TAG}
-    container_name: nestjs-api
+    container_name: nestjs-api-test
     env_file:
-      - ./.env
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DB_HOST: postgres-db
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - "${LISTEN_PORT}:${LISTEN_PORT}"
     depends_on:
       postgres-db:
         condition: service_healthy
-
+  
+  # Service Nginx pour le reverse proxy
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: nginx-proxy
     ports:
       - "80:80"
       - "443:443"
