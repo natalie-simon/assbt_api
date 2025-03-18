@@ -4,7 +4,7 @@
 
 # Variables
 domains=(api-assbt-test.lesbulleurstoulonnais.fr)
-email="votre-email@example.com"  # Remplacez par votre email
+email="ybah2201@gmail.com"  # Remplacez par votre email
 data_path="./certbot"
 rsa_key_size=4096
 staging=0  # Mettre à 1 pour tester (pas de limite de rate)
@@ -16,8 +16,8 @@ if [[ "$email" == "votre-email@example.com" ]]; then
 fi
 
 # Création des répertoires nécessaires
-mkdir -p "$data_path/conf/live/$domains"
-mkdir -p "$data_path/www"
+sed -i 's/mkdir -p "$data_path\/conf\/live\/$domains"/mkdir -p "$data_path\/conf\/live\/$domain"/g' init-letsencrypt.sh
+sed -i 's/--force-renewal/-d $domain --force-renewal/g' init-letsencrypt.sh 2>/dev/null || echo "Pattern not found"
 
 # Vérification si les certificats existent déjà
 if [ -d "$data_path/conf/live/$domains" ]; then
