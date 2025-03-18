@@ -123,12 +123,25 @@ jobs:
           
           scp -i ~/.ssh/id_rsa .env ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 with correct PATH
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            # S'assurer que le PATH inclut /usr/bin
+            export PATH="/usr/bin:$PATH"
+            
             cd /home/ubuntu/apps/bulleurs-toulonnais/
             chmod +x deploy.sh
             chmod +x init-letsencrypt.sh
+            
+            # Vérifier que Docker est disponible
+            which docker
+            docker --version
+            
+            # Vérifier que Docker Compose est disponible
+            which docker-compose
+            docker-compose --version
+            
+            # Exécuter le déploiement
             ./deploy.sh develop
           EOF
 
@@ -138,13 +151,21 @@ jobs:
           sleep 30
           
           # Vérifier le statut des containers
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            export PATH="/usr/bin:$PATH"
             cd /home/ubuntu/apps/bulleurs-toulonnais/
+            
+            echo "Liste des conteneurs Docker:"
             docker ps
+            
+            echo "Logs Nginx:"
             docker-compose logs --tail=20 nginx
+            
+            echo "Logs Certbot:"
             docker-compose logs --tail=20 certbot
-            # Vérifier si Nginx est correctement configuré
-            docker-compose exec nginx nginx -t
+            
+            echo "Test configuration Nginx:"
+            docker-compose exec -T nginx nginx -t
           EOF
 
       - name: Send success email
