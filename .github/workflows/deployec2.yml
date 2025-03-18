@@ -81,10 +81,10 @@ jobs:
           scp -i ~/.ssh/id_rsa ./deploy/docker-compose.yml ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
           scp -i ~/.ssh/id_rsa ./deploy/deploy.sh ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
           scp -i ~/.ssh/id_rsa ./deploy/init-letsencrypt.sh ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
-          
+
           # Copier le fichier de configuration Nginx
           scp -i ~/.ssh/id_rsa ./deploy/nginx/conf.d/default.conf ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/nginx/conf.d/
-          
+
           # Remplacer l'adresse email dans le script init-letsencrypt.sh
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
             cd /home/ubuntu/apps/bulleurs-toulonnais/
@@ -97,75 +97,87 @@ jobs:
           NODE_ENV=production
           TAG=develop
           GITHUB_REPOSITORY=${{ github.repository }}
-          
+
           # Database
           DB_HOST=postgres-db
           DB_PORT=5432
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_NAME=${{ secrets.DB_NAME }}
-          
+
           # API
           LISTEN_PORT=3000
           API_PORT=3000
-          
+
           # AWS S3
           AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION=${{ secrets.AWS_REGION }}
           AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}
-          
+
           # Deploy
           EC2_PUBLIC_IP=${{ secrets.EC2_PUBLIC_IP }}
           DOMAIN_NAME=api-assbt-test.lesbulleurstoulonnais.fr
           RUN_MIGRATIONS=true
           EOF
-          
+
           scp -i ~/.ssh/id_rsa .env ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
 
-      - name: Deploy to EC2 with correct PATH
+      - name: Modify scripts to use absolute paths on EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            # S'assurer que le PATH inclut /usr/bin
-            export PATH="/usr/bin:$PATH"
-            
             cd /home/ubuntu/apps/bulleurs-toulonnais/
+
+            # Modifier le script init-letsencrypt.sh pour utiliser les chemins absolus
+            sed -i 's/docker-compose/\/usr\/bin\/docker-compose/g' init-letsencrypt.sh
+            sed -i 's/docker /\/usr\/bin\/docker /g' init-letsencrypt.sh
+
+            # Modifier le script deploy.sh pour utiliser les chemins absolus
+            sed -i 's/docker-compose/\/usr\/bin\/docker-compose/g' deploy.sh
+            sed -i 's/docker /\/usr\/bin\/docker /g' deploy.sh
+
+            # Rendre les scripts exécutables
             chmod +x deploy.sh
             chmod +x init-letsencrypt.sh
-            
-            # Vérifier que Docker est disponible
-            which docker
-            docker --version
-            
-            # Vérifier que Docker Compose est disponible
-            which docker-compose
-            docker-compose --version
-            
+          EOF
+
+      - name: Deploy to EC2 with absolute paths
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            cd /home/ubuntu/apps/bulleurs-toulonnais/
+
+            # Vérifier si les certificats SSL existent déjà
+            if [ ! -d "./certbot/conf/live/api-assbt-test.lesbulleurstoulonnais.fr" ]; then
+              echo "Les certificats SSL n'existent pas encore, lancement de l'initialisation..."
+              ./init-letsencrypt.sh
+            else
+              echo "Les certificats SSL existent déjà."
+            fi
+
             # Exécuter le déploiement
             ./deploy.sh develop
           EOF
 
-      - name: Verify deployment
+      - name: Verify deployment with absolute paths
         run: |
           # Attendre que les services démarrent
           sleep 30
-          
-          # Vérifier le statut des containers
+
+          # Vérifier le statut des containers avec des chemins absolus
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            export PATH="/usr/bin:$PATH"
             cd /home/ubuntu/apps/bulleurs-toulonnais/
-            
+
             echo "Liste des conteneurs Docker:"
-            docker ps
-            
+            /usr/bin/docker ps
+
             echo "Logs Nginx:"
-            docker-compose logs --tail=20 nginx
-            
+            /usr/bin/docker-compose logs --tail=20 nginx
+
             echo "Logs Certbot:"
-            docker-compose logs --tail=20 certbot
-            
+            /usr/bin/docker-compose logs --tail=20 certbot
+
             echo "Test configuration Nginx:"
-            docker-compose exec -T nginx nginx -t
+            /usr/bin/docker-compose exec -T nginx nginx -t
           EOF
 
       - name: Send success email
