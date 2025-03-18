@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop # Uniquement la branche develop
+  workflow_dispatch: # Permet de lancer manuellement le workflow
 
 permissions:
   contents: read
@@ -89,6 +90,9 @@ jobs:
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
             cd /home/ubuntu/apps/bulleurs-toulonnais/
             sed -i "s/votre-email@example.com/${{ secrets.ADMIN_EMAIL }}/g" init-letsencrypt.sh
+
+            # Corriger le script pour la création de répertoires
+            sed -i 's/mkdir -p "$data_path\/conf\/live\/$domains"/mkdir -p "$data_path\/conf\/live\/$domain"/g' init-letsencrypt.sh
           EOF
 
       - name: Create .env file on EC2
@@ -123,61 +127,49 @@ jobs:
 
           scp -i ~/.ssh/id_rsa .env ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/
 
-      - name: Modify scripts to use absolute paths on EC2
+      - name: Deploy to EC2 with sudo
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
             cd /home/ubuntu/apps/bulleurs-toulonnais/
-
-            # Modifier le script init-letsencrypt.sh pour utiliser les chemins absolus
-            sed -i 's/docker-compose/\/usr\/bin\/docker-compose/g' init-letsencrypt.sh
-            sed -i 's/docker /\/usr\/bin\/docker /g' init-letsencrypt.sh
-
-            # Modifier le script deploy.sh pour utiliser les chemins absolus
-            sed -i 's/docker-compose/\/usr\/bin\/docker-compose/g' deploy.sh
-            sed -i 's/docker /\/usr\/bin\/docker /g' deploy.sh
-
-            # Rendre les scripts exécutables
             chmod +x deploy.sh
             chmod +x init-letsencrypt.sh
-          EOF
+            chmod -R 755 certbot/
 
-      - name: Deploy to EC2 with absolute paths
-        run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            cd /home/ubuntu/apps/bulleurs-toulonnais/
+            # Nettoyer les conteneurs existants
+            sudo docker-compose down
 
             # Vérifier si les certificats SSL existent déjà
             if [ ! -d "./certbot/conf/live/api-assbt-test.lesbulleurstoulonnais.fr" ]; then
               echo "Les certificats SSL n'existent pas encore, lancement de l'initialisation..."
-              ./init-letsencrypt.sh
+              sudo ./init-letsencrypt.sh
             else
               echo "Les certificats SSL existent déjà."
             fi
 
             # Exécuter le déploiement
-            ./deploy.sh develop
+            sudo ./deploy.sh develop
           EOF
 
-      - name: Verify deployment with absolute paths
+      - name: Verify deployment with sudo
         run: |
           # Attendre que les services démarrent
           sleep 30
 
-          # Vérifier le statut des containers avec des chemins absolus
+          # Vérifier le statut des containers
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
             cd /home/ubuntu/apps/bulleurs-toulonnais/
 
             echo "Liste des conteneurs Docker:"
-            /usr/bin/docker ps
+            sudo docker ps
 
             echo "Logs Nginx:"
-            /usr/bin/docker-compose logs --tail=20 nginx
+            sudo docker-compose logs --tail=20 nginx
 
             echo "Logs Certbot:"
-            /usr/bin/docker-compose logs --tail=20 certbot
+            sudo docker-compose logs --tail=20 certbot
 
             echo "Test configuration Nginx:"
-            /usr/bin/docker-compose exec -T nginx nginx -t
+            sudo docker-compose exec -T nginx nginx -t
           EOF
 
       - name: Send success email
