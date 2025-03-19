@@ -1,3 +1,4 @@
+# Description: Fichier de configuration pour la construction de l'image Docker de l'API NestJs
 # Etape 1: Construction de l'application NestJs
 FROM node:22-alpine AS build
 

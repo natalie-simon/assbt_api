@@ -74,6 +74,7 @@ jobs:
             mkdir -p /home/ubuntu/apps/bulleurs-toulonnais/nginx/conf.d
             mkdir -p /home/ubuntu/apps/bulleurs-toulonnais/certbot/conf
             mkdir -p /home/ubuntu/apps/bulleurs-toulonnais/certbot/www
+            chmod -R 755 /home/ubuntu/apps/bulleurs-toulonnais/certbot
           EOF
 
       - name: Copy deployment files to EC2
@@ -85,15 +86,6 @@ jobs:
 
           # Copier le fichier de configuration Nginx
           scp -i ~/.ssh/id_rsa ./deploy/nginx/conf.d/default.conf ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/apps/bulleurs-toulonnais/nginx/conf.d/
-
-          # Remplacer l'adresse email dans le script init-letsencrypt.sh
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} << EOF
-            cd /home/ubuntu/apps/bulleurs-toulonnais/
-            sed -i "s/votre-email@example.com/${{ secrets.ADMIN_EMAIL }}/g" init-letsencrypt.sh
-
-            # Corriger le script pour la création de répertoires
-            sed -i 's/mkdir -p "$data_path\/conf\/live\/$domains"/mkdir -p "$data_path\/conf\/live\/$domain"/g' init-letsencrypt.sh
-          EOF
 
       - name: Create .env file on EC2
         run: |
@@ -137,14 +129,6 @@ jobs:
 
             # Nettoyer les conteneurs existants
             sudo docker-compose down
-
-            # Vérifier si les certificats SSL existent déjà
-            if [ ! -d "./certbot/conf/live/api-assbt-test.lesbulleurstoulonnais.fr" ]; then
-              echo "Les certificats SSL n'existent pas encore, lancement de l'initialisation..."
-              sudo ./init-letsencrypt.sh
-            else
-              echo "Les certificats SSL existent déjà."
-            fi
 
             # Exécuter le déploiement
             sudo ./deploy.sh develop

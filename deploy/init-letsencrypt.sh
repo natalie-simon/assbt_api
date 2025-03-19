@@ -3,8 +3,8 @@
 # Script pour initialiser les certificats Let's Encrypt
 
 # Variables
-domains=(api-assbt-test.lesbulleurstoulonnais.fr)
-email="ybah2201@gmail.com"  # Remplacez par votre email
+domain="api-assbt-test.lesbulleurstoulonnais.fr"
+email="ybah2201@gmail.com"  # Votre email est déjà configuré
 data_path="./certbot"
 rsa_key_size=4096
 staging=0  # Mettre à 1 pour tester (pas de limite de rate)
@@ -16,11 +16,11 @@ if [[ "$email" == "votre-email@example.com" ]]; then
 fi
 
 # Création des répertoires nécessaires
-sed -i 's/mkdir -p "$data_path\/conf\/live\/$domains"/mkdir -p "$data_path\/conf\/live\/$domain"/g' init-letsencrypt.sh
-sed -i 's/--force-renewal/-d $domain --force-renewal/g' init-letsencrypt.sh 2>/dev/null || echo "Pattern not found"
+mkdir -p "$data_path/conf/live/$domain"
+mkdir -p "$data_path/www"
 
 # Vérification si les certificats existent déjà
-if [ -d "$data_path/conf/live/$domains" ]; then
+if [ -d "$data_path/conf/live/$domain" ] && [ -f "$data_path/conf/live/$domain/fullchain.pem" ]; then
   read -p "Les certificats existent déjà. Voulez-vous les remplacer? (y/N) " decision
   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
     exit 0
@@ -30,18 +30,21 @@ fi
 # Création de la configuration SSL par défaut
 if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
   echo "Téléchargement des paramètres recommandés TLS..."
+  mkdir -p "$data_path/conf"
   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
+  chmod -R 755 "$data_path/conf"
 fi
 
 # Création d'un certificat temporaire pour Nginx
-for domain in "${domains[@]}"; do
-  echo "Création d'un certificat temporaire pour $domain..."
-  openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1 \
-    -keyout "$data_path/conf/live/$domain/privkey.pem" \
-    -out "$data_path/conf/live/$domain/fullchain.pem" \
-    -subj "/CN=$domain"
-done
+echo "Création d'un certificat temporaire pour $domain..."
+mkdir -p "$data_path/conf/live/$domain"
+openssl req -x509 -nodes -newkey rsa:$rsa_key_size -days 1 \
+  -keyout "$data_path/conf/live/$domain/privkey.pem" \
+  -out "$data_path/conf/live/$domain/fullchain.pem" \
+  -subj "/CN=$domain"
+
+chmod -R 755 "$data_path/conf/live"
 
 # Démarrage de Nginx
 echo "Démarrage du conteneur Nginx..."
@@ -56,30 +59,28 @@ docker-compose stop certbot
 docker-compose rm -f certbot
 
 # Exécution de Certbot
-for domain in "${domains[@]}"; do
-  echo "Demande de certificat pour $domain..."
+echo "Demande de certificat pour $domain..."
 
-  staging_arg=""
-  if [ $staging -eq 1 ]; then
-    staging_arg="--staging"
-  fi
+staging_arg=""
+if [ $staging -eq 1 ]; then
+  staging_arg="--staging"
+fi
 
-  docker-compose run --rm certbot certonly --webroot \
-    --webroot-path=/var/www/certbot \
-    $staging_arg \
-    --email $email \
-    --rsa-key-size $rsa_key_size \
-    --agree-tos \
-    --no-eff-email \
-    --force-renewal \
-    -d $domain
+docker-compose run --rm certbot certonly --webroot \
+  --webroot-path=/var/www/certbot \
+  $staging_arg \
+  --email $email \
+  --rsa-key-size $rsa_key_size \
+  --agree-tos \
+  --no-eff-email \
+  --force-renewal \
+  -d $domain
 
-  # Vérification du succès
-  if [ $? -ne 0 ]; then
-    echo "Échec lors de la demande de certificat pour $domain"
-    exit 1
-  fi
-done
+# Vérification du succès
+if [ $? -ne 0 ]; then
+  echo "Échec lors de la demande de certificat pour $domain"
+  exit 1
+fi
 
 echo "Redémarrage de Nginx avec les nouveaux certificats..."
 docker-compose exec nginx nginx -s reload
