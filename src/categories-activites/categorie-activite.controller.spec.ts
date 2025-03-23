@@ -5,11 +5,15 @@ import { CategorieActiviteService } from './services/categorie-activite.service'
 import { CategorieActivite } from '../database/core/categorie_activite.entity';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import {
-  //mockCategoriesActivite,
   mockCategorieActivite,
   mockCreateCategorieActiviteDto,
 } from './mocks/categorie-activite.mock';
 import { mockUpload } from '../fichiers/mocks/upload.service.mock';
+import { CategorieActiviteController } from './categorie-activite.controller';
+import { FichierService } from '../fichiers/services/fichier.service';
+import { CreateCategorieActiviteDto } from './dtos/create-categorie-activite.dto';
+import { Fichier } from '../database/core/fichier.entity';
+import { mockUploadedFile } from '../fichiers/mocks/uploads.mock';
 
 const mockLogger = {
   log: jest.fn(),
@@ -146,5 +150,87 @@ describe('CategorieActiviteService', () => {
       expect(mockLogger.log).toHaveBeenCalled();
       expect(result).toEqual(newCategorieActivite);
     });
+  });
+});
+
+describe('CategorieActiviteController', () => {
+  let controller: CategorieActiviteController;
+  let categorieActiviteService: CategorieActiviteService;
+  let fichierService: FichierService;
+
+  const mockCategorieActiviteService = {
+    createCategorieActivite: jest.fn(),
+  };
+
+  const mockFichierService = {
+    uploadFile: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [CategorieActiviteController],
+      providers: [
+        {
+          provide: CategorieActiviteService,
+          useValue: mockCategorieActiviteService,
+        },
+        {
+          provide: FichierService,
+          useValue: mockFichierService,
+        },
+      ],
+    }).compile();
+
+    controller = module.get<CategorieActiviteController>(CategorieActiviteController);
+    categorieActiviteService = module.get<CategorieActiviteService>(CategorieActiviteService);
+    fichierService = module.get<FichierService>(FichierService);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  describe('createCategorieActivite', () => {
+    it('should create a new category with image', async () => {
+      mockFichierService.uploadFile.mockResolvedValue(mockUpload);
+      mockCategorieActiviteService.createCategorieActivite.mockResolvedValue({
+        ...mockCategorieActivite,
+        image: mockUpload,
+      });
+
+      const result = await controller.createCategorieActivite(mockCreateCategorieActiviteDto, mockUploadedFile);
+
+      expect(mockFichierService.uploadFile).toHaveBeenCalledWith(mockUploadedFile);
+      expect(mockCategorieActiviteService.createCategorieActivite).toHaveBeenCalledWith(
+        mockCreateCategorieActiviteDto,
+        mockUpload,
+      );
+      expect(result).toEqual({
+        ...mockCategorieActivite,
+        image: mockUpload,
+      });
+    });
+
+    it('should create a new category without image', async () => {
+      mockCategorieActiviteService.createCategorieActivite.mockResolvedValue(mockCategorieActivite);
+
+      const result = await controller.createCategorieActivite(mockCreateCategorieActiviteDto, null);
+
+      expect(mockCategorieActiviteService.createCategorieActivite).toHaveBeenCalledWith(
+        mockCreateCategorieActiviteDto,
+        null,
+      );
+      expect(result).toEqual(mockCategorieActivite);
+    });
+
+    /*it('should handle upload errors', async () => {
+      mockFichierService.uploadFile.mockRejectedValue(new Error('Upload failed'));
+
+      await expect(controller.createCategorieActivite(mockCreateCategorieActiviteDto, mockUploadedFile)).rejects.toThrow(
+        'Upload failed',
+      );
+      expect(mockFichierService.uploadFile).toHaveBeenCalledWith(mockUploadedFile);
+      expect(mockCategorieActiviteService.createCategorieActivite).not.toHaveBeenCalled();
+    });*/
   });
 });

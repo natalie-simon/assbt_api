@@ -50,7 +50,7 @@ export class ArticlesService {
     return new ArticleStandardDto({
       ...savedArticle,
       image: {
-        url: image?.url,
+        url: image?.url || null,
       },
       redacteur: {
         email: user.email,

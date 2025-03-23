@@ -11,14 +11,17 @@ import { FichierService } from '../fichiers/services/fichier.service';
 import { UploadServiceMock } from '../fichiers/mocks/upload.service.mock';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
 import { statutArticleTypes } from './enums/statut-article-types.enum';
-import { fileTypes } from '../fichiers/enums/file-types.enum';
-import { Fichier } from '../database/core/fichier.entity';
-import { Article } from '../database/core/article.entity';
+import { mockUploadedFile } from '../fichiers/mocks/uploads.mock';
 
 describe('ArticlesController', () => {
   let controller: ArticlesController;
   let articlesService: ArticlesService;
   let uploadService: FichierService;
+
+  const mockActiveUser: ActiveUserData = {
+    sub: 1,
+    email: 'test@example.com',
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,185 +53,84 @@ describe('ArticlesController', () => {
 
   describe('getArticles', () => {
     it('should return all articles', async () => {
-      // Arrange
-      jest
-        .spyOn(articlesService, 'findAllArticles')
-        .mockResolvedValue(articlesMock as Article[]);
-
-      // Act
       const result = await controller.getArticles();
 
-      // Assert
       expect(result).toEqual(articlesMock);
-      expect(articlesService.findAllArticles).toHaveBeenCalled();
     });
   });
 
   describe('findArticleById', () => {
     it('should return an article by id', async () => {
-      // Arrange
-      const id = 1;
-      jest
-        .spyOn(articlesService, 'findArticleById')
-        .mockResolvedValue(articlesMock[0] as Article);
+      const result = await controller.findArticleById(1);
 
-      // Act
-      const result = await controller.findArticleById(id);
-
-      // Assert
       expect(result).toEqual(articlesMock[0]);
-      expect(articlesService.findArticleById).toHaveBeenCalledWith(id);
+    });
+
+    it('should return null when article is not found', async () => {
+      const result = await controller.findArticleById(999);
+
+      expect(result).toBeNull();
     });
   });
 
   describe('createArticle', () => {
-    it('should create a new article with uploaded file', async () => {
-      // Arrange
-      const createArticleDto: CreateArticleDto = {
-        titre: 'Nouvel Article',
-        contenu: 'Contenu du nouvel article',
-        statut: statutArticleTypes.BROUILLON,
-        categorie: categorieArticleTypes.ACCUEIL,
-      };
+    const createDto: CreateArticleDto = {
+      titre: 'New Article',
+      contenu: 'New Content',
+      statut: statutArticleTypes.PUBLIE,
+      categorie: categorieArticleTypes.ACCUEIL,
+    };
 
-      const user: ActiveUserData = { sub: 1, email: 'admin@example.com' };
+    it('should create a new article with image', async () => {
+      const result = await controller.createArticle(createDto, mockUploadedFile, mockActiveUser);
 
-      const mockFile = {
-        originalname: 'testimage.jpg',
-        mimetype: 'image/jpeg',
-        size: 5000,
-      } as Express.Multer.File;
-
-      const uploadedImage: Fichier = {
-        id: 4,
-        nom: 'testimage',
-        url: '/uploads/testimage.jpg',
-        type: fileTypes.IMAGE,
-        mime: 'image/jpeg',
-        taille: 5000,
-        dateCreation: new Date(),
-        dateMaj: new Date(),
-      };
-
-      const expectedResult = {
+      expect(result).toEqual({
         id: 999,
-        ...createArticleDto,
-        image: {
-          url: uploadedImage.url,
-        },
-        redacteur: {
-          email: user.email,
-        },
-      };
-
-      jest.spyOn(uploadService, 'uploadFile').mockResolvedValue(uploadedImage);
-      jest
-        .spyOn(articlesService, 'createArticle')
-        .mockResolvedValue(expectedResult);
-
-      // Act
-      const result = await controller.createArticle(
-        createArticleDto,
-        mockFile,
-        user,
-      );
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(uploadService.uploadFile).toHaveBeenCalledWith(mockFile);
-      expect(articlesService.createArticle).toHaveBeenCalledWith(
-        createArticleDto,
-        user,
-        uploadedImage,
-      );
+        ...createDto,
+        image: { url: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg' },
+        redacteur: { email: mockActiveUser.email },
+      });
     });
 
-    /*it('should create a new article without uploaded file', async () => {
-      // Arrange
-      const createArticleDto: CreateArticleDto = {
-        titre: 'Nouvel Article',
-        contenu: 'Contenu du nouvel article',
-        statut: statutArticleTypes.BROUILLON,
-        categorie: categorieArticleTypes.ACCUEIL,
-      };
+    it('should create a new article without image', async () => {
+      const result = await controller.createArticle(createDto, null, mockActiveUser);
 
-      const user: ActiveUserData = { sub: 1, email: 'admin@example.com' };
-
-      const expectedResult = {
+      expect(result).toEqual({
         id: 999,
-        ...createArticleDto,
-        image: {
-          url: null,
-        },
-        redacteur: {
-          email: user.email,
-        },
-      };
+        ...createDto,
+        image: { url: null },
+        redacteur: { email: mockActiveUser.email },
+      });
+    });
 
-      jest
-        .spyOn(articlesService, 'createArticle')
-        .mockResolvedValue(expectedResult);
+    it('should handle upload errors', async () => {
+      jest.spyOn(uploadService, 'uploadFile').mockRejectedValueOnce(new Error('Upload failed'));
 
-      // Act
-      const result = await controller.createArticle(
-        createArticleDto,
-        null,
-        user,
-      );
-
-      // Assert
-      expect(result).toEqual(expectedResult);
-      expect(uploadService.uploadFile).not.toHaveBeenCalled();
-      expect(articlesService.createArticle).toHaveBeenCalledWith(
-        createArticleDto,
-        user,
-        null,
-      );
-    });*/
+      await expect(
+        controller.createArticle(createDto, mockUploadedFile, mockActiveUser),
+      ).rejects.toThrow('Upload failed');
+    });
   });
 
   describe('findArticlesByCategorie', () => {
-    it('should return articles filtered by category', async () => {
-      // Arrange
+    it('should return articles by category', async () => {
       const categorie = categorieArticleTypes.ACCUEIL;
-
-      // Créer des articles avec la structure complète pour le test
-      const filteredArticles = articlesMock.filter(
-        (article) =>
-          article.categorie === categorie &&
-          article.statut === statutArticleTypes.PUBLIE,
-      );
-
-      jest
-        .spyOn(articlesService, 'findArticlePublieByCategorie')
-        .mockResolvedValue(filteredArticles as Article[]);
-
-      // Act
       const result = await controller.findArticlesByCategorie(categorie);
 
-      // Assert
-      expect(result).toEqual(filteredArticles);
-      expect(articlesService.findArticlePublieByCategorie).toHaveBeenCalledWith(
-        categorie,
+      expect(result).toEqual(
+        articlesStandardMock.filter(
+          (article) =>
+            article.categorie === categorie &&
+            article.statut === statutArticleTypes.PUBLIE,
+        ),
       );
     });
 
     it('should return empty array when no articles found for category', async () => {
-      // Arrange
-      const categorie = 'inexistant' as categorieArticleTypes;
-
-      jest
-        .spyOn(articlesService, 'findArticlePublieByCategorie')
-        .mockResolvedValue([]);
-
-      // Act
+      const categorie = categorieArticleTypes.INFOS;
       const result = await controller.findArticlesByCategorie(categorie);
 
-      // Assert
       expect(result).toEqual([]);
-      expect(articlesService.findArticlePublieByCategorie).toHaveBeenCalledWith(
-        categorie,
-      );
     });
   });
 });

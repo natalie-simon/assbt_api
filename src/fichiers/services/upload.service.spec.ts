@@ -101,7 +101,7 @@ describe('UploadService', () => {
         url: `https://${mockCloudfrontUrl}/${mockFileName}`,
         type: fileTypes.IMAGE,
         mime: file.mimetype,
-        taille: file.size,
+        size: file.size,
       });
       expect(uploadsRepository.save).toHaveBeenCalledWith(mockUpload);
       expect(result).toEqual(mockUpload);

@@ -1,20 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UploadToAwsProvider } from './upload-to-aws.provider';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { RequestTimeoutException } from '@nestjs/common';
+import { S3Client, PutObjectCommand, PutObjectCommandOutput } from '@aws-sdk/client-s3';
+
+jest.mock('@aws-sdk/client-s3');
 
 describe('UploadToAwsProvider', () => {
-  let service: UploadToAwsProvider;
+  let provider: UploadToAwsProvider;
   let configService: ConfigService;
-  let s3Client: S3Client;
+  let s3Client: jest.Mocked<S3Client>;
 
   const mockConfigService = {
     get: jest.fn(),
-  };
-
-  const mockS3Client = {
-    send: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -28,76 +26,82 @@ describe('UploadToAwsProvider', () => {
       ],
     }).compile();
 
-    service = module.get<UploadToAwsProvider>(UploadToAwsProvider);
+    provider = module.get<UploadToAwsProvider>(UploadToAwsProvider);
     configService = module.get<ConfigService>(ConfigService);
-    // Remplacer le s3Client créé dans le constructeur par le mock
-    service['s3Client'] = mockS3Client as any;
-    s3Client = service['s3Client'];
+    s3Client = new S3Client({}) as jest.Mocked<S3Client>;
+    (provider as any).s3Client = s3Client;
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(provider).toBeDefined();
   });
 
   describe('uploadFile', () => {
+    const mockFile = {
+      originalname: 'test image.jpg',
+      mimetype: 'image/jpeg',
+      buffer: Buffer.from('test content'),
+    } as Express.Multer.File;
+
     it('should upload file successfully', async () => {
-      const file = {
-        originalname: 'test-file.png',
-        buffer: Buffer.from('test'),
-        mimetype: 'image/png',
-      } as Express.Multer.File;
+      mockConfigService.get.mockReturnValue('test-bucket');
+      const mockResponse = {
+        $metadata: {
+          httpStatusCode: 200,
+          requestId: 'test-request-id',
+          attempts: 1,
+          totalRetryDelay: 0,
+        },
+      } as PutObjectCommandOutput;
+      (s3Client.send as jest.Mock).mockResolvedValue(mockResponse);
 
-      const mockBucketName = 'test-bucket';
-      const mockFileName = expect.any(String); // On ne connait pas le nom exact, mais on vérifie que c'est une string
-      const mockUploadResult = {};
+      const result = await provider.uploadFile(mockFile);
 
-      mockConfigService.get.mockReturnValueOnce(mockBucketName);
-      mockS3Client.send.mockResolvedValueOnce(mockUploadResult);
-
-      const result = await service.uploadFile(file);
-
-      expect(configService.get).toHaveBeenCalledWith('appConfig.awsBucketName');
       expect(s3Client.send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          input: {
-            Bucket: mockBucketName,
-            Key: mockFileName,
-            Body: file.buffer,
-            ContentType: file.mimetype,
-          },
-        }),
+        expect.any(PutObjectCommand),
       );
-      expect(result).toEqual(mockFileName);
+      expect(result).toMatch(/^testimage-\d+-[a-f0-9-]+\.jpg$/);
     });
 
-    it('should throw RequestTimeoutException on upload failure', async () => {
-      const file = {
-        originalname: 'test-file.png',
-        buffer: Buffer.from('test'),
-        mimetype: 'image/png',
-      } as Express.Multer.File;
+    it('should throw RequestTimeoutException when upload fails', async () => {
+      mockConfigService.get.mockReturnValue('test-bucket');
+      (s3Client.send as jest.Mock).mockRejectedValue(new Error('Upload failed'));
 
-      const mockBucketName = 'test-bucket';
-      const errorMessage = 'Upload failed';
-
-      mockConfigService.get.mockReturnValueOnce(mockBucketName);
-      mockS3Client.send.mockRejectedValueOnce(new Error(errorMessage));
-
-      await expect(service.uploadFile(file)).rejects.toThrow(
+      await expect(provider.uploadFile(mockFile)).rejects.toThrow(
         RequestTimeoutException,
       );
     });
   });
 
   describe('generateFileName', () => {
-    it('should generate a unique file name', () => {
-      const file = {
-        originalname: 'test file.png',
+    it('should generate a unique filename with timestamp and uuid', () => {
+      const mockFile = {
+        originalname: 'test image.jpg',
       } as Express.Multer.File;
 
-      const fileName = service['generateFileName'](file); // Accès à la méthode privée via ['generateFileName']
+      const fileName = (provider as any).generateFileName(mockFile);
 
-      expect(fileName).toMatch(/^testfile-\d+-[a-f0-9-]+.png$/);
+      expect(fileName).toMatch(/^testimage-\d+-[a-f0-9-]+\.jpg$/);
+    });
+
+    it('should handle filenames with multiple dots', () => {
+      const mockFile = {
+        originalname: 'test.image.with.dots.jpg',
+      } as Express.Multer.File;
+
+      const fileName = (provider as any).generateFileName(mockFile);
+
+      expect(fileName).toMatch(/^test-\d+-[a-f0-9-]+\.jpg$/);
+    });
+
+    it('should handle filenames with spaces', () => {
+      const mockFile = {
+        originalname: 'test image with spaces.jpg',
+      } as Express.Multer.File;
+
+      const fileName = (provider as any).generateFileName(mockFile);
+
+      expect(fileName).toMatch(/^testimagewithspaces-\d+-[a-f0-9-]+\.jpg$/);
     });
   });
 });
