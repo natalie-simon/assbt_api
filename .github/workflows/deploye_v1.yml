@@ -21,6 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run security audit
+        run: |
+          npm audit
+          npm audit fix --force
+
       - name: Run tests
         run: npm run test
 
@@ -41,14 +46,24 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.ESG_EC2_PUBLIC_IP }} << 'EOF'
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -i ~/.ssh/id_rsa ubuntu@${{ secrets.ESG_EC2_PUBLIC_IP }} << 'EOF'
+            # Mise à jour du système
+            sudo apt update
+            sudo apt upgrade -y
+            
+            # Nettoyage des paquets obsolètes
+            sudo apt autoremove -y
+            sudo apt clean
+            
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Charge NVM
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
             export PATH=$NVM_DIR/versions/node/v22.13.1/bin:$PATH
+            
             cd ~/assbt-api/
             git pull origin develop
             npm install
+            npm audit fix --force
             npm run build
             npm run migration:generate
             npm run migration:run

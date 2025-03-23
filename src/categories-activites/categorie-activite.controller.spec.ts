@@ -9,7 +9,7 @@ import {
   mockCategorieActivite,
   mockCreateCategorieActiviteDto,
 } from './mocks/categorie-activite.mock';
-import { mockUpload } from '../uploads/mocks/upload.service.mock';
+import { mockUpload } from '../fichiers/mocks/upload.service.mock';
 
 const mockLogger = {
   log: jest.fn(),

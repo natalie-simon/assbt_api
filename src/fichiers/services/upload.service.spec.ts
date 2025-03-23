@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UploadService } from './fichier.service';
+import { FichierService } from './fichier.service';
 import { UploadToAwsProvider } from './upload-to-aws.provider';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
-import { Upload } from '../../database/core/fichier.entity';
+import { Fichier } from '../../database/core/fichier.entity';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { fileTypes } from '../enums/file-types.enum';
 
 describe('UploadService', () => {
-  let service: UploadService;
+  let service: FichierService;
   let uploadToAwsProvider: UploadToAwsProvider;
   let configService: ConfigService;
-  let uploadsRepository: Repository<Upload>;
+  let uploadsRepository: Repository<Fichier>;
 
   const mockUploadToAwsProvider = {
     uploadFile: jest.fn(),
@@ -30,7 +30,7 @@ describe('UploadService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UploadService,
+        FichierService,
         {
           provide: UploadToAwsProvider,
           useValue: mockUploadToAwsProvider,
@@ -40,17 +40,17 @@ describe('UploadService', () => {
           useValue: mockConfigService,
         },
         {
-          provide: getRepositoryToken(Upload),
+          provide: getRepositoryToken(Fichier),
           useValue: mockUploadsRepository,
         },
       ],
     }).compile();
 
-    service = module.get<UploadService>(UploadService);
+    service = module.get<FichierService>(FichierService);
     uploadToAwsProvider = module.get<UploadToAwsProvider>(UploadToAwsProvider);
     configService = module.get<ConfigService>(ConfigService);
-    uploadsRepository = module.get<Repository<Upload>>(
-      getRepositoryToken(Upload),
+    uploadsRepository = module.get<Repository<Fichier>>(
+      getRepositoryToken(Fichier),
     );
   });
 
@@ -82,8 +82,8 @@ describe('UploadService', () => {
         url: `https://${mockCloudfrontUrl}/${mockFileName}`,
         type: fileTypes.IMAGE,
         mime: file.mimetype,
-        size: file.size,
-      } as Upload;
+        taille: file.size,
+      } as Fichier;
 
       mockUploadToAwsProvider.uploadFile.mockResolvedValue(mockFileName);
       mockConfigService.get.mockReturnValue(mockCloudfrontUrl);
@@ -101,7 +101,7 @@ describe('UploadService', () => {
         url: `https://${mockCloudfrontUrl}/${mockFileName}`,
         type: fileTypes.IMAGE,
         mime: file.mimetype,
-        size: file.size,
+        taille: file.size,
       });
       expect(uploadsRepository.save).toHaveBeenCalledWith(mockUpload);
       expect(result).toEqual(mockUpload);

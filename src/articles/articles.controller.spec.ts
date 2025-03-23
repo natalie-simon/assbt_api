@@ -7,18 +7,18 @@ import { MembresServiceMock } from '../membres/mocks/membres.service.mock';
 import { articlesMock, articlesStandardMock } from './mocks/articles.mock';
 import { CreateArticleDto } from './dtos/create-article.dto';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
-import { UploadService } from '../uploads/services/fichier.service';
-import { UploadServiceMock } from '../uploads/mocks/upload.service.mock';
+import { FichierService } from '../fichiers/services/fichier.service';
+import { UploadServiceMock } from '../fichiers/mocks/upload.service.mock';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
 import { statutArticleTypes } from './enums/statut-article-types.enum';
-import { fileTypes } from '../uploads/enums/file-types.enum';
-import { Upload } from '../database/core/fichier.entity';
+import { fileTypes } from '../fichiers/enums/file-types.enum';
+import { Fichier } from '../database/core/fichier.entity';
 import { Article } from '../database/core/article.entity';
 
 describe('ArticlesController', () => {
   let controller: ArticlesController;
   let articlesService: ArticlesService;
-  let uploadService: UploadService;
+  let uploadService: FichierService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -33,7 +33,7 @@ describe('ArticlesController', () => {
           useClass: MembresServiceMock,
         },
         {
-          provide: UploadService,
+          provide: FichierService,
           useClass: UploadServiceMock,
         },
       ],
@@ -41,7 +41,7 @@ describe('ArticlesController', () => {
 
     controller = module.get<ArticlesController>(ArticlesController);
     articlesService = module.get<ArticlesService>(ArticlesService);
-    uploadService = module.get<UploadService>(UploadService);
+    uploadService = module.get<FichierService>(FichierService);
   });
 
   it('should be defined', () => {
@@ -99,15 +99,15 @@ describe('ArticlesController', () => {
         size: 5000,
       } as Express.Multer.File;
 
-      const uploadedImage: Upload = {
+      const uploadedImage: Fichier = {
         id: 4,
         nom: 'testimage',
         url: '/uploads/testimage.jpg',
         type: fileTypes.IMAGE,
         mime: 'image/jpeg',
-        size: 5000,
-        createDate: new Date(),
-        updateDate: new Date(),
+        taille: 5000,
+        dateCreation: new Date(),
+        dateMaj: new Date(),
       };
 
       const expectedResult = {

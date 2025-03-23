@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UploadsController } from './uploads.controller';
-import { UploadService } from './services/fichier.service';
+import { FichierService } from './services/fichier.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiHeaders, ApiOperation } from '@nestjs/swagger';
@@ -8,7 +8,7 @@ import { Express } from 'express';
 
 describe('UploadsController', () => {
   let controller: UploadsController;
-  let uploadService: UploadService;
+  let fichierService: FichierService;
 
   const mockUploadService = {
     uploadFile: jest.fn(),
@@ -19,14 +19,14 @@ describe('UploadsController', () => {
       controllers: [UploadsController],
       providers: [
         {
-          provide: UploadService,
+          provide: FichierService,
           useValue: mockUploadService,
         },
       ],
     }).compile();
 
     controller = module.get<UploadsController>(UploadsController);
-    uploadService = module.get<UploadService>(UploadService);
+    fichierService = module.get<FichierService>(FichierService);
   });
 
   it('should be defined', () => {
@@ -43,7 +43,7 @@ describe('UploadsController', () => {
 
       controller.uploadFile(mockFile);
 
-      expect(uploadService.uploadFile).toHaveBeenCalledWith(mockFile);
+      expect(fichierService.uploadFile).toHaveBeenCalledWith(mockFile);
     });
   });
 });
