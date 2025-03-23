@@ -1,7 +1,7 @@
 import { Article } from '../../database/core/article.entity';
 import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../enums/statut-article-types.enum';
-import { fileTypes } from '../../uploads/enums/file-types.enum';
+import { fileTypes } from '../../fichiers/enums/file-types.enum';
 
 /**
  * Mock de données d'articles pour les tests

@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { Upload } from './upload.entity';
+import { Fichier } from './fichier.entity';
 import { Membre } from './membre.entity';
 
 /**
@@ -38,8 +38,8 @@ export class Profil {
   @Column({ type: 'boolean', default: false })
   communication_sms: boolean;
 
-  @ManyToOne(() => Upload, { nullable: true })
-  avatar: Upload;
+  @ManyToOne(() => Fichier, { nullable: true })
+  avatar: Fichier;
 
   @OneToOne(() => Membre, (membre) => membre.profil)
   membre: Membre;

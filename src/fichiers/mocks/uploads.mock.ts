@@ -1,4 +1,4 @@
-import { Upload } from '../../database/core/upload.entity';
+import { Fichier } from '../../database/core/fichier.entity';
 
 
 
@@ -21,15 +21,15 @@ export const mockUploadedFile: Express.Multer.File = {
 /**
  * Mock d'une entité Upload
  */
-export const mockUpload: Upload = {
+export const mockUpload: Fichier = {
   id: 1,
   nom: 'test-image.jpg',
   type: 'image/jpeg',
-  size: 1024,
+  taille: 1024,
   mime: 'image/jpeg',
   url: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg',
-  createDate: new Date(),
-  updateDate: new Date(),
+  dateCreation: new Date(),
+  dateMaj: new Date(),
 };
 
 /**

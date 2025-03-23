@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 //import { ProfilsService } from './services/profils.service';
 //import { Profil } from '../database/core/profil.entity';
 import { MembresModule } from '../membres/membres.module';
-import { UploadService } from '../uploads/services/upload.service';
-import { UploadToAwsProvider } from '../uploads/services/upload-to-aws.provider';
-import { Upload } from '../database/core/upload.entity';
+import { FichierService } from '../fichiers/services/fichier.service';
+import { UploadToAwsProvider } from '../fichiers/services/upload-to-aws.provider';
+import { Fichier } from '../database/core/fichier.entity';
 

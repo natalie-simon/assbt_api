@@ -14,8 +14,8 @@ import {
   ApiHeaders,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadService } from '../uploads/services/upload.service';
-import { Upload } from '../database/core/upload.entity';
+import { FichierService } from '../fichiers/services/fichier.service';
+import { Fichier } from '../database/core/fichier.entity';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { RoleTypes } from '../auth/enums/role-types.enum';
@@ -35,7 +35,7 @@ export class CategorieActiviteController {
    */
   constructor(
     private readonly categorieActiviteService: CategorieActiviteService,
-    private readonly uploadService: UploadService,
+    private readonly fichierService: FichierService,
   ) {}
 
   /**
@@ -61,9 +61,9 @@ export class CategorieActiviteController {
     @Body() createCategorieActiviteDto: CreateCategorieActiviteDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    let image = null as Upload | null;
+    let image = null as Fichier | null;
     if (file) {
-      image = await this.uploadService.uploadFile(file);
+      image = await this.fichierService.uploadFile(file);
     }
     return this.categorieActiviteService.createCategorieActivite(
       createCategorieActiviteDto,

@@ -4,7 +4,7 @@ import {
 } from './categorie-activite.mock';
 import { CategorieActivite } from '../../database/core/categorie_activite.entity';
 import { CreateCategorieActiviteDto } from '../../categories-activites/dtos/create-categorie-activite.dto';
-import { Upload } from '../../database/core/upload.entity';
+import { Fichier } from '../../database/core/fichier.entity';
 
 /**
  * Service mock pour les catégories d'activités
@@ -28,7 +28,7 @@ export class CategorieActiviteServiceMock {
    */
   createCategorieActivite(
     createCategorieActiviteDto: CreateCategorieActiviteDto,
-    image: Upload | null,
+    image: Fichier | null,
   ): Promise<CategorieActivite> {
     return Promise.resolve({
       ...mockCategorieActivite,

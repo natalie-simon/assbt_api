@@ -24,9 +24,9 @@ import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { RoleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadService } from '../uploads/services/upload.service';
+import { FichierService } from '../fichiers/services/fichier.service';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
-import { Upload } from '../database/core/upload.entity';
+import { Fichier } from '../database/core/fichier.entity';
 import { ConditionalAuth } from '../auth/decorators/conditional-auth.decorator';
 
 /**
@@ -42,7 +42,7 @@ export class ArticlesController {
    */
   constructor(
     private readonly articlesService: ArticlesService,
-    private readonly uploadService: UploadService,
+    private readonly fichierService: FichierService,
   ) {}
 
   /**
@@ -97,9 +97,9 @@ export class ArticlesController {
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
   ) {
-    let image = null as Upload | null;
+    let image = null as Fichier | null;
     if (file) {
-      image = await this.uploadService.uploadFile(file);
+      image = await this.fichierService.uploadFile(file);
     }
     return this.articlesService.createArticle(createArticleDto, user, image);
   }

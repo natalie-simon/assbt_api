@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Upload } from './upload.entity';
+import { Fichier } from './fichier.entity';
 
 /**
  * Entité CategorieActivite
@@ -83,7 +83,7 @@ export class CategorieActivite {
    * @type {boolean}
    * @memberof CategorieActivite
    */
-  @ManyToOne(() => Upload, { nullable: true })
+  @ManyToOne(() => Fichier, { nullable: true })
   @JoinColumn()
-  image: Upload;
+  image: Fichier;
 }

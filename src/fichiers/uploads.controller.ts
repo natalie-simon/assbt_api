@@ -2,7 +2,7 @@ import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiHeaders, ApiOperation } from '@nestjs/swagger';
 import { Express } from 'express';
-import { UploadService } from './services/upload.service';
+import { FichierService } from './services/fichier.service';
 
 /**
  * Gestion du controller des uploads
@@ -11,9 +11,9 @@ import { UploadService } from './services/upload.service';
 export class UploadsController {
   /**
    * Constructeur
-   * @param uploadService
+   * @param fichierService
    */
-  constructor(private uploadService: UploadService) {}
+  constructor(private fichierService: FichierService) {}
   /**
    * Téléchargement du fichier et mise à jour de la Bdd
    * @param file
@@ -26,6 +26,6 @@ export class UploadsController {
   ])
   @ApiOperation({ summary: 'Téléchargement de ficher sur le serveur S3 Aws' })
   public uploadFile(@UploadedFile() file:Express.Multer.File){
-    this.uploadService.uploadFile(file);
+    this.fichierService.uploadFile(file);
   }
 }
