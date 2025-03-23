@@ -1,0 +1,79 @@
+name: Deploy to AWS EC2 ESG
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: aws_ns_gmail
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ESG_EC2_SSH_PRIVATE }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.ESG_EC2_PUBLIC_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.ESG_EC2_PUBLIC_IP }} << 'EOF'
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Charge NVM
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            export PATH=$NVM_DIR/versions/node/v22.13.1/bin:$PATH
+            cd ~/assbt-api/
+            git pull origin develop
+            npm install
+            npm run build
+            npm run migration:generate
+            npm run migration:run
+            pm2 restart all
+          EOF
+      - name: Send success email
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: ${{secrets.SMTP_ADRESS}}
+          server_port: ${{secrets.SMTP_PORT}}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Déploiement réussi pour le moter API sur AWS EC2 NSG"
+          body: "Le déploiement de l'API sur AWS EC2 NSG a été effectué avec succès."
+          to: ybah2201@gmail.com
+          from: ybah2201@gmail.com
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: ${{secrets.SMTP_ADRESS}}
+          server_port: ${{secrets.SMTP_PORT}}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Echec de déploiement pour le moter API sur AWS EC2"
+          body: "Le déploiement de l'API sur AWS EC2 a échoué."
+          to: ybah2201@gmail.com
+          from: ybah2201@gmail.com

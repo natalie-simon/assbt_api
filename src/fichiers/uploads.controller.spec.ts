@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UploadsController } from './uploads.controller';
-import { UploadService } from './services/upload.service';
+import { UploadService } from './services/fichier.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiHeaders, ApiOperation } from '@nestjs/swagger';

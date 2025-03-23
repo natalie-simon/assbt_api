@@ -1,6 +1,19 @@
 #!/bin/bash
 
 # Script pour initialiser les certificats Let's Encrypt
+set -e
+
+# Vérifier si Docker est installé
+if ! command -v docker &> /dev/null; then
+  echo "Docker n'est pas installé. Veuillez installer Docker d'abord."
+  exit 1
+fi
+
+# Vérifier si Docker Compose est installé
+if ! command -v docker-compose &> /dev/null; then
+  echo "Docker Compose n'est pas installé. Veuillez installer Docker Compose d'abord."
+  exit 1
+fi
 
 # Variables
 domain="api-assbt-test.lesbulleurstoulonnais.fr"

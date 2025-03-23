@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UploadService } from './upload.service';
+import { UploadService } from './fichier.service';
 import { UploadToAwsProvider } from './upload-to-aws.provider';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
-import { Upload } from '../../database/core/upload.entity';
+import { Upload } from '../../database/core/fichier.entity';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { fileTypes } from '../enums/file-types.enum';

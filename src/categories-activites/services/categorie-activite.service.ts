@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CategorieActivite } from '../../database/core/categorie_activite.entity';
 import { Repository } from 'typeorm';
 import { CreateCategorieActiviteDto } from '../dtos/create-categorie-activite.dto';
-import { Upload } from '../../database/core/upload.entity';
+import { Fichier } from '../../database/core/fichier.entity';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 /**
@@ -29,7 +29,7 @@ export class CategorieActiviteService {
    */
   public async createCategorieActivite(
     createCategorieActiviteDto: CreateCategorieActiviteDto,
-    image: Upload | null,
+    image: Fichier | null,
   ) {
     const newCategorieActivite = this.categorieActiviteRepository.create({
       ...createCategorieActiviteDto,

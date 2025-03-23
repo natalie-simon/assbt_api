@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateArticleDto } from '../dtos/create-article.dto';
 import { MembresService } from '../../membres/services/membres.service';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
-import { Upload } from '../../database/core/upload.entity';
+import { Fichier } from '../../database/core/fichier.entity';
 import { ArticleStandardDto } from '../dtos/article-standard.dto';
 import { categorieArticleTypes } from '../enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../enums/statut-article-types.enum';
@@ -35,7 +35,7 @@ export class ArticlesService {
   public async createArticle(
     createArticleDto: CreateArticleDto,
     activeUser: ActiveUserData,
-    image: Upload | null,
+    image: Fichier | null,
   ) {
 
     let user = await this.membresService.findUserById(activeUser['sub']);

@@ -1,4 +1,4 @@
-import { fileTypes } from '../../uploads/enums/file-types.enum';
+import { fileTypes } from '../../fichiers/enums/file-types.enum';
 import {
   Column,
   CreateDateColumn,
@@ -11,7 +11,7 @@ import {
  * Entité définissant la table upload
  */
 @Entity()
-export class Upload {
+export class Fichier {
 
   /**
    * Identifiant de l'upload
@@ -55,11 +55,11 @@ export class Upload {
     length: 1024,
     nullable: false,
   })
-  size: number;
+  taille: number;
 
   @CreateDateColumn()
-  createDate: Date;
+  dateCreation: Date;
 
   @UpdateDateColumn()
-  updateDate: Date;
+  dateMaj: Date;
 }

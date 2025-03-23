@@ -7,12 +7,12 @@ import { MembresServiceMock } from '../membres/mocks/membres.service.mock';
 import { articlesMock, articlesStandardMock } from './mocks/articles.mock';
 import { CreateArticleDto } from './dtos/create-article.dto';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
-import { UploadService } from '../uploads/services/upload.service';
+import { UploadService } from '../uploads/services/fichier.service';
 import { UploadServiceMock } from '../uploads/mocks/upload.service.mock';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
 import { statutArticleTypes } from './enums/statut-article-types.enum';
 import { fileTypes } from '../uploads/enums/file-types.enum';
-import { Upload } from '../database/core/upload.entity';
+import { Upload } from '../database/core/fichier.entity';
 import { Article } from '../database/core/article.entity';
 
 describe('ArticlesController', () => {

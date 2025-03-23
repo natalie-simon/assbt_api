@@ -11,7 +11,7 @@ import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { MailModule } from './mail/mail.module';
 import { RolesGuard } from './auth/guards/roles.guard';
-import { UploadsModule } from './uploads/uploads.module';
+import { FichiersModule } from './fichiers/fichiers.module';
 import { LoggerModule } from './logger/logger.module';
 import { CategoriesActivitesModule } from './categories-activites/categories-activites.module';
 import { ActivitesModule } from './activites/activites.module';
@@ -67,7 +67,7 @@ const ENV = process.env.NODE_ENV;
     ArticlesModule,
     AuthModule,
     MailModule,
-    UploadsModule,
+    FichiersModule,
     LoggerModule,
     CategoriesActivitesModule,
     ActivitesModule,

@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Membre } from './membre.entity';
-import { Upload } from './upload.entity';
+import { Fichier } from './fichier.entity';
 import { categorieArticleTypes } from '../../articles/enums/categorie-article-types.enum';
 import { statutArticleTypes } from '../../articles/enums/statut-article-types.enum';
 
@@ -78,9 +78,9 @@ export class Article {
    * @type {Date}
    * @memberof Article
    */
-  @ManyToOne(() => Upload, { nullable: true })
+  @ManyToOne(() => Fichier, { nullable: true })
   @JoinColumn()
-  image: Upload;
+  image: Fichier;
 
   /**
    * L'auteur de l'article

@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Upload } from '../../database/core/upload.entity';
+import { Fichier } from '../../database/core/fichier.entity';
 import { Repository } from 'typeorm';
 import { UploadToAwsProvider } from './upload-to-aws.provider';
 import { ConfigService } from '@nestjs/config';
@@ -16,7 +16,7 @@ import { fileTypes } from '../enums/file-types.enum';
  * Service de gestion des uploads
  */
 @Injectable()
-export class UploadService {
+export class FichierService {
   /**
    * Constructeur
    * @param uploadToAwsProvider
@@ -26,8 +26,8 @@ export class UploadService {
   constructor(
     private readonly uploadToAwsProvider: UploadToAwsProvider,
     private readonly configService: ConfigService,
-    @InjectRepository(Upload)
-    private readonly uploadsRepository: Repository<Upload>,
+    @InjectRepository(Fichier)
+    private readonly uploadsRepository: Repository<Fichier>,
   ) {}
 
   /**
@@ -35,7 +35,7 @@ export class UploadService {
    * @param file
    * @returns
    */
-  public async uploadFile(file: Express.Multer.File): Promise<Upload> {
+  public async uploadFile(file: Express.Multer.File): Promise<Fichier> {
     if (
       !['image/gif', 'image/jpg', 'image/jpeg', 'image/png'].includes(
         file.mimetype,
