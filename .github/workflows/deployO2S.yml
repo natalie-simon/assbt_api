@@ -30,7 +30,7 @@ jobs:
           server: '${{ secrets.FTP_HOST_API_TEST }}'
           username: ${{ secrets.FTP_USERNAME_API_TEST }}
           password: ${{ secrets.FTP_PASSWORD_API_TEST }}
-          local-dir: './dist'
+          local-dir: './dist/'
           server-dir: './'
       - name: Send success email
         uses: dawidd6/action-send-mail@v2
