@@ -1,0 +1,58 @@
+name: Deployer env Test o2switch
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22.8'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to O2Switch
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: '${{ secrets.FTP_HOST_API_TEST }}'
+          username: ${{ secrets.FTP_USERNAME_API_TEST }}
+          password: ${{ secrets.FTP_PASSWORD_API_TEST }}
+          local-dir: './dist'
+          server-dir: './'
+      - name: Send success email
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: ${{secrets.SMTP_ADRESS}}
+          server_port: ${{secrets.SMTP_PORT}}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Déploiement réussi pour l'application ASSBT Front"
+          body: "Le déploiement sur l'environnement test a réussi. Vous pouvez consulter l'application à l'adresse suivante: https://apitest.nataliesimon.fr/"
+          to: ybah2201@gmail.com
+          from: ybah2201@gmail.com
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{secrets.SMTP_ADRESS}}
+          server_port: ${{secrets.SMTP_PORT}}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Échec du déploiement pour l'application ASSBT Front"
+          body: "Le déploiement sur l'environnement test a échoué. Veuillez vérifier les logs pour plus de détails."
+          to: ybah2201@gmail.com
+          from: ybah2201@gmail.com
+    
