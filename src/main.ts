@@ -21,7 +21,14 @@ async function bootstrap() {
 
   // Configuration CORS
   app.enableCors({
-    origin: process.env.ORIGIN,
+      origin: [
+    /^https?:\/\/.+\.nataliesimon\.fr$/, // Tous les sous-domaines de nataliesimon.fr
+    'https://nataliesimon.fr',           // Domaine principal en HTTPS
+    'http://nataliesimon.fr',            // Domaine principal en HTTP
+    'http://localhost:3000',             // Localhost avec port spécifique pour le frontend
+    'http://localhost:8080',             // Autre port potentiel
+    'http://localhost'                   // Localhost sans port spécifié
+  ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
