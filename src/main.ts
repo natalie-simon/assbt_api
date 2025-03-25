@@ -19,6 +19,13 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
 
+  // Configuration CORS
+  app.enableCors({
+    origin: process.env.ORIGIN,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   // swagger configuration
   const swaggerConfig = new DocumentBuilder()
     .setVersion('0.1')
