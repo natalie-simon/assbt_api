@@ -18,11 +18,6 @@ async function bootstrap() {
     transform: true,
     forbidNonWhitelisted: true,
   }));
-  app.enableCors({
-    origin: process.env.ORIGIN, // Remplacez par l'origine de votre frontend
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
 
   // swagger configuration
   const swaggerConfig = new DocumentBuilder()
@@ -34,17 +29,16 @@ async function bootstrap() {
 
   SwaggerModule.setup('documentation', app, document);
 
-// Configuration de l'accès à AWS
-const configService = app.get(ConfigService);
-const s3Config: S3ClientConfig = {
-  region: configService.get('appConfig.awsRegion'),
-  credentials: {
-    accessKeyId: configService.get('appConfig.awsAccessKeyId'),
-    secretAccessKey: configService.get('appConfig.awsSecretAccessKey'),
-  },
-};
-const s3Client = new S3Client(s3Config);
-
+  // Configuration de l'accès à AWS
+  const configService = app.get(ConfigService);
+  const s3Config: S3ClientConfig = {
+    region: configService.get('appConfig.awsRegion'),
+    credentials: {
+      accessKeyId: configService.get('appConfig.awsAccessKeyId'),
+      secretAccessKey: configService.get('appConfig.awsSecretAccessKey'),
+    },
+  };
+  const s3Client = new S3Client(s3Config);
 
   await app.listen(process.env.LISTEN_PORT || 3000);
 }
