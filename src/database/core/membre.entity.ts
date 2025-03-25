@@ -46,7 +46,7 @@ export class Membre {
   @Column({
     type: 'enum',
     enum: RoleTypes,
-    default: RoleTypes.ADMIN,
+    default: RoleTypes.USER,
     nullable: false,
   })
   role: string;
