@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Fichier } from '../../database/core/fichier.entity';
 import { Repository } from 'typeorm';
-import { UploadToAwsProvider } from './upload-to-aws.provider';
+import { UploadToO2SwitchProvider } from '../providers/upload-to-o2switch.provider';
 import { ConfigService } from '@nestjs/config';
 import { UploadFile } from '../interfaces/upload-file.interface';
 import { fileTypes } from '../enums/file-types.enum';
@@ -24,7 +24,7 @@ export class FichierService {
    * @param uploadsRepository
    */
   constructor(
-    private readonly uploadToAwsProvider: UploadToAwsProvider,
+    private readonly uploadToAwsProvider: UploadToO2SwitchProvider,
     private readonly configService: ConfigService,
     @InjectRepository(Fichier)
     private readonly uploadsRepository: Repository<Fichier>,
@@ -45,16 +45,8 @@ export class FichierService {
     }
 
     try {
-      const nom = await this.uploadToAwsProvider.uploadFile(file);
-      const uploadFile: UploadFile = {
-        nom: nom,
-        url: `https://${this.configService.get('appConfig.cloudfront_url')}/${nom}`,
-        type: fileTypes.IMAGE,
-        mime: file.mimetype,
-        size: file.size,
-      };
-      const upload = this.uploadsRepository.create(uploadFile);
-      return await this.uploadsRepository.save(upload);
+      const fichier = await this.uploadToAwsProvider.uploadFile(file);
+      return this.uploadsRepository.save(fichier);
     } catch (error) {
       console.log(error);
       throw new ConflictException(error.message);

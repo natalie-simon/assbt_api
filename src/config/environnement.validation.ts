@@ -5,7 +5,13 @@ export default Joi.object({
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),
-  LISTEN_PORT: Joi.number().port().default(3000),
+
+  LISTEN_PORT: Joi.alternatives()
+    .try(
+      Joi.number().port(),
+      Joi.string().pattern(/^\d+$/)
+    )
+    .default(3000),
 
   // Nouvelles variables pour le logging
   PAPERTRAIL_HOST: Joi.string().default('logs5.papertrailapp.com'),
@@ -46,4 +52,9 @@ export default Joi.object({
   AWS_ACCESS_KEY_ID: Joi.string().required(),
   AWS_SECRET_ACCESS_KEY: Joi.string().required(),
   CLOUDFRONT_URL: Joi.string().required(),
+
+  // Variables FTP
+  FTP_HOST_API_TEST: Joi.string().required(),
+  FTP_USERNAME_API_TEST: Joi.string().required(),
+  FTP_PASSWORD_API_TEST: Joi.string().required(),
 });

@@ -14,8 +14,7 @@ import {
   ApiHeaders,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FichierService } from '../fichiers/services/fichier.service';
-import { Fichier } from '../database/core/fichier.entity';
+import { CategorieActiviteUploadService } from './services/categorie-activite-upload.service';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { RoleTypes } from '../auth/enums/role-types.enum';
@@ -35,19 +34,19 @@ export class CategorieActiviteController {
    */
   constructor(
     private readonly categorieActiviteService: CategorieActiviteService,
-    private readonly fichierService: FichierService,
+    private readonly uploadService: CategorieActiviteUploadService,
   ) {}
 
   /**
    * Création d'une catégorie d'activité
    * @param createCategorieActiviteDto
-   * @param file
+   * @param image
    * @returns
    */
   @Post('create')
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.ADMIN)
-  @UseInterceptors(FileInterceptor('fichier'))
+  @UseInterceptors(FileInterceptor('image'))
   @ApiOperation({ summary: "Création d'une catégorie d'activité" })
   @ApiHeaders([
     { name: 'Content-Type', description: 'multipart/form-data' },
@@ -59,15 +58,12 @@ export class CategorieActiviteController {
   })
   public async createCategorieActivite(
     @Body() createCategorieActiviteDto: CreateCategorieActiviteDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
-    let image = null as Fichier | null;
-    if (file) {
-      image = await this.fichierService.uploadFile(file);
+    let fichier = null;
+    if (image) {
+      fichier = await this.uploadService.uploadFile(image);
     }
-    return this.categorieActiviteService.createCategorieActivite(
-      createCategorieActiviteDto,
-      image,
-    );
+    return this.categorieActiviteService.createCategorieActivite(createCategorieActiviteDto, fichier);
   }
 }

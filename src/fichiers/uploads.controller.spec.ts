@@ -3,6 +3,7 @@ import { UploadsController } from './uploads.controller';
 import { FichierService } from './services/fichier.service';
 import { Fichier } from '../database/core/fichier.entity';
 import { mockUploadedFile } from './mocks/uploads.mock';
+import { UploadToO2SwitchProvider } from './providers/upload-to-o2switch.provider';
 
 describe('UploadsController', () => {
   let controller: UploadsController;
@@ -20,6 +21,7 @@ describe('UploadsController', () => {
           provide: FichierService,
           useValue: mockFichierService,
         },
+        UploadToO2SwitchProvider,
       ],
     }).compile();
 
@@ -31,12 +33,12 @@ describe('UploadsController', () => {
     expect(controller).toBeDefined();
   });
 
-  /*describe('uploadFile', () => {
+  describe('uploadFile', () => {
     it('should upload a file successfully', async () => {
       const mockFichier: Fichier = {
         id: 1,
         nom: 'test-image.jpg',
-        url: 'https://example.com/test-image.jpg',
+        url: '/uploads/test-image.jpg',
         type: 'image',
         mime: 'image/jpeg',
         taille: 1024,
@@ -58,5 +60,5 @@ describe('UploadsController', () => {
       await expect(controller.uploadFile(mockUploadedFile)).rejects.toThrow('Upload failed');
       expect(mockFichierService.uploadFile).toHaveBeenCalledWith(mockUploadedFile);
     });
-  });*/
+  });
 });
