@@ -35,14 +35,14 @@ export interface LogQueryParams {
 export class LogsService {
   /**
    * Constructor
-   * @param logModel 
+   * @param logModel
    */
   constructor(@InjectModel(Log.name) private logModel: Model<Logdocument>) {}
 
   /**
    * Récupération de tous les logs avec filtres
-   * @param queryParams 
-   * @returns 
+   * @param queryParams
+   * @returns
    */
   async findAll(queryParams: LogQueryParams): Promise<{
     logs: Log[];

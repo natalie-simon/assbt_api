@@ -9,6 +9,7 @@ export default Joi.object({
   LISTEN_PORT: Joi.alternatives()
     .try(
       Joi.number().port(),
+      Joi.string().valid('passenger'),
       Joi.string().pattern(/^\d+$/)
     )
     .default(3000),
