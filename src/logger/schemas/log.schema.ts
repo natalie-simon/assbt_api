@@ -46,6 +46,15 @@ export class Log {
    */
   @Prop({ required: true })
   timestamp: Date;
+
+  /**
+   * URL du serveur ayant émis le log
+   *
+   * @type {string}
+   * @memberof Log
+   */
+  @Prop({ required: false })
+  serverUrl: string;
 }
 
 /**

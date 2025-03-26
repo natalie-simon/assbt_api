@@ -14,7 +14,7 @@ import { ConfigType } from '@nestjs/config';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
-
+import { ServerInfoService } from '../../logger/services/serveur-info';
 /**
  * Service de gestion de la connexion
  */
@@ -36,6 +36,7 @@ export class SignInProvider {
     private readonly hashingProvider: HashingProvider,
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
+    private readonly serverInfoService: ServerInfoService,
   ) {}
 
   /**
@@ -53,13 +54,20 @@ export class SignInProvider {
         user.mot_de_passe,
       );
     } catch (error) {
+      this.logger.log(`Erreur signin `, {
+        serverUrl: this.serverInfoService.getServerUrl(),
+        email: user.email,
+      });
       throw new RequestTimeoutException(error, {
         description: 'Erreur de connexion',
       });
     }
 
     if (!isEqual) {
-      this.logger.log(`Erreur de connexion : ${user.email}`);
+      this.logger.log(`Erreur de connexion : ${user.email}`, {
+        serverUrl: this.serverInfoService.getServerUrl(),
+        email: user.email,
+      });
       throw new UnauthorizedException();
     }
 
@@ -75,7 +83,10 @@ export class SignInProvider {
       },
     );
 
-    this.logger.log(`Le membre : ${user.email} s'est connecté.`);
+    this.logger.log(`Le membre : ${user.email} s'est connecté.`, {
+      serverUrl: this.serverInfoService.getServerUrl(),
+      email: user.email,
+    });
 
     return { accessToken };
   }

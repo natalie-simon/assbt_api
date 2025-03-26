@@ -27,7 +27,7 @@ async function bootstrap() {
     'http://nataliesimon.fr',            // Domaine principal en HTTP
     'http://localhost:3000',             // Localhost avec port spécifique pour le frontend
     'http://localhost:8080',             // Autre port potentiel
-    'http://localhost'                   // Localhost sans port spécifié
+    'http://localhost:5173'                   // Localhost sans port spécifié
   ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
