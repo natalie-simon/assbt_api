@@ -46,6 +46,7 @@ export class SignInProvider {
    */
   public async signIn(signinDto: SigninDto) {
     let user = await this.membreService.findOneByEmail(signinDto.email);
+    console.log(user);
     let isEqual: boolean = false;
 
     try {
@@ -76,6 +77,7 @@ export class SignInProvider {
         sub: user.id,
         email: user.email,
         role: user.role,
+        profil: user.profil,
       } as ActiveUserData,
       {
         secret: this.jwtConfiguration.secret,

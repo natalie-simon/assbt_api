@@ -1,17 +1,20 @@
 import { Controller, Get, Post, Put, Body, Param, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiHeaders } from '@nestjs/swagger';
 import { ProfilsService } from './services/profils.service';
 import { Profil } from '../database/core/profil.entity';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
-
+import { CategorieActiviteUploadService } from 'src/categories-activites/services/categorie-activite-upload.service';
 @Controller('profils')
 @ApiTags('profils')
 export class ProfilsController {
-  constructor(private readonly profilsService: ProfilsService) {}
+  constructor(
+    private readonly profilsService: ProfilsService,
+    private readonly uploadService: CategorieActiviteUploadService,
+  ) {}
 
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un profil par son id' })
@@ -37,6 +40,29 @@ export class ProfilsController {
       throw new BadRequestException('Vous ne pouvez pas modifier ce profil');
     }
     return this.profilsService.update(updateProfilDto);
+  }
+
+  @Post('create')
+  @Auth(AuthTypes.Bearer)
+  @ApiOperation({ summary: 'Créer un profil' })
+  @ApiResponse({ status: 201, description: 'Le profil créé' })
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiOperation({ summary: "Création  d'un profil" })
+  @ApiHeaders([
+    { name: 'Content-Type', description: 'multipart/form-data' },
+    { name: 'Authorization', description: 'Bearer Token' },
+  ])
+  @ApiResponse({ status: 201, description: 'Le profil créé' })
+  async create(
+    @Body() createProfilDto: Profil,
+    @UploadedFile() file: Express.Multer.File,
+    @ActiveUser() activeUser: ActiveUserData,
+  ){
+    let fichier = null;
+    if(file){
+      fichier = await this.uploadService.uploadFile(file);
+    }
+    return this.profilsService.create(createProfilDto, fichier, activeUser);
   }
 
   @Post(':id/avatar')
