@@ -8,6 +8,7 @@ import * as MongoDB from 'winston-mongodb';
 import { LogsService } from './services/logs.service';
 import { LogsController } from './logs.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ServerInfoService } from './services/serveur-info';
 
 /**
  * Logger module
@@ -45,8 +46,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  providers: [LogsService],
+  providers: [LogsService, ServerInfoService],
   controllers: [LogsController],
-  exports: [LogsService],
+  exports: [LogsService, ServerInfoService],
 })
 export class LoggerModule {}

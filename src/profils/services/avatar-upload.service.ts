@@ -5,7 +5,7 @@ import { Fichier } from '../../database/core/fichier.entity';
 import { UploadToO2SwitchProvider } from '../../fichiers/providers/upload-to-o2switch.provider';
 
 @Injectable()
-export class CategorieActiviteUploadService {
+export class AvatarUploadService {
   constructor(
     @InjectRepository(Fichier)
     private fichierRepository: Repository<Fichier>,

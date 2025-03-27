@@ -48,6 +48,7 @@ export class MembresService {
   public async findOneByEmail(email: string): Promise<Membre | null> {
     return this.usersRepository.findOne({
       where: { email },
+      relations: ['profil'],
     });
   }
 
@@ -74,7 +75,7 @@ export class MembresService {
    * @returns
    */
   public async findUserById(id: number) {
-    return this.usersRepository.findOne({ where: { id: id } });
+    return this.usersRepository.findOne({ where: { id: id }, relations: ['profil'] });
   }
 
   /**

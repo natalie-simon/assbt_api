@@ -21,6 +21,7 @@ import environnementValidation from './config/environnement.validation';
 import { MongooseModule } from '@nestjs/mongoose';
 import mailConfig from './config/mail.config';
 import loggerConfig from './config/logger.config';
+import { ProfilsModule } from './profils/profils.module';
 
 /**
  * Chargement des variables d'environnement
@@ -71,6 +72,7 @@ const ENV = process.env.NODE_ENV;
     LoggerModule,
     CategoriesActivitesModule,
     ActivitesModule,
+    ProfilsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthenticationGuard },
