@@ -33,7 +33,6 @@ export class ProfilsService {
   ): Promise<Profil> {
     const newProfil = this.profilRepository.create({...profil, avatar : avatar});
     const savedProfil = await this.profilRepository.save(newProfil);
-
     let membre = await this.membresService.findUserById(activeUser['sub']);
     membre.profil = savedProfil;
     await this.membreRepository.save(membre);

@@ -48,7 +48,7 @@ export class MembresService {
   public async findOneByEmail(email: string): Promise<Membre | null> {
     return this.usersRepository.findOne({
       where: { email },
-      relations: ['profil'],
+      relations: ['profil', 'profil.avatar'],
     });
   }
 
