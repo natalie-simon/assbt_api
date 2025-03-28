@@ -1,11 +1,11 @@
 version: "3.8"
 services:
-  #PostgreSQL
+  # Service pour la bdd PostgreSQL
   postgres-db:
     image: postgres:latest
     container_name: api-postgres-db-test
     env_file:
-    - .env
+      - .env.test
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -14,34 +14,32 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # NestJS
+  # Service pour l'API NestJs
   nestjs-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: api-nestjs-test
+    container_name: nestjs-api-test
     env_file:
-      - .env
+      - .env.test
     environment:
+      NODE_ENV: ${NODE_ENV}
       DB_HOST: ${DB_HOST}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
       DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - "${LISTEN_PORT}:${LISTEN_PORT}"
     depends_on:
-      - postgres-db
-    volumes:
-      - ./:/app
-      # Assurez-vous que node_modules dans le conteneur n'est pas remplacé par le volume
-      - /app/node_modules
-    # Commande pour installer les dépendances au démarrage du conteneur
-    command: >
-      bash -c "npm install
-      && npm rebuild bcrypt --build-from-source
-      && npm run start:dev"
+      postgres-db:
+        condition: service_healthy
 
 volumes:
   postgres-data-test:
