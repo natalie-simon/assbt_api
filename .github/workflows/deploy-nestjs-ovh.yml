@@ -25,7 +25,7 @@ jobs:
             cd ~/app
 
             # Copier les fichiers nécessaires pour l'application NestJS
-            cp -r $GITHUB_WORKSPACE/* ~/app/nestjs/
+            rsync -av --exclude=/proc $GITHUB_WORKSPACE/ ~/app/nestjs/
 
             # Se déplacer dans le répertoire de l'application
             cd ~/app/nestjs
