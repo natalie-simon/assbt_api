@@ -53,7 +53,7 @@ jobs:
             certificatesResolvers:
               letsencrypt:
                 acme:
-                  email: votre@email.com
+                  email: nataliesimon2201@gmail.com
                   storage: "/etc/traefik/acme/acme.json"
                   httpChallenge:
                     entryPoint: http
@@ -100,5 +100,20 @@ jobs:
               web:
                 external: true
             EOL
-            echo "All configuration files created successfully"
-            ls -la ~/app/traefik/
+            echo "Creating Docker network..."
+            docker network create web || true
+
+            echo "Starting Traefik..."
+            cd ~/app/traefik
+            docker-compose down
+            docker-compose up -d
+
+            echo "Checking if Traefik is running..."
+            sleep 5
+            if docker ps | grep -q traefik; then
+              echo "SUCCESS: Traefik is running"
+            else
+              echo "ERROR: Traefik failed to start"
+              docker-compose logs
+              exit 1
+            fi
