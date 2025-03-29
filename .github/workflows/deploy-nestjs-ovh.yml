@@ -3,8 +3,8 @@ name: Deploy NestJS to OVH VPS
 on:
   push:
     branches:
-      - master
-  workflow_dispatch:
+      - dev  # branche de développement pour les tests
+  workflow_dispatch:  # permet de déclencher manuellement
 
 jobs:
   deploy:
@@ -19,13 +19,16 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: deploy
           key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
-          port: 2222
+          port: 2222  # ou votre port SSH personnalisé
           script: |
             # Se rendre dans le répertoire de déploiement
-            cd ~/app/docker/app
+            cd ~/app
 
-            # Récupérer les dernières modifications
-            git pull origin develop
+            # Copier les fichiers nécessaires pour l'application NestJS
+            cp -r $GITHUB_WORKSPACE/* ~/app/nestjs/
+
+            # Se déplacer dans le répertoire de l'application
+            cd ~/app/nestjs
 
             # Construire et démarrer les conteneurs
             docker-compose -f docker-compose.prod.yml down
