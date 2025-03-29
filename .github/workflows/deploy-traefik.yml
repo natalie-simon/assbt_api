@@ -18,10 +18,45 @@ jobs:
           port: 2222
           script: |
             echo "Creating Traefik directories..."
-            mkdir -p ~/app/traefik/config
+            mkdir -p ~/app/traefik/configgit
             mkdir -p ~/app/traefik/dynamic
             mkdir -p ~/app/traefik/acme
             touch ~/app/traefik/acme/acme.json
             chmod 600 ~/app/traefik/acme/acme.json
-            echo "Directories created successfully"
-            ls -la ~/app/traefik/
+
+            echo "Creating traefik.yml..."
+            cat > ~/app/traefik/config/traefik.yml << 'EOL'
+            api:
+              dashboard: true
+              debug: true
+
+            entryPoints:
+              http:
+                address: ":80"
+                http:
+                  redirections:
+                    entryPoint:
+                      to: https
+                      scheme: https
+              https:
+                address: ":443"
+
+            providers:
+              docker:
+                endpoint: "unix:///var/run/docker.sock"
+                exposedByDefault: false
+                network: web
+              file:
+                directory: "/etc/traefik/dynamic"
+                watch: true
+
+            certificatesResolvers:
+              letsencrypt:
+                acme:
+                  email: votre@email.com
+                  storage: "/etc/traefik/acme/acme.json"
+                  httpChallenge:
+                    entryPoint: http
+            EOL
+            echo "traefik.yml created successfully"
+            cat ~/app/traefik/config/traefik.yml
