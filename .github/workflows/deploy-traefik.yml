@@ -15,7 +15,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: deploy
-          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}git 
           port: 2222
           script: |
             echo "Testing SSH connection"
