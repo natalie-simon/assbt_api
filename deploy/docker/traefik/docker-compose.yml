@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/:/etc/traefik/config/
+      - ./dynamic/:/etc/traefik/dynamic/
+      - ./acme:/etc/traefik/acme/
+    networks:
+      - web
+    command:
+      - "--configfile=/etc/traefik/config/traefik.yml"
+
+networks:
+  web:
+    external: true
