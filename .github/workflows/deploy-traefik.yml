@@ -7,10 +7,7 @@ jobs:
   deploy-traefik:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up SSH connection
+      - name: Set up Traefik directories
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -18,47 +15,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
           port: 2222
           script: |
-            echo "Testing SSH connection"
+            echo "Creating Traefik directories..."
+            mkdir -p ~/app/traefik/config
+            mkdir -p ~/app/traefik/dynamic
             mkdir -p ~/app/traefik/acme
             touch ~/app/traefik/acme/acme.json
             chmod 600 ~/app/traefik/acme/acme.json
-            # Vérifier que le réseau Docker "web" existe
-            if ! docker network ls | grep -q web; then
-              docker network create web
-            fi
-
-      - name: Copy Traefik configuration files
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: deploy
-          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
-          port: 2222
-          source: "deploy/docker/traefik/config/*,deploy/docker/traefik/dynamic/*,deploy/docker/traefik/docker-compose.yml"
-          target: "~/app/traefik"
-          strip_components: 3
-
-      - name: Deploy Traefik
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: deploy
-          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
-          port: 2222
-          script: |
-            cd ~/app/traefik
-            # Afficher les fichiers pour vérification
-            ls -la
-            # Arrêter et redémarrer Traefik
-            docker-compose down
-            docker-compose up -d
-            # Vérifier que Traefik fonctionne
-            sleep 5
-            if ! docker ps | grep -q traefik; then
-              echo "ERREUR: Traefik n'est pas en cours d'exécution!"
-              docker-compose logs
-              exit 1
-            else
-              echo "Traefik est en cours d'exécution"
-              docker ps | grep traefik
-            fi
+            echo "Directories created successfully"
+            ls -la ~/app/traefik/

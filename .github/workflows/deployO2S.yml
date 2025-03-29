@@ -1,9 +1,10 @@
 name: Deployer env Test o2switch
 
 on:
-  push:
-    branches:
-      - develop
+  workflow_dispatch:
+ # push:
+  #  branches:
+  #   - develop
 
 jobs:
   build-and-deploy:
