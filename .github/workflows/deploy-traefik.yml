@@ -18,7 +18,7 @@ jobs:
           port: 2222
           script: |
             echo "Creating Traefik directories..."
-            mkdir -p ~/app/traefik/configgit
+            mkdir -p ~/app/traefik/config
             mkdir -p ~/app/traefik/dynamic
             mkdir -p ~/app/traefik/acme
             touch ~/app/traefik/acme/acme.json
@@ -58,5 +58,17 @@ jobs:
                   httpChallenge:
                     entryPoint: http
             EOL
-            echo "traefik.yml created successfully"
-            cat ~/app/traefik/config/traefik.yml
+
+            echo "Creating dynamic_conf.yml..."
+            cat > ~/app/traefik/dynamic/dynamic_conf.yml << 'EOL'
+            http:
+              middlewares:
+                secureHeaders:
+                  headers:
+                    sslRedirect: true
+                    forceSTSHeader: true
+                    stsIncludeSubdomains: true
+                    stsPreload: true
+                    stsSeconds: 31536000
+            EOL
+            echo "Configuration files created successfully"
