@@ -11,31 +11,37 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-data-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # NestJS
   nestjs-api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: api-nestjs-test
     env_file:
       - .env
     environment:
-      DB_HOST: ${DB_HOST}
+      DB_HOST: postgres-db
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
+      DB_PORT: 5432
+      NODE_ENV: development
     ports:
       - "${LISTEN_PORT}:${LISTEN_PORT}"
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
     volumes:
       - ./:/app
-      # Assurez-vous que node_modules dans le conteneur n'est pas remplacé par le volume
       - /app/node_modules
     # Commande pour installer les dépendances au démarrage du conteneur
     command: >

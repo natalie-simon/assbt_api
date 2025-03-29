@@ -1,0 +1,20 @@
+http:
+  middlewares:
+    secureHeaders:
+      headers:
+        sslRedirect: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+
+  routers:
+    api:
+      rule: "Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      service: "api-service"
+      entrypoints:
+        - https
+      middlewares:
+        - secureHeaders
+      tls:
+        certResolver: letsencrypt

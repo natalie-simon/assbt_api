@@ -1,9 +1,11 @@
-FROM node:latest
+FROM node:18-alpine
 
 WORKDIR /app
 
 # installation des dépendances nécessaires pour bcrypt
-RUN apt-get update && apt-get install -y python3 make g++
+RUN apt-get update && apt-get install -y python3 make g++ bash
+
+EXPOSE 3000
 
 # Dockerfile minimaliste pb lié à bcrypt en mode hotreload
 
