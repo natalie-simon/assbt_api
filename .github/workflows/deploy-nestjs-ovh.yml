@@ -1,0 +1,35 @@
+name: Deploy NestJS to OVH VPS
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to OVH VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
+          port: 2222
+          script: |
+            # Se rendre dans le répertoire de déploiement
+            cd ~/app/docker/app
+
+            # Récupérer les dernières modifications
+            git pull origin master
+
+            # Construire et démarrer les conteneurs
+            docker-compose -f docker-compose.prod.yml down
+            docker-compose -f docker-compose.prod.yml up -d --build
+
+            # Vérifier que les conteneurs sont bien démarrés
+            docker ps
