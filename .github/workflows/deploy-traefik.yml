@@ -34,9 +34,9 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
           port: 2222
-          source: "deploy/traefik/config/*,deploy/traefik/dynamic/*,deploy/traefik/docker-compose.yml"
+          source: "deploy/docker/traefik/config/*,deploy/docker/traefik/dynamic/*,deploy/docker/traefik/docker-compose.yml"
           target: "~/app/traefik"
-          strip_components: 2
+          strip_components: 3
 
       - name: Deploy Traefik
         uses: appleboy/ssh-action@master
