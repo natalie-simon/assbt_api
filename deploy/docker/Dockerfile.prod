@@ -6,14 +6,6 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Créer les répertoires nécessaires pour les migrations
-RUN mkdir -p /app/src/config /app/src/database/migrations
-
-# Copier seulement les fichiers nécessaires pour les migrations
-COPY --from=builder /app/src/config/typeorm.config.* /app/src/config/
-COPY --from=builder /app/tsconfig.json /app/
-
-
 RUN npm ci
 
 COPY . .
@@ -22,27 +14,34 @@ RUN npm run build
 
 RUN npm ci --only=production && npm cache clean --force
 
+# Créer les répertoires nécessaires pour les migrations
 RUN mkdir -p /app/dist/database/migrations
 
 FROM node:18-alpine AS production
 
 RUN addgroup -S nestjs && adduser -S nestjs -G nestjs
 
-RUN apk add --no-cache  dumb-init
+RUN apk add --no-cache dumb-init
 
 WORKDIR /app
-
 
 # Copie des fichiers de build et node_modules de l'étape précédente
 COPY --from=builder /app/dist /app/dist
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/package*.json /app/
 
+# Créer les répertoires nécessaires pour les migrations
+RUN mkdir -p /app/src/config /app/src/database/migrations
+
+# Copier les fichiers source nécessaires pour les migrations
+COPY --from=builder /app/src/config/typeorm.config.* /app/src/config/
+COPY --from=builder /app/tsconfig.json /app/
+
 # Changement d'utilisateur pour plus de sécurité
 USER nestjs
 
 # Exposition du port
-EXPOSE ${LISTEN_PORT}
+EXPOSE 3000
 
 # Utilisation de dumb-init comme point d'entrée pour une meilleure gestion des signaux
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
