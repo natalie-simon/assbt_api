@@ -46,11 +46,11 @@ jobs:
             rsync -av --exclude 'node_modules' --exclude '.git' /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}/ ~/app/nestjs/
 
             # Utiliser le fichier .env.prod existant sur le VPS
-            if [ -f "/home/deploy/.env.prod" ]; then
-              cp /home/deploy/.env.prod ~/app/nestjs/.env
+            if [ -f "/app/.env.prod" ]; then
+              cp /app/.env.prod ~/app/nestjs/.env
               echo "✅ Fichier .env.prod copié vers .env"
             else
-              echo "⚠️ Fichier .env.prod non trouvé, le déploiement pourrait échouer"
+              echo "⚠️ Fichier .env.prod non trouvé à l'emplacement /app/.env.prod"
             fi
 
             # Se déplacer dans le répertoire de l'application
