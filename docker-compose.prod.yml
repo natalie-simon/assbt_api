@@ -26,6 +26,8 @@ services:
       - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "54322:5432"  # Exposer le port de la base de données
     networks:
       - app-network
     healthcheck:
