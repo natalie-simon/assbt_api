@@ -52,14 +52,31 @@ jobs:
               cp ${APP_DIR}/.env ${APP_DIR}/.env.backup
             fi
 
-            # Nettoyer le répertoire mais préserver certains dossiers/fichiers
-            echo "🧹 Nettoyage du répertoire de déploiement..."
-            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -exec rm -rf {} \; 2>/dev/null || true
+            # Créer un répertoire temporaire pour le clone
+            TMP_DIR=$(mktemp -d)
+            echo "📋 Clonage du dépôt dans ${TMP_DIR}..."
 
-            # Copier les fichiers du projet depuis le dépôt GitHub
+            # Clone du dépôt GitHub (utiliser la branche production)
+            # Notez: Remplacez URL_REPO par l'URL de votre dépôt
+            git clone --depth=1 --branch=production https://github.com/natalie-simon/assbt_api.git ${TMP_DIR}
+
+            # Vérifier si le clone a réussi
+            if [ $? -ne 0 ]; then
+              echo "❌ Échec du clonage du dépôt"
+              exit 1
+            fi
+
+            # Nettoyer le répertoire de l'application mais préserver .env et backups
+            echo "🧹 Nettoyage du répertoire de déploiement..."
+            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -not -name "docker-compose.prod.yml" -exec rm -rf {} \; 2>/dev/null || true
+
+            # Copier les fichiers du dépôt cloné vers le répertoire de l'application
             echo "📋 Copie des fichiers du projet..."
-            cd /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}
-            tar cf - --exclude='.git' --exclude='node_modules' . | (cd ${APP_DIR} && tar xf -)
+            cp -R ${TMP_DIR}/* ${APP_DIR}/
+            cp -R ${TMP_DIR}/.* ${APP_DIR}/ 2>/dev/null || true
+
+            # Supprimer le répertoire temporaire
+            rm -rf ${TMP_DIR}
 
             # Gestion du fichier .env
             if [ ! -f "${APP_DIR}/.env" ]; then
