@@ -16,48 +16,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Ajouter une étape pour vérifier le contenu du dépôt
-      - name: Check repository content
-        run: |
-          echo "Contenu du dépôt GitHub:"
-          ls -la
-          echo "Vérification du fichier docker-compose.prod.yml:"
-          if [ -f "docker-compose.prod.yml" ]; then
-            echo "✅ Fichier docker-compose.prod.yml trouvé dans le dépôt"
-            cat docker-compose.prod.yml | head -n 10
-          else
-            echo "❌ Fichier docker-compose.prod.yml NON trouvé dans le dépôt"
-            find . -name "docker-compose*.yml" -type f
-          fi
-
-      # Nouvelle approche: utiliser scp pour transférer directement les fichiers
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
-          known_hosts: 'placeholder-to-avoid-errors'
-          if_key_exists: replace
-
-      - name: Add host to known_hosts
-        run: ssh-keyscan -p 2222 ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Copy docker-compose file directly
-        if: ${{ success() }}
-        run: |
-          if [ -f "docker-compose.prod.yml" ]; then
-            scp -P 2222 docker-compose.prod.yml deploy@${{ secrets.VPS_HOST }}:/home/deploy/app/nestjs/
-            echo "✅ Fichier docker-compose.prod.yml transféré avec scp"
-          else
-            echo "❌ Impossible de transférer le fichier, il n'existe pas localement"
-          fi
-
       - name: Deploy to OVH VPS
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
           username: deploy
           key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
-          port: 2222
+          port: 2222  # ou votre port SSH personnalisé
           script: |
             # Définition du répertoire racine sur le VPS
             VPS_ROOT="/home/deploy/app"
@@ -87,23 +52,14 @@ jobs:
               cp ${APP_DIR}/.env ${APP_DIR}/.env.backup
             fi
 
-            # Nettoyer le répertoire mais préserver certains dossiers/fichiers et docker-compose.prod.yml
+            # Nettoyer le répertoire mais préserver certains dossiers/fichiers
             echo "🧹 Nettoyage du répertoire de déploiement..."
-            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -not -name "docker-compose.prod.yml" -exec rm -rf {} \; 2>/dev/null || true
+            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -exec rm -rf {} \; 2>/dev/null || true
 
             # Copier les fichiers du projet depuis le dépôt GitHub
             echo "📋 Copie des fichiers du projet..."
             cd /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}
             tar cf - --exclude='.git' --exclude='node_modules' . | (cd ${APP_DIR} && tar xf -)
-
-            # Vérifier si docker-compose.prod.yml existe dans le répertoire d'application
-            if [ ! -f "${APP_DIR}/docker-compose.prod.yml" ]; then
-              echo "⚠️ docker-compose.prod.yml n'a pas été trouvé après la copie des fichiers"
-              # Rechercher le fichier dans le workspace GitHub Actions
-              find /tmp/github-actions-runner/_work -name "docker-compose.prod.yml" 2>/dev/null
-            else
-              echo "✅ Fichier docker-compose.prod.yml trouvé à ${APP_DIR}/docker-compose.prod.yml"
-            fi
 
             # Gestion du fichier .env
             if [ ! -f "${APP_DIR}/.env" ]; then
@@ -122,7 +78,7 @@ jobs:
               fi
             fi
 
-            # Afficher le contenu du répertoire après la copie
+            # Vérifier le contenu après la copie
             echo "📂 Contenu du répertoire après copie:"
             ls -la ${APP_DIR}
 
