@@ -69,6 +69,7 @@ jobs:
             # Nettoyer le répertoire de l'application mais préserver .env et backups
             echo "🧹 Nettoyage du répertoire de déploiement..."
             find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -not -name "docker-compose.prod.yml" -exec rm -rf {} \; 2>/dev/null || true
+            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -not -name "docker-compose.prod.yml" -exec rm -rf {} \; 2>/dev/null || true
 
             # Copier les fichiers du dépôt cloné vers le répertoire de l'application
             echo "📋 Copie des fichiers du projet..."
