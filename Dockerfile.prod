@@ -1,0 +1,43 @@
+FROM node:18-alpine AS builder
+
+RUN apk add --no-cache python3 make g++ git
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+RUN npm ci --only=production && npm cache clean --force
+
+FROM node:18-alpine AS production
+
+RUN addgroup -S nestjs && adduser -S nestjs -G nestjs
+
+RUN apk add --no-cache  dumb-init
+
+WORKDIR /app
+
+
+# Copie des fichiers de build et node_modules de l'étape précédente
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/package*.json /app/
+
+
+
+# Changement d'utilisateur pour plus de sécurité
+USER nestjs
+
+# Exposition du port
+EXPOSE ${LISTEN_PORT}
+
+# Utilisation de dumb-init comme point d'entrée pour une meilleure gestion des signaux
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Commande de démarrage
+CMD ["node", "dist/main"]

@@ -44,7 +44,7 @@ const ENV = process.env.NODE_ENV;
         password: configService.get('database.password'),
         database: configService.get('database.name'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: process.env.NODE_ENV !== 'production',
         entities: [__dirname + '/database/core/**/*.entity{.ts,.js}'],
         logging: process.env.NODE_ENV === 'development',
       }),

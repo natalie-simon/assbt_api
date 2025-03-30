@@ -25,7 +25,11 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: nataliesimon2201@gmail.com
+      email: "nataliesimon2201@gmail.com"
       storage: "/etc/traefik/acme/acme.json"
       httpChallenge:
         entryPoint: http
+
+# Access log
+accessLog:
+  filePath: "/var/log/traefik/access.log"
