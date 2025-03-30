@@ -128,8 +128,8 @@ jobs:
               # Si une nouvelle migration est nécessaire, la générer et l'exécuter
               if [ "$MIGRATION_RESULT" != "0" ]; then
                 echo "🔄 Tentative de génération de nouvelles migrations..."
-                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:generate
-                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run || echo "⚠️ Échec des migrations après génération"
+                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:prod generate
+                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run:prod || echo "⚠️ Échec des migrations après génération"
               fi
             else
               echo "⚠️ Le service api n'est pas en cours d'exécution, migrations ignorées"
