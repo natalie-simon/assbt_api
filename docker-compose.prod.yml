@@ -8,7 +8,9 @@ services:
       dockerfile: ./deploy/docker/Dockerfile.prod
     restart: unless-stopped
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
+
     env_file:
       - ./.env
     volumes:
