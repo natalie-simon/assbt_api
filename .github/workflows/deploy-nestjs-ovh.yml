@@ -16,8 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Pas besoin de créer un fichier .env, nous utiliserons celui déjà sur le VPS
-
       - name: Deploy to OVH VPS
         uses: appleboy/ssh-action@master
         with:
@@ -26,49 +24,96 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
           port: 2222  # ou votre port SSH personnalisé
           script: |
-            # Se rendre dans le répertoire de déploiement
-            cd ~/app
+            # Définition du répertoire racine sur le VPS
+            VPS_ROOT="/home/deploy/app"
+            APP_DIR="${VPS_ROOT}/nestjs"
 
-            # Sauvegarde de la base de données si l'application est déjà en cours d'exécution
-            if [ -d "~/app/nestjs" ] && [ -f "~/app/nestjs/docker-compose.prod.yml" ]; then
-              cd ~/app/nestjs
+            # S'assurer que le répertoire d'application existe
+            mkdir -p ${APP_DIR}
+
+            # Vérifier l'état actuel
+            echo "📂 Contenu actuel du répertoire de déploiement:"
+            ls -la ${APP_DIR}
+
+            # Sauvegarde de la base de données si elle est en cours d'exécution
+            if [ -f "${APP_DIR}/docker-compose.prod.yml" ]; then
+              cd ${APP_DIR}
               if docker-compose -f docker-compose.prod.yml ps postgres 2>&1 | grep -q "Up"; then
                 echo "📦 Sauvegarde de la base de données..."
-                mkdir -p ./backups
-                docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U ${POSTGRES_USER:-appuser} ${POSTGRES_DB:-nestjs_db} > ./backups/db_$(date +"%Y%m%d_%H%M%S").sql
+                mkdir -p ${APP_DIR}/backups
+                docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U postgres nestjs_db > ${APP_DIR}/backups/db_$(date +"%Y%m%d_%H%M%S").sql || echo "⚠️ Échec de sauvegarde, poursuite du déploiement"
               fi
             fi
 
-            # Création du répertoire s'il n'existe pas
-            mkdir -p ~/app/nestjs
-
-            # Copier les fichiers nécessaires pour l'application NestJS
-            rsync -av --exclude 'node_modules' --exclude '.git' /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}/ ~/app/nestjs/
-
-            # Utiliser le fichier .env.prod existant sur le VPS
-            if [ -f "/app/.env.prod" ]; then
-              cp /app/.env.prod ~/app/nestjs/.env
-              echo "✅ Fichier .env.prod copié vers .env"
-            else
-              echo "⚠️ Fichier .env.prod non trouvé à l'emplacement /app/.env.prod"
+            # Préserver les fichiers importants
+            cd ${APP_DIR}
+            if [ -f "${APP_DIR}/.env" ]; then
+              echo "💾 Sauvegarde du fichier .env actuel"
+              cp ${APP_DIR}/.env ${APP_DIR}/.env.backup
             fi
 
-            # Se déplacer dans le répertoire de l'application
-            cd ~/app/nestjs
+            # Nettoyer le répertoire mais préserver certains dossiers/fichiers
+            echo "🧹 Nettoyage du répertoire de déploiement..."
+            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -exec rm -rf {} \; 2>/dev/null || true
 
-            # Construire et démarrer les conteneurs
-            docker-compose -f docker-compose.prod.yml down
+            # Copier les fichiers du projet depuis le dépôt GitHub
+            echo "📋 Copie des fichiers du projet..."
+            cd /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}
+            tar cf - --exclude='.git' --exclude='node_modules' . | (cd ${APP_DIR} && tar xf -)
+
+            # Gestion du fichier .env
+            if [ ! -f "${APP_DIR}/.env" ]; then
+              echo "🔍 Fichier .env non trouvé, recherche d'alternatives..."
+
+              # Vérifier si .env.backup existe
+              if [ -f "${APP_DIR}/.env.backup" ]; then
+                echo "✅ Restauration du fichier .env.backup"
+                cp ${APP_DIR}/.env.backup ${APP_DIR}/.env
+              # Vérifier si .env.prod existe dans le répertoire racine
+              elif [ -f "${VPS_ROOT}/.env.prod" ]; then
+                echo "✅ Copie du fichier .env.prod depuis ${VPS_ROOT}"
+                cp ${VPS_ROOT}/.env.prod ${APP_DIR}/.env
+              else
+                echo "⚠️ Aucun fichier .env trouvé! Le déploiement pourrait échouer."
+              fi
+            fi
+
+            # Vérifier le contenu après la copie
+            echo "📂 Contenu du répertoire après copie:"
+            ls -la ${APP_DIR}
+
+            # Vérifier que docker-compose.prod.yml existe
+            if [ ! -f "${APP_DIR}/docker-compose.prod.yml" ]; then
+              echo "❌ Fichier docker-compose.prod.yml non trouvé!"
+              exit 1
+            fi
+
+            # Déployer l'application
+            cd ${APP_DIR}
+            echo "🚀 Déploiement de l'application..."
+            docker-compose -f docker-compose.prod.yml down || true
             docker-compose -f docker-compose.prod.yml up -d --build
 
             # Attendre que les services soient prêts
             echo "⏳ Attente du démarrage des services..."
-            sleep 20
+            sleep 30
+
+            # Vérifier l'état des services
+            echo "📊 État des services après déploiement:"
+            docker-compose -f docker-compose.prod.yml ps
 
             # Exécuter les migrations TypeORM
-            docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run
+            if docker-compose -f docker-compose.prod.yml ps | grep -q "api"; then
+              echo "🔄 Exécution des migrations TypeORM..."
+              docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run || echo "⚠️ Échec des migrations"
+            else
+              echo "⚠️ Le container api n'est pas en cours d'exécution, migrations ignorées"
+            fi
 
-            # Vérifier que les conteneurs sont bien démarrés
+            # Afficher les logs Docker
+            echo "📃 Logs des containers:"
             docker ps
 
             # Nettoyage
+            echo "🧹 Nettoyage des images inutilisées..."
             docker image prune -f
