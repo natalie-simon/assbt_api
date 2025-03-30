@@ -58,7 +58,8 @@ jobs:
 
             # Copier les fichiers du projet depuis le dépôt GitHub
             echo "📋 Copie des fichiers du projet..."
-            cd /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}
+            #cd /tmp/github-actions-runner/_work/${{ github.repository }}/${{ github.repository }}
+            cd /tmp/github-actions-runner/_work/*/*
             tar cf - --exclude='.git' --exclude='node_modules' . | (cd ${APP_DIR} && tar xf -)
 
             # Gestion du fichier .env
