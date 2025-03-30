@@ -58,7 +58,7 @@ jobs:
 
             # Clone du dépôt GitHub (utiliser la branche production)
             # Notez: Remplacez URL_REPO par l'URL de votre dépôt
-            git clone --depth=1 --branch=production https://github.com/natalie-simon/assbt_api.git ${TMP_DIR}
+            git clone --depth=1 --branch=develop https://github.com/natalie-simon/assbt_api.git ${TMP_DIR}
 
             # Vérifier si le clone a réussi
             if [ $? -ne 0 ]; then
