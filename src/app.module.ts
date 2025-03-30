@@ -44,10 +44,9 @@ const ENV = process.env.NODE_ENV;
         password: configService.get('database.password'),
         database: configService.get('database.name'),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: process.env.NODE_ENV !== 'production',
         entities: [__dirname + '/database/core/**/*.entity{.ts,.js}'],
-        logging: true,
-      }),
+        logging: process.env.NODE_ENV === 'development',      }),
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
