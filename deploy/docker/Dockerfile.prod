@@ -37,6 +37,9 @@ RUN mkdir -p /app/src/config /app/src/database/migrations
 COPY --from=builder /app/src/config/typeorm.config.* /app/src/config/
 COPY --from=builder /app/tsconfig.json /app/
 
+# Installer les dépendances nécessaires pour les migrations
+RUN npm install --no-save ts-node tsconfig-paths @types/node typescript
+
 # Changement d'utilisateur pour plus de sécurité
 USER nestjs
 
