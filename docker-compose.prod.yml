@@ -8,7 +8,7 @@ services:
       dockerfile: ./deploy/docker/Dockerfile.prod
     restart: unless-stopped
     depends_on:
-      - postgres
+      - postgres-db
     env_file:
       - ./.env
     volumes:
@@ -28,7 +28,7 @@ services:
       - "traefik.http.routers.api-http.entrypoints=http"
       - "traefik.http.routers.api-http.middlewares=redirectToHttps"
 
-  postgres:
+  postgres-db:
     container_name: postgres_db
     image: postgres:15-alpine
     restart: unless-stopped
