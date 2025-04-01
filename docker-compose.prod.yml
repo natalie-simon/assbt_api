@@ -11,8 +11,6 @@ services:
       - postgres
     env_file:
       - ./.env
-    environment:
-      - DB_HOST=postgres-db  # Force l'utilisation du bon nom d'hôte
     volumes:
       - ./.env:/app/.env  # Montage du fichier .env local dans le conteneur
     networks:
@@ -21,11 +19,17 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
-      - "traefik.http.routers.api.entrypoints=http"
+      - "traefik.http.routers.api.entrypoints=https"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
+      # Ajout de la configuration pour la redirection HTTP -> HTTPS
+      - "traefik.http.routers.api-http.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api-http.entrypoints=http"
+      - "traefik.http.routers.api-http.middlewares=redirectToHttps"
 
   postgres:
-    container_name: postgres-db  # Nom modifié pour correspondre à celui attendu par l'application
+    container_name: postgres_db
     image: postgres:15-alpine
     restart: unless-stopped
     env_file:
@@ -46,20 +50,29 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-      # Port 443 commenté pour la première étape (sans HTTPS)
-      # - "443:443"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./deploy/docker/traefik/config/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./deploy/docker/traefik/dynamic:/etc/traefik/dynamic:ro
+      - traefik_certificates:/etc/traefik/acme
     networks:
       - web
     labels:
       - "traefik.enable=true"
-      # Dashboard configuration simplifiée
+      # Dashboard configuration
       - "traefik.http.routers.dashboard.rule=Host(`traefik.lesbulleurstoulonnais.fr`)"
       - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.entrypoints=http"
+      - "traefik.http.routers.dashboard.entrypoints=https"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      # Ajout de la redirection HTTP -> HTTPS pour le dashboard
+      - "traefik.http.routers.dashboard-http.rule=Host(`traefik.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.dashboard-http.entrypoints=http"
+      - "traefik.http.routers.dashboard-http.middlewares=redirectToHttps"
+      # Définition du middleware de redirection
+      - "traefik.http.middlewares.redirectToHttps.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirectToHttps.redirectscheme.permanent=true"
 
 networks:
   app-network:
@@ -69,3 +82,4 @@ networks:
 
 volumes:
   postgres_data:
+  traefik_certificates:
