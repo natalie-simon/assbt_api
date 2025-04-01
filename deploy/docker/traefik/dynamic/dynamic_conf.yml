@@ -1,20 +1,22 @@
 http:
   middlewares:
-    secureHeaders:
+    basicHeaders:
       headers:
-        sslRedirect: true
-        forceSTSHeader: true
-        stsIncludeSubdomains: true
-        stsPreload: true
-        stsSeconds: 31536000
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
 
   routers:
     api:
       rule: "Host(`api-prod.lesbulleurstoulonnais.fr`)"
       service: "api-service"
       entrypoints:
-        - https
+        - http
       middlewares:
-        - secureHeaders
-      tls:
-        certResolver: letsencrypt
+        - basicHeaders
+
+  services:
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://nestjs_api:3000/"

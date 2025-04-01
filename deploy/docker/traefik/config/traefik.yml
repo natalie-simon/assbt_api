@@ -5,13 +5,14 @@ api:
 entryPoints:
   http:
     address: ":80"
-    http:
-      redirections:
-        entryPoint:
-          to: https
-          scheme: https
-  https:
-    address: ":443"
+  # Commenté temporairement pour la première étape
+  #  http:
+  #    redirections:
+  #      entryPoint:
+  #        to: https
+  #        scheme: https
+  # https:
+  #  address: ":443"
 
 providers:
   docker:
@@ -22,13 +23,14 @@ providers:
     directory: "/etc/traefik/dynamic"
     watch: true
 
-certificatesResolvers:
-  letsencrypt:
-    acme:
-      email: "nataliesimon2201@gmail.com"
-      storage: "/etc/traefik/acme/acme.json"
-      httpChallenge:
-        entryPoint: http
+# Commenté temporairement pour la première étape
+# certificatesResolvers:
+#  letsencrypt:
+#    acme:
+#      email: "nataliesimon2201@gmail.com"
+#      storage: "/etc/traefik/acme/acme.json"
+#      httpChallenge:
+#        entryPoint: http
 
 # Access log
 accessLog:

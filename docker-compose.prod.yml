@@ -8,30 +8,28 @@ services:
       dockerfile: ./deploy/docker/Dockerfile.prod
     restart: unless-stopped
     depends_on:
-      postgres-db:
-        condition: service_healthy
-
+      - postgres
     env_file:
       - ./.env
     volumes:
       - ./.env:/app/.env
-    ports:
-      - "3000:3000"  # Exposer directement le port de l'API
     networks:
       - app-network
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api.entrypoints=http"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
 
-  postgres-db:
+  postgres:
     container_name: postgres_db
     image: postgres:15-alpine
     restart: unless-stopped
     env_file:
       - ./.env
-    environment:
-      - NODE_ENV=production
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "54322:5432"  # Exposer le port de la base de données
     networks:
       - app-network
     healthcheck:
@@ -40,8 +38,31 @@ services:
       timeout: 5s
       retries: 5
 
+  traefik:
+    container_name: traefik
+    image: traefik:v2.10
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # Port 443 commenté pour la première étape
+      # - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./deploy/docker/traefik/config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./deploy/docker/traefik/dynamic:/etc/traefik/dynamic:ro
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      # Dashboard configuration simplifiée
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=http"
+
 networks:
   app-network:
+    driver: bridge
+  web:
     driver: bridge
 
 volumes:
