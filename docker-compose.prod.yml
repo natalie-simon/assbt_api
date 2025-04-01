@@ -11,8 +11,10 @@ services:
       - postgres
     env_file:
       - ./.env
+    environment:
+      - DB_HOST=postgres-db  # Force l'utilisation du bon nom d'hôte
     volumes:
-      - ./.env:/app/.env
+      - ./.env:/app/.env  # Montage du fichier .env local dans le conteneur
     networks:
       - app-network
       - web
@@ -23,7 +25,7 @@ services:
       - "traefik.http.services.api.loadbalancer.server.port=3000"
 
   postgres:
-    container_name: postgres_db
+    container_name: postgres-db  # Nom modifié pour correspondre à celui attendu par l'application
     image: postgres:15-alpine
     restart: unless-stopped
     env_file:
@@ -44,7 +46,7 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
-      # Port 443 commenté pour la première étape
+      # Port 443 commenté pour la première étape (sans HTTPS)
       # - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
