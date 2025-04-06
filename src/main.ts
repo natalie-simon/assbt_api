@@ -56,6 +56,6 @@ async function bootstrap() {
   };
   const s3Client = new S3Client(s3Config);
 
-  await app.listen(process.env.LISTEN_PORT || 3000);
+  await app.listen(process.env.LISTEN_PORT || 3000, '0.0.0.0');
 }
 bootstrap();
