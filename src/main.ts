@@ -24,6 +24,7 @@ async function bootstrap() {
     origin: [
       /^https?:\/\/.+\.nataliesimon\.fr$/,
       /^https?:\/\/.+\.lesbulleurstoulonnais\.fr$/,
+      'https://assbt2025.lesbulleurstoulonnais.fr',
       // Tous les sous-domaines de nataliesimon.fr
       'https://nataliesimon.fr', // Domaine principal en HTTPS
       'http://nataliesimon.fr', // Domaine principal en HTTP
