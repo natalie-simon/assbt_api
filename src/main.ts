@@ -21,14 +21,16 @@ async function bootstrap() {
 
   // Configuration CORS
   app.enableCors({
-      origin: [
-    /^https?:\/\/.+\.nataliesimon\.fr$/, // Tous les sous-domaines de nataliesimon.fr
-    'https://nataliesimon.fr',           // Domaine principal en HTTPS
-    'http://nataliesimon.fr',            // Domaine principal en HTTP
-    'http://localhost:3000',             // Localhost avec port spécifique pour le frontend
-    'http://localhost:8080',             // Autre port potentiel
-    'http://localhost:5173'                   // Localhost sans port spécifié
-  ],
+    origin: [
+      /^https?:\/\/.+\.nataliesimon\.fr$/,
+      /^https?:\/\/.+\.lesbulleurstoulonnais\.fr$/,
+      // Tous les sous-domaines de nataliesimon.fr
+      'https://nataliesimon.fr', // Domaine principal en HTTPS
+      'http://nataliesimon.fr', // Domaine principal en HTTP
+      'http://localhost:3000', // Localhost avec port spécifique pour le frontend
+      'http://localhost:8080', // Autre port potentiel
+      'http://localhost:5173', // Localhost sans port spécifié
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
