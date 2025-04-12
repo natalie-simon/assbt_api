@@ -57,7 +57,7 @@ export class MembresService {
    * @returns
    */
   public async findAllUsers() {
-    return this.usersRepository.find({ relations: ['role'] });
+    return this.usersRepository.find({ relations: ['profil'] });
   }
 
   /**

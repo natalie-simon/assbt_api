@@ -1,9 +1,14 @@
 import {
   Controller,
+  Get,
   Post,
   Body,
   UseInterceptors,
   UploadedFile,
+  Param,
+  NotFoundException,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { CategorieActiviteService } from './services/categorie-activite.service';
 import { CreateCategorieActiviteDto } from './dtos/create-categorie-activite.dto';
@@ -64,6 +69,128 @@ export class CategorieActiviteController {
     if (image) {
       fichier = await this.uploadService.uploadFile(image);
     }
-    return this.categorieActiviteService.createCategorieActivite(createCategorieActiviteDto, fichier);
+    return this.categorieActiviteService.createCategorieActivite(
+      createCategorieActiviteDto,
+      fichier,
+    );
   }
+
+  /**
+   * Récupération de toutes les catégories d'activités (Admin)
+   * @returns
+   */
+  @Get()
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({
+    summary: "Récupération de toutes les catégories d'activités",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Liste de toutes les catégories d'activités",
+  })
+  public async findAllCategoriesActivites() {
+    const result =
+      await this.categorieActiviteService.findAllCategoriesActivites();
+    console.log('Result: ', JSON.stringify(result));
+    console.log('nb : ', result.length);
+
+    return result;
+  }
+
+  /**
+   * Récupération d'une catégorie d'activité avec filtres possibles
+   * @param id
+   */
+  @Get(':id')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({
+    summary: "Récupération d'un catégorie d'activité avec filtres possibles",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Récupération d'une catégorie d'activité",
+  })
+  public async findOneCategorieById(@Param('id') id: number) {
+    return this.categorieActiviteService.findCategorieActiviteById(id);
+  }
+
+  /**
+   * Mise à jour d'une catégorie d'activité
+   * @description Met à jour une catégorie d'activité existante avec les nouvelles données fournies.
+   * @param id
+   * @param createCategorieActiviteDto
+   * @param image
+   * @returns
+   */
+  @Put(':id')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOperation({
+    summary: "Mise à jour d'une catégorie d'activité",
+  })
+  @ApiHeaders([
+    { name: 'Content-Type', description: 'multipart/form-data' },
+    { name: 'Authorization', description: 'Bearer Token' },
+  ])
+  @ApiResponse({
+    status: 200,
+    description: "Mise à jour d'une catégorie d'activité",
+  })
+  public async updateCategorieActivite(
+    @Param('id') id: number,
+    @Body() createCategorieActiviteDto: CreateCategorieActiviteDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    const categorieActivite =
+      await this.categorieActiviteService.findCategorieActiviteById(id);
+    if (!categorieActivite) {
+      throw new NotFoundException(
+        `Catégorie d'activité avec l'id ${id} non trouvée`,
+      );
+    }
+
+    let fichier = null;
+    if (image) {
+      fichier = await this.uploadService.uploadFile(image);
+    }
+    const updatedCategorieActivite = {
+      ...createCategorieActiviteDto,
+      image: fichier,
+    };
+
+    return this.categorieActiviteService.updateCategorieActivite(
+      id,
+      updatedCategorieActivite,
+    );
+  }
+
+  /**
+   * Suppression d'une catégorie d'activité
+   * @param id
+   * @returns
+   */
+  @Delete(':id')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({
+    summary: "Suppression d'une catégorie d'activité",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Suppression d'une catégorie d'activité",
+  })
+  public async deleteCategorieActivite(@Param('id') id: number) {
+    const categorieActivite =
+      await this.categorieActiviteService.findCategorieActiviteById(id);
+    if (!categorieActivite) {
+      throw new NotFoundException(
+        `Catégorie d'activité avec l'id ${id} non trouvée`,
+      );
+    }
+    return this.categorieActiviteService.deleteCategorieActivite(id);
+  }
+ 
 }

@@ -1,5 +1,12 @@
-import { IsNotEmpty, MaxLength, IsString, IsBoolean, IsOptional } from "class-validator";
+import {
+  IsNotEmpty,
+  MaxLength,
+  IsString,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from 'class-transformer';
 
 /**
  * DTO de création d'une catégorie d'activité
@@ -39,7 +46,8 @@ export class CreateCategorieActiviteDto {
     type: Boolean,
   })
   @IsOptional()
-  @IsBoolean({ message: 'Le champ doit être un booléen' })
+  @Transform(({ value }) => (value == 'true' ? true : false))
+  @IsBoolean({ message: 'Le champ  avec_equipement doit être un booléen' })
   avec_equipement: boolean;
 
   /**
@@ -72,7 +80,8 @@ export class CreateCategorieActiviteDto {
     required: false,
     type: Boolean,
   })
+  @Transform(({ value }) => (value == 'true' ? true : false))
   @IsOptional()
-  @IsBoolean({ message: 'Le champ doit être un booléen' })
+  @IsBoolean({ message: 'Le champ avec_notification doit être un booléen' })
   avec_notification: boolean;
 }

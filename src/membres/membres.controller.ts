@@ -7,6 +7,8 @@ import {
   SetMetadata,
   Param,
   Query,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createMembre.dto';
 import { MembresService } from './services/membres.service';
@@ -57,6 +59,7 @@ export class MembresController {
    * @returns
    */
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.ADMIN)
   @ApiOperation({

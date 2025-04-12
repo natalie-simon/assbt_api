@@ -50,6 +50,47 @@ export class CategorieActiviteService {
    * @returns
    */
   public async findCategorieActiviteById(id: number) {
-    return this.categorieActiviteRepository.findOneBy({ id });
+    return this.categorieActiviteRepository.findOne({
+      relations: ['image'],
+      where:  {id: id}
+    });
+  }
+
+  /**
+   * Récupération de toutes les catégories d'activités
+   * @returns
+   */
+  public async findAllCategoriesActivites() {
+    return await this.categorieActiviteRepository.find({
+      order: {
+        lbl_categorie: 'ASC',
+      },
+    });
+  }
+
+  /**
+   * Mise à jour d'une catégorie d'activité
+   * @param id
+   * @param updateData
+   * @returns
+   */
+  public async updateCategorieActivite(id: number, updateData: Partial<CategorieActivite>) {
+    await this.categorieActiviteRepository.update(id, updateData);
+    return this.findCategorieActiviteById(id);
+  }
+
+  /**
+   * Suppression d'une catégorie d'activité
+   * @param id
+   * @returns
+   */
+  public async deleteCategorieActivite(id: number) {
+    const categorieActivite = await this.findCategorieActiviteById(id);
+    // voir pour la suppression du fichier associé
+    if (!categorieActivite) {
+      throw new Error('CategorieActivite not found');
+    }
+    await this.categorieActiviteRepository.delete(id);
+    return categorieActivite;
   }
 }

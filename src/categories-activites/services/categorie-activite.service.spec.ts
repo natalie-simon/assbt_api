@@ -17,6 +17,7 @@ describe('CategorieActiviteService', () => {
     create: jest.fn(),
     save: jest.fn(),
     findOneBy: jest.fn(),
+    findOne: jest.fn(), // Utilisez findOne au lieu de findOneBy
   };
 
   const mockLogger = {
@@ -112,21 +113,27 @@ describe('CategorieActiviteService', () => {
 
   describe('findCategorieActiviteById', () => {
     it('should return a category activity by id', async () => {
-      mockCategorieActiviteRepository.findOneBy.mockResolvedValue(mockCategorieActivite);
+      mockCategorieActiviteRepository.findOne.mockResolvedValue(mockCategorieActivite);
 
       const result = await service.findCategorieActiviteById(1);
 
-      expect(mockCategorieActiviteRepository.findOneBy).toHaveBeenCalledWith({ id: 1 });
+      expect(mockCategorieActiviteRepository.findOne).toHaveBeenCalledWith({
+        relations: ['image'],
+        where: { id: 1 },
+      });
       expect(result).toEqual(mockCategorieActivite);
     });
 
     it('should return null when category activity is not found', async () => {
-      mockCategorieActiviteRepository.findOneBy.mockResolvedValue(null);
+      mockCategorieActiviteRepository.findOne.mockResolvedValue(null);
 
       const result = await service.findCategorieActiviteById(999);
 
-      expect(mockCategorieActiviteRepository.findOneBy).toHaveBeenCalledWith({ id: 999 });
+      expect(mockCategorieActiviteRepository.findOne).toHaveBeenCalledWith({
+        relations: ['image'],
+        where: { id: 999 },
+      });
       expect(result).toBeNull();
     });
   });
-}); 
+});

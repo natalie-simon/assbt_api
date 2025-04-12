@@ -14,10 +14,15 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      /*transformOptions: {
+        enableImplicitConversion: true,
+      },*/
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   // Configuration CORS
   app.enableCors({
