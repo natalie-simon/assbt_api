@@ -25,7 +25,7 @@ async function bootstrap() {
   );
 
   // Configuration CORS
-  app.enableCors({
+  /*app.enableCors({
     origin: [
       /^https?:\/\/.+\.nataliesimon\.fr$/,
       /^https?:\/\/.+\.lesbulleurstoulonnais\.fr$/,
@@ -39,7 +39,7 @@ async function bootstrap() {
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-  });
+  });*/
 
   // swagger configuration
   const swaggerConfig = new DocumentBuilder()
