@@ -25,21 +25,16 @@ async function bootstrap() {
   );
 
   // Configuration CORS
-  app.enableCors({
-    origin: '*' /*[
-      /^https?:\/\/.+\.nataliesimon\.fr$/,
-      /^https?:\/\/.+\.lesbulleurstoulonnais\.fr$/,
-      'https://assbt2025.lesbulleurstoulonnais.fr',
-      // Tous les sous-domaines de nataliesimon.fr
-      'https://nataliesimon.fr', // Domaine principal en HTTPS
-      'http://nataliesimon.fr', // Domaine principal en HTTP
-      'http://localhost:3000', // Localhost avec port spécifique pour le frontend
-      'http://localhost:8080', // Autre port potentiel
-      'http://localhost:5173', // Localhost sans port spécifié
-    ]*/,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: false,
-  });
+app.enableCors({
+  origin: true, // Autorise toutes les origines
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: '*', // Autorise tous les en-têtes
+  exposedHeaders: '*', // Expose tous les en-têtes
+  credentials: true, // Autorise les credentials (cookies, auth)
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  maxAge: 86400, // Cache la réponse preflight pendant 24h
+});
 
   // swagger configuration
   const swaggerConfig = new DocumentBuilder()
