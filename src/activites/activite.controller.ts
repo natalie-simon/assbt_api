@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   ParseIntPipe,
   Put,
@@ -130,5 +131,32 @@ export class ActiviteController {
     @ActiveUser() user: ActiveUserData,
   ) {
     return this.activiteService.desinscriptionActivite(id, user);
+  }
+
+  @Put(':id')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Mettre à jour une activité' })
+  @ApiResponse({
+    status: 200,
+    description: "L'activité a été mise à jour avec succès",
+  })
+  public async updateActivite(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateActiviteDto: CreateActiviteDto,
+  ) {
+    return this.activiteService.updateActivite(id, updateActiviteDto);
+  }
+
+  @Delete(':id')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Supprimer une activité' })
+  @ApiResponse({
+    status: 200,
+    description: "L'activité a été supprimée avec succès",
+  })
+  public async deleteActivite(@Param('id', ParseIntPipe) id: number) {
+    return this.activiteService.deleteActivite(id);
   }
 }

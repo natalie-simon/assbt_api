@@ -194,4 +194,64 @@ export class ActiviteService {
       message: 'Désinscription effectuée avec succès',
     };
   }
+
+  /**
+   * Mise à jour d'une activité
+   * @param id
+   * @param updateActiviteDto
+   * @returns
+   */
+  public async updateActivite(
+    id: number,
+    updateActiviteDto: Partial<CreateActiviteDto>,
+  ) {
+    const activite = await this.activiteRepository.findOne({
+      where: { id: id },
+    });
+    if (!activite) {
+      throw new BadRequestException('Activité non trouvée');
+    }
+
+    const categorie =
+      await this.categorieActiviteService.findCategorieActiviteById(
+        updateActiviteDto.categorie,
+      );
+    if (!categorie) {
+      throw new Error('Catégorie non trouvée');
+    }
+
+    const updateActivite = this.activiteRepository.update(id, {
+      ...updateActiviteDto,
+      categorie,
+    });
+
+    return updateActivite;
+  }
+
+  /**
+   * Suppression d'une activité
+   * @param id
+   * @returns
+   */
+  public async deleteActivite(id: number) {
+    const activite = await this.activiteRepository.findOne({
+      where: { id: id },
+    });
+    if (!activite) {
+      throw new BadRequestException('Activité non trouvée');
+    }
+
+    try {
+      await this.activiteRepository.delete(id);
+      this.logger.log(
+        `L'activité suivante : ${activite.titre} a été supprimée.`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(
+        `Il y a des membres inscrits à cette activité, vous ne pouvez pas la supprimer`,
+      );
+    }
+    return activite;
+  }
 }
