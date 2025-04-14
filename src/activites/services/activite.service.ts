@@ -59,38 +59,32 @@ export class ActiviteService {
    * @param participants
    * @returns
    */
-  public async findOneActiviteWithFilters(id: number, participants?: boolean): Promise<Activite> {
+  public async findOneActiviteWithFilters(
+    id: number,
+    participants?: boolean,
+  ): Promise<Activite> {
     const relations = participants
-      ? ['categorie', 'participants', 'participants.membre', 'participants.membre.profil']
+      ? [
+          'categorie',
+          'participants',
+          'participants.membre',
+          'participants.membre.profil',
+        ]
       : ['categorie'];
 
-    const activite = await this.activiteRepository.findOne({
-      where: { id: id },
-      relations: relations,
-      select: {
-        id: true,
-        titre: true,
-        contenu: true,
-        date_heure_debut: true,
-        date_heure_fin: true,
-        categorie: {
-          lbl_categorie: true,
-          couleur: true,
-          avec_equipement: true,
-        },
-        participants: {
-          observations: true,
-          dateInscription: true,
-          membre: {
-            id: true,
-            profil: {
-              nom: true,
-              prenom: true,
-            }
-          }
-        }
-      }
-    });
+    const queryBuilder = this.activiteRepository
+      .createQueryBuilder('activite')
+      .leftJoinAndSelect('activite.categorie', 'categorie')
+      .where('activite.id = :id', { id });
+
+    if (participants) {
+      queryBuilder
+        .leftJoinAndSelect('activite.participants', 'participants')
+        .leftJoinAndSelect('participants.membre', 'membre')
+        .leftJoinAndSelect('membre.profil', 'profil');
+    }
+
+    const activite = await queryBuilder.getOne();
 
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
@@ -199,5 +193,65 @@ export class ActiviteService {
       success: true,
       message: 'Désinscription effectuée avec succès',
     };
+  }
+
+  /**
+   * Mise à jour d'une activité
+   * @param id
+   * @param updateActiviteDto
+   * @returns
+   */
+  public async updateActivite(
+    id: number,
+    updateActiviteDto: Partial<CreateActiviteDto>,
+  ) {
+    const activite = await this.activiteRepository.findOne({
+      where: { id: id },
+    });
+    if (!activite) {
+      throw new BadRequestException('Activité non trouvée');
+    }
+
+    const categorie =
+      await this.categorieActiviteService.findCategorieActiviteById(
+        updateActiviteDto.categorie,
+      );
+    if (!categorie) {
+      throw new Error('Catégorie non trouvée');
+    }
+
+    const updateActivite = this.activiteRepository.update(id, {
+      ...updateActiviteDto,
+      categorie,
+    });
+
+    return updateActivite;
+  }
+
+  /**
+   * Suppression d'une activité
+   * @param id
+   * @returns
+   */
+  public async deleteActivite(id: number) {
+    const activite = await this.activiteRepository.findOne({
+      where: { id: id },
+    });
+    if (!activite) {
+      throw new BadRequestException('Activité non trouvée');
+    }
+
+    try {
+      await this.activiteRepository.delete(id);
+      this.logger.log(
+        `L'activité suivante : ${activite.titre} a été supprimée.`,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new BadRequestException(
+        `Il y a des membres inscrits à cette activité, vous ne pouvez pas la supprimer`,
+      );
+    }
+    return activite;
   }
 }

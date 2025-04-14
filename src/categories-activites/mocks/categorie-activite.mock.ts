@@ -13,6 +13,7 @@ export const CategoriesActiviteMock: CategorieActivite[] = [
     couleur: 'FF5733',
     avec_notification: true,
     image: null,
+    is_supprime: false,
   },
   {
     id: 2,
@@ -21,6 +22,7 @@ export const CategoriesActiviteMock: CategorieActivite[] = [
     couleur: '33FF57',
     avec_notification: true,
     image: null,
+    is_supprime: true,
   },
   {
     id: 3,
@@ -29,6 +31,7 @@ export const CategoriesActiviteMock: CategorieActivite[] = [
     couleur: '3357FF',
     avec_notification: false,
     image: null,
+    is_supprime: false,
   },
 ];
 

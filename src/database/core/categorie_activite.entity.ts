@@ -86,4 +86,17 @@ export class CategorieActivite {
   @ManyToOne(() => Fichier, { nullable: true })
   @JoinColumn()
   image: Fichier;
+
+/**
+ * True si la catégorie est supprimée
+ *
+ * @type {boolean}
+ * @memberof CategorieActivite
+ */
+@Column({
+    type: 'boolean',
+    name: 'is_supprime',
+    default: false,
+  })
+  is_supprime: boolean;
 }

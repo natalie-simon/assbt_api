@@ -16,6 +16,7 @@ export const mockCategorieActivite: CategorieActivite = {
   couleur: 'FF0000',
   avec_notification: false,
   image: null,
+  is_supprime: false,
 };
 
 /**

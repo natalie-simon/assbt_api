@@ -79,6 +79,32 @@ export class Activite {
   date_heure_fin: Date;
 
   /**
+   * Date et heure limite d'inscription à l'activité
+   *
+   * @type {Date}
+   * @memberof Activite
+   */
+  /*@Column({
+    type: 'timestamp',
+    name: 'date_heure_limite',
+    nullable: true,
+  })
+  date_heure_limite: Date;*/
+
+  /**
+   * Nombre maximum de participants à l'activité
+   *
+   * @type {number}
+   * @memberof Activite
+   */
+  /*@Column({
+    type: 'number',
+    name: 'nombre_max_participants',
+    nullable: true,
+  })
+  nombre_max_participants: number;*/
+
+  /**
    * Catégorie de l'activité
    *
    * @type {CategorieActivite}
