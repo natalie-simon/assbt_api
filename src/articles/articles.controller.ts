@@ -26,7 +26,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FichierService } from '../fichiers/services/fichier.service';
 import { categorieArticleTypes } from './enums/categorie-article-types.enum';
-import { Fichier } from '../database/core/fichier.entity';
 import { ConditionalAuth } from '../auth/decorators/conditional-auth.decorator';
 
 /**
@@ -97,11 +96,12 @@ export class ArticlesController {
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
   ) {
-    let image = null as Fichier | null;
+    let imageId = null;
     if (file) {
-      image = await this.fichierService.uploadFile(file);
+      const image = await this.fichierService.uploadFile(file);
+      imageId = image.id; // On récupère seulement l'id
     }
-    return this.articlesService.createArticle(createArticleDto, user, image);
+    return this.articlesService.createArticle(createArticleDto, user, imageId);
   }
 
   /**

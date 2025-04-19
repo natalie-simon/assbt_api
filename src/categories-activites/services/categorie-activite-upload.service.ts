@@ -1,19 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Fichier } from '../../database/core/fichier.entity';
+import { PrismaService } from '../../prisma/prisma.service';
 import { UploadToO2SwitchProvider } from '../../fichiers/providers/upload-to-o2switch.provider';
+import { FileTypes } from '@prisma/client';
 
 @Injectable()
 export class CategorieActiviteUploadService {
   constructor(
-    @InjectRepository(Fichier)
-    private fichierRepository: Repository<Fichier>,
+    private prisma: PrismaService,
     private uploadProvider: UploadToO2SwitchProvider,
   ) {}
 
-  async uploadFile(file: Express.Multer.File): Promise<Fichier> {
-    const fichier = await this.uploadProvider.uploadFile(file);
-    return this.fichierRepository.save(fichier);
+  async uploadFile(file: Express.Multer.File) {
+    const fichierData = await this.uploadProvider.uploadFile(file);
+
+    console.log('fichierData type : ', fichierData.type);
+    // Créer manuellement un objet avec la structure exacte attendue par Prisma
+    const created = await this.prisma.fichier.create({
+      data: {
+        nom: fichierData.nom,
+        url: fichierData.url,
+        mime: fichierData.mime,
+        type: FileTypes.IMAGE, // Convertir en enum si nécessaire
+        taille: String(fichierData.taille), // Convertir en string
+      },
+    });
+
+    return created?.id;
   }
 }

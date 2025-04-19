@@ -22,6 +22,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import mailConfig from './config/mail.config';
 import loggerConfig from './config/logger.config';
 import { ProfilsModule } from './profils/profils.module';
+import { PrismaModule } from './prisma/prisma.module';
+
 
 /**
  * Chargement des variables d'environnement
@@ -33,6 +35,7 @@ const ENV = process.env.NODE_ENV;
  */
 @Module({
   imports: [
+    PrismaModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -44,7 +47,7 @@ const ENV = process.env.NODE_ENV;
         password: configService.get('database.password'),
         database: configService.get('database.name'),
         autoLoadEntities: true,
-        synchronize: process.env.NODE_ENV !== 'production',
+        synchronize: false,
         entities: [__dirname + '/database/core/**/*.entity{.ts,.js}'],
         logging: process.env.NODE_ENV === 'development',      }),
     }),

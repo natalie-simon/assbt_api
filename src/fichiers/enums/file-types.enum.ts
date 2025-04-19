@@ -3,5 +3,5 @@ export enum fileTypes  {
   VIDEO = 'video',
   AUDIO = 'audio',
   DOCUMENT = 'document',
-  OTHER = 'other'
+  AUTRE = 'autre'
 }

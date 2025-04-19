@@ -1,12 +1,11 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Membre } from '../../database/core/membre.entity';
-import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dtos/createMembre.dto';
 import { CreateUserProvider } from '../../auth/services/create-user.provider';
 import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
-import { Profil } from '../../database/core/profil.entity';
-import { QueryExpressionMap } from 'typeorm/query-builder/QueryExpressionMap';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client'; // Importer les types Prisma
+
 
 /**
  * Service de gestion des utilisateurs
@@ -18,10 +17,7 @@ export class MembresService {
    * @param usersRepository le repository des Users
    */
   constructor(
-    @InjectRepository(Membre)
-    private readonly usersRepository: Repository<Membre>,
-    @InjectRepository(Profil)
-    private readonly profilRepository: Repository<Profil>,
+    private readonly prisma: PrismaService,
     private readonly createUserProvider: CreateUserProvider,
     private readonly findOneByEmailProvider: FindOneByEmailProvider,
   ) {}
@@ -45,10 +41,16 @@ export class MembresService {
    * @returns
    * @throws BadRequestException
    */
-  public async findOneByEmail(email: string): Promise<Membre | null> {
-    return this.usersRepository.findOne({
+  public async findOneByEmail(email: string): Promise<any> {
+    return this.prisma.membre.findUnique({
       where: { email },
-      relations: ['profil', 'profil.avatar'],
+      include: {
+        profil: {
+          include: {
+            avatar: true,
+          },
+        },
+      },
     });
   }
 
@@ -57,7 +59,11 @@ export class MembresService {
    * @returns
    */
   public async findAllUsers() {
-    return this.usersRepository.find({ relations: ['profil'] });
+    return this.prisma.membre.findMany({
+      include: {
+        profil: true,
+      },
+    });
   }
 
   /**
@@ -65,8 +71,19 @@ export class MembresService {
    * @param user
    * @returns
    */
-  public async update(user: Membre) {
-    return this.usersRepository.save(user);
+  public async update(user: any) {
+    const { id, email, mot_de_passe, est_supprime, role } = user;
+
+    return this.prisma.membre.update({
+      where: { id },
+      data: {
+        email,
+        mot_de_passe,
+        est_supprime,
+        role,
+        // Ajoutez d'autres champs si nécessaire
+      },
+    });
   }
 
   /**
@@ -75,7 +92,10 @@ export class MembresService {
    * @returns
    */
   public async findUserById(id: number) {
-    return this.usersRepository.findOne({ where: { id: id }, relations: ['profil'] });
+    return this.prisma.membre.findUnique({
+      where: { id: id },
+      include: { profil: true },
+    });
   }
 
   /**
@@ -85,30 +105,35 @@ export class MembresService {
    */
   public async findOneUserByEmailProvider(
     email: string,
-  ): Promise<Membre | null> {
+  ): Promise<any> {
     return this.findOneByEmailProvider.findOneUserByEmailProvider(email);
   }
 
   public async findProfileByUserIdWithFilters(id: number, activites: boolean) {
     const now = new Date().toISOString();
 
-    const query = await this.usersRepository
-      .createQueryBuilder('membre')
-      .select(['membre.id']) // Ne garde que l'ID du membre
-      .leftJoinAndSelect('membre.profil', 'profil');
+    const include: any = {
+      profil: true,
+    };
 
     if (activites) {
-      query
-        .leftJoinAndSelect('membre.inscriptions', 'inscriptions') // Inscriptions complètes
-        .leftJoinAndSelect('inscriptions.activite', 'activite');
+      include.inscriptions = {
+        include: {
+          activite: true,
+        },
+        where: {
+          activite: {
+            date_heure_debut: {
+              gt: now,
+            },
+          },
+        },
+      };
     }
 
-    query.where('membre.id = :id', { id });
-
-    if (activites) {
-      query.andWhere('activite.date_heure_debut > :now', { now });
-    }
-
-    return query.getOne();
+    return this.prisma.membre.findUnique({
+      where: { id },
+      include,
+    });
   }
 }

@@ -2,6 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { Membre } from '../../database/core/membre.entity';
 import * as dotenv from 'dotenv';
+import { MembreWithRelations } from 'src/partage/types/prisma-type';
 dotenv.config();
 
 /**
@@ -19,7 +20,7 @@ export class MailService {
    * Envoie d'une mail pour l'inscription d'un nouveau membre
    * @param user
    */
-  public async sendInscriptionNouveauMembre(membre: Membre): Promise<void> {
+  public async sendInscriptionNouveauMembre(membre: MembreWithRelations): Promise<void> {
     await this.mailerService.sendMail({
       to: process.env.MAIL_ADMIN,
       from: `Membre : ${membre.email}`,

@@ -15,6 +15,7 @@ import jwtConfig from '../config/jwt.config';
 import { ChangePasswordDto } from '../dtos/changePassword.dto';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { HashingProvider } from './hashing.provider';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Service de gestion des Statuts
@@ -37,6 +38,7 @@ export class AuthService {
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly mailService: MailService,
+    private readonly prisma: PrismaService, // Ajout du PrismaService si nécessaire
   ) {}
 
   /**
@@ -63,7 +65,7 @@ export class AuthService {
       {
         sub: user.id,
         email: user.email,
-        role: user
+        role: user.role,
       },
       {
         secret: this.jwtConfiguration.secret,
@@ -73,7 +75,10 @@ export class AuthService {
 
     try {
       await this.mailService.sendMailReinitialisationMDP(user, accessToken);
-      return { message: 'Un email pour réinitialiser votre mot de passe vient de vous être envoyé.' };
+      return {
+        message:
+          'Un email pour réinitialiser votre mot de passe vient de vous être envoyé.',
+      };
     } catch (err) {
       console.log(err);
       throw new BadRequestException("Erreur lors de l'envoi de l'email.");
@@ -94,19 +99,22 @@ export class AuthService {
     const mot_de_passe = await this.hashingProvider.hashPassword(
       changePasswordDto.nouveau_mdp,
     );
-      (user.mot_de_passe = mot_de_passe);
-    await this.usersService.update(user);
 
-        try {
-          await this.mailService.sendMailMotDePasseModifie(user);
-          return {
-            message:
-              'Votre mot de passe a bien été modifié.',
-          };
-        } catch (err) {
-          console.log(err);
-          throw new BadRequestException("Erreur lors de l'envoi de l'email.");
-        }
+    // Mettre à jour directement avec Prisma si nécessaire
+    await this.prisma.membre.update({
+      where: { id: user.id },
+      data: { mot_de_passe: mot_de_passe },
+    });
+
+    try {
+      await this.mailService.sendMailMotDePasseModifie(user);
+      return {
+        message: 'Votre mot de passe a bien été modifié.',
+      };
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException("Erreur lors de l'envoi de l'email.");
+    }
   }
 
   /**
