@@ -1,5 +1,4 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Membre } from '../../database/core/membre.entity';
 import { CreateUserDto } from '../dtos/createMembre.dto';
 import { CreateUserProvider } from '../../auth/services/create-user.provider';
 import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';

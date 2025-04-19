@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Fichier } from '../../database/core/fichier.entity';
 import { Express } from 'express';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,7 +26,7 @@ export class UploadToO2SwitchProvider {
     return `${cleanBaseName}-${timestamp}-${uniqueId}${extension}`;
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<Fichier> {
+  async uploadFile(file: Express.Multer.File): Promise<any> {
     const client = new ftp.Client();
     client.ftp.verbose = true;
 
@@ -67,7 +66,7 @@ export class UploadToO2SwitchProvider {
       await client.uploadFrom(stream, fileName);
 
       // Créer l'entité Fichier
-      const fichier = new Fichier();
+      const fichier = null;
       fichier.nom = fileName;
       // URL complète vers le fichier
       fichier.url = `https://apitest.nataliesimon.fr/uploads/${fileName}`;

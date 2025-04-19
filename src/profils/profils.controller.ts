@@ -2,12 +2,12 @@ import { Controller, Get, Post, Put, Body, Param, UseInterceptors, UploadedFile,
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiHeaders } from '@nestjs/swagger';
 import { ProfilsService } from './services/profils.service';
-import { Profil } from '../database/core/profil.entity';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { CategorieActiviteUploadService } from 'src/categories-activites/services/categorie-activite-upload.service';
+import { Profil } from '@prisma/client';
 @Controller('profils')
 @ApiTags('profils')
 export class ProfilsController {

@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
-import { Membre } from '../../database/core/membre.entity';
+import { Membre } from '@prisma/client';
 import * as dotenv from 'dotenv';
 import { MembreWithRelations } from 'src/partage/types/prisma-type';
 dotenv.config();
