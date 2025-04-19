@@ -8,10 +8,16 @@ RUN npm install
 
 # Generate Prisma client
 COPY prisma ./prisma/
+RUN mkdir -p ./generated
+RUN echo "export type Membre = any;" > ./generated/prisma/index.ts
+RUN echo "export type Profil = any;" >> ./generated/prisma/index.ts
 RUN npx prisma generate
 
 # Copy source files and build the application
 COPY . .
+
+RUN chmod +x ./fix-imports.sh && ./fix-imports.sh
+
 RUN npm run build
 
 # Production stage
