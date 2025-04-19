@@ -13,6 +13,8 @@ services:
       - postgres-db
     env_file:
       - ./.env
+    environment:
+      - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-postgres}@postgres-db:5432/${DB_NAME:-nestjs_db}?schema=public
     volumes:
       - ./.env:/app/.env
       - ./prisma:/app/prisma
@@ -38,15 +40,15 @@ services:
     env_file:
       - ./.env
     environment:
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-nestjs_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-nestjs_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
