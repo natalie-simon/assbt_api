@@ -1,35 +1,28 @@
-api:
-  dashboard: true
-  debug: true
+# Configuration Traefik avec CORS entièrement ouvert
+# À placer dans deploy/docker/traefik/dynamic/cors.yml
 
-entryPoints:
-  http:
-    address: ":80"
-    http:
-      redirections:
-        entryPoint:
-          to: https
-          scheme: https
-  https:
-    address: ":443"
+http:
+  middlewares:
+    # Middleware CORS complètement ouvert
+    cors-open:
+      headers:
+        accessControlAllowOriginList:
+          - "*"
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowHeaders:
+          - "*"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 86400
+        addVaryHeader: true
 
-providers:
-  docker:
-    endpoint: "unix:///var/run/docker.sock"
-    exposedByDefault: false
-    network: web
-  file:
-    directory: "/etc/traefik/dynamic"
-    watch: true
-
-certificatesResolvers:
-  letsencrypt:
-    acme:
-      email: "nataliesimon2201@gmail.com"
-      storage: "/etc/traefik/acme/acme.json"
-      httpChallenge:
-        entryPoint: http
-
-# Access log
-accessLog:
-  filePath: "/var/log/traefik/access.log"
+    # Middleware pour la redirection HTTP vers HTTPS
+    redirectToHttps:
+      redirectScheme:
+        scheme: https
+        permanent: true

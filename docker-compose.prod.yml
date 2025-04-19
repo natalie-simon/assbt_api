@@ -28,10 +28,11 @@ services:
       - "traefik.http.routers.api.tls=true"
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.api.middlewares=cors-open@file"
       # Ajout de la configuration pour la redirection HTTP -> HTTPS
       - "traefik.http.routers.api-http.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
       - "traefik.http.routers.api-http.entrypoints=http"
-      - "traefik.http.routers.api-http.middlewares=redirectToHttps"
+      - "traefik.http.routers.api-http.middlewares=redirectToHttps@file"
 
   postgres-db:
     container_name: postgres_db

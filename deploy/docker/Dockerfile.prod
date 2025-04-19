@@ -22,6 +22,9 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /app
 
+# Ajouter curl pour le débogage
+RUN apk add --no-cache curl
+
 # Copy package files and install production dependencies
 COPY package*.json ./
 RUN npm ci --only=production
@@ -36,5 +39,16 @@ COPY --from=builder /app/dist ./dist
 # Expose the application port
 EXPOSE 3000
 
-# Command to run the application
-CMD ["node", "dist/main"]
+# Script de démarrage pour désactiver CORS
+RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
+  echo 'echo "Configuration CORS dans NestJS..."' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_ORIGINS="*"' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_METHODS="*"' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_ALLOWED_HEADERS="*"' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_CREDENTIALS="true"' >> /usr/local/bin/start.sh && \
+  echo 'echo "Démarrage de l'application..."' >> /usr/local/bin/start.sh && \
+  echo 'node dist/main' >> /usr/local/bin/start.sh && \
+  chmod +x /usr/local/bin/start.sh
+
+# Remplace la commande originale
+CMD ["/usr/local/bin/start.sh"]

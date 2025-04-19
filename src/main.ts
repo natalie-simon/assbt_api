@@ -16,6 +16,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
+      whitelist: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true, // Conversion implicite
@@ -26,7 +27,7 @@ async function bootstrap() {
 
   // Configuration CORS
 app.enableCors({
-  origin: true, // Autorise toutes les origines
+  origin: '*', // Autorise toutes les origines
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: '*', // Autorise tous les en-têtes
   exposedHeaders: '*', // Expose tous les en-têtes
