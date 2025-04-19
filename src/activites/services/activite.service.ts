@@ -4,9 +4,6 @@ import {
   LoggerService,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Activite } from '../../database/core/activite.entity';
-import { Repository } from 'typeorm';
 import { CreateActiviteDto } from '../dtos/create-activite.dto';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { CategorieActiviteService } from '../../categories-activites/services/categorie-activite.service';
@@ -14,8 +11,8 @@ import { plainToInstance } from 'class-transformer';
 import { ActiviteAgendaDto } from '../dtos/activite-agenda.dto';
 import { InscriptionActiviteDto } from '../dtos/inscription-activite.dto';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
-import { MembreActivite } from '../../database/core/membre_activite.entity';
 import { MembresService } from '../../membres/services/membres.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Service de l'activité
@@ -24,15 +21,12 @@ import { MembresService } from '../../membres/services/membres.service';
 export class ActiviteService {
   /**
    * Constructeur
-   * @param activiteRepository
+   * @param prisma
    * @param categorieActiviteService
    * @param logger
    */
   constructor(
-    @InjectRepository(Activite)
-    private readonly activiteRepository: Repository<Activite>,
-    @InjectRepository(MembreActivite)
-    private readonly membreActiviteRepository: Repository<MembreActivite>,
+    private readonly prisma: PrismaService,
     private readonly categorieActiviteService: CategorieActiviteService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
@@ -44,8 +38,10 @@ export class ActiviteService {
    * @returns
    */
   public async findAllActivites() {
-    const activites = await this.activiteRepository.find({
-      relations: ['categorie'],
+    const activites = await this.prisma.activite.findMany({
+      include: {
+        categorie: true,
+      },
     });
 
     return plainToInstance(ActiviteAgendaDto, activites, {
@@ -62,29 +58,27 @@ export class ActiviteService {
   public async findOneActiviteWithFilters(
     id: number,
     participants?: boolean,
-  ): Promise<Activite> {
-    const relations = participants
-      ? [
-          'categorie',
-          'participants',
-          'participants.membre',
-          'participants.membre.profil',
-        ]
-      : ['categorie'];
-
-    const queryBuilder = this.activiteRepository
-      .createQueryBuilder('activite')
-      .leftJoinAndSelect('activite.categorie', 'categorie')
-      .where('activite.id = :id', { id });
+  ): Promise<any> {
+    const include: any = {
+      categorie: true,
+    };
 
     if (participants) {
-      queryBuilder
-        .leftJoinAndSelect('activite.participants', 'participants')
-        .leftJoinAndSelect('participants.membre', 'membre')
-        .leftJoinAndSelect('membre.profil', 'profil');
+      include.participants = {
+        include: {
+          membre: {
+            include: {
+              profil: true,
+            },
+          },
+        },
+      };
     }
 
-    const activite = await queryBuilder.getOne();
+    const activite = await this.prisma.activite.findUnique({
+      where: { id },
+      include,
+    });
 
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
@@ -103,18 +97,28 @@ export class ActiviteService {
       await this.categorieActiviteService.findCategorieActiviteById(
         createActiviteDto.categorie,
       );
+
     if (!categorie) {
       throw new Error('Catégorie non trouvée');
     }
-    const newActivite = this.activiteRepository.create({
-      ...createActiviteDto,
-      categorie,
+
+    const savedActivite = await this.prisma.activite.create({
+      data: {
+        titre: createActiviteDto.titre,
+        contenu: createActiviteDto.contenu,
+        date_heure_debut: createActiviteDto.date_heure_debut,
+        date_heure_fin: createActiviteDto.date_heure_fin,
+        categorieId: categorie.id,
+      },
+      include: {
+        categorie: true,
+      },
     });
 
-    const savedActivite = await this.activiteRepository.save(newActivite);
     this.logger.log(
       `L'activité suivante : ${savedActivite.titre} a été créée.`,
     );
+
     return savedActivite;
   }
 
@@ -129,34 +133,45 @@ export class ActiviteService {
     id: number,
     inscriptionActiviteDto: InscriptionActiviteDto,
     activeUser: ActiveUserData,
-  ): Promise<MembreActivite> {
-    const activite = await this.activiteRepository.findOne({
-      where: { id: id },
+  ): Promise<any> {
+    const activite = await this.prisma.activite.findUnique({
+      where: { id },
     });
 
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
     }
 
-    let membre = await this.membresService.findUserById(activeUser['sub']);
-    const isInscrit = await this.membreActiviteRepository.findOne({
-      where: { activite, membre },
+    const membre = await this.membresService.findUserById(activeUser['sub']);
+
+    const isInscrit = await this.prisma.membreActivite.findFirst({
+      where: {
+        activiteId: activite.id,
+        membreId: membre.id,
+      },
     });
 
     if (isInscrit) {
       throw new BadRequestException('Membre déjà inscrit à cette activité');
     }
 
-    const nouvelleInscription = this.membreActiviteRepository.create({
-      membre: membre,
-      activite: activite,
-      observations: inscriptionActiviteDto.observations,
+    const nouvelleInscription = await this.prisma.membreActivite.create({
+      data: {
+        membreId: membre.id,
+        activiteId: activite.id,
+        observations: inscriptionActiviteDto.observations,
+      },
+      include: {
+        activite: true,
+        membre: true,
+      },
     });
+
     this.logger.log(
       `Le membre ${activeUser.email} s'est inscrit à l'activité ${activite.titre} - ${activite.date_heure_debut}`,
     );
 
-    return this.membreActiviteRepository.save(nouvelleInscription);
+    return nouvelleInscription;
   }
 
   /**
@@ -168,27 +183,35 @@ export class ActiviteService {
     id: number,
     activeUser: ActiveUserData,
   ): Promise<{ success: boolean; message: string }> {
-    const activite = await this.activiteRepository.findOne({
-      where: { id: id },
+    const activite = await this.prisma.activite.findUnique({
+      where: { id },
     });
 
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
     }
 
-    let membre = await this.membresService.findUserById(activeUser['sub']);
-    const inscription = await this.membreActiviteRepository.findOne({
-      where: { activite: activite, membre: membre },
+    const membre = await this.membresService.findUserById(activeUser['sub']);
+
+    const inscription = await this.prisma.membreActivite.findFirst({
+      where: {
+        activiteId: activite.id,
+        membreId: membre.id,
+      },
     });
 
     if (!inscription) {
       throw new BadRequestException("Vous n'êtes pas inscrit à cette activité");
     }
 
-    await this.membreActiviteRepository.remove(inscription);
+    await this.prisma.membreActivite.delete({
+      where: { id: inscription.id },
+    });
+
     this.logger.log(
       `Le membre ${activeUser.email} s'est désinscrit de l'activité ${activite.titre} - ${activite.date_heure_debut}`,
     );
+
     return {
       success: true,
       message: 'Désinscription effectuée avec succès',
@@ -205,9 +228,10 @@ export class ActiviteService {
     id: number,
     updateActiviteDto: Partial<CreateActiviteDto>,
   ) {
-    const activite = await this.activiteRepository.findOne({
-      where: { id: id },
+    const activite = await this.prisma.activite.findUnique({
+      where: { id },
     });
+
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
     }
@@ -216,16 +240,21 @@ export class ActiviteService {
       await this.categorieActiviteService.findCategorieActiviteById(
         updateActiviteDto.categorie,
       );
+
     if (!categorie) {
       throw new Error('Catégorie non trouvée');
     }
 
-    const updateActivite = this.activiteRepository.update(id, {
-      ...updateActiviteDto,
-      categorie,
+    return this.prisma.activite.update({
+      where: { id },
+      data: {
+        titre: updateActiviteDto.titre,
+        contenu: updateActiviteDto.contenu,
+        date_heure_debut: updateActiviteDto.date_heure_debut,
+        date_heure_fin: updateActiviteDto.date_heure_fin,
+        categorieId: categorie.id,
+      },
     });
-
-    return updateActivite;
   }
 
   /**
@@ -234,24 +263,40 @@ export class ActiviteService {
    * @returns
    */
   public async deleteActivite(id: number) {
-    const activite = await this.activiteRepository.findOne({
-      where: { id: id },
+    const activite = await this.prisma.activite.findUnique({
+      where: { id },
     });
+
     if (!activite) {
       throw new BadRequestException('Activité non trouvée');
     }
 
     try {
-      await this.activiteRepository.delete(id);
+      // Vérifier s'il y a des inscriptions
+      const inscriptions = await this.prisma.membreActivite.findMany({
+        where: { activiteId: id },
+      });
+
+      if (inscriptions.length > 0) {
+        throw new BadRequestException(
+          `Il y a des membres inscrits à cette activité, vous ne pouvez pas la supprimer`,
+        );
+      }
+
+      await this.prisma.activite.delete({
+        where: { id },
+      });
+
       this.logger.log(
         `L'activité suivante : ${activite.titre} a été supprimée.`,
       );
     } catch (error) {
       this.logger.error(error);
       throw new BadRequestException(
-        `Il y a des membres inscrits à cette activité, vous ne pouvez pas la supprimer`,
+        `Erreur lors de la suppression de l'activité: ${error.message}`,
       );
     }
+
     return activite;
   }
 }

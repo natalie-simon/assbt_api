@@ -19,7 +19,7 @@ export class ProfilsController {
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un profil par son id' })
   @ApiResponse({ status: 200, description: 'Un profil' })
-  async findOne(@Param('id') id: string): Promise<Profil> {
+  async findOne(@Param('id') id: string): Promise<any> {
     const profil = await this.profilsService.findOne(+id);
     if (!profil) {
       throw new BadRequestException('Profil non trouvé');
@@ -35,7 +35,7 @@ export class ProfilsController {
     @Param('id') id: string,
     @Body() updateProfilDto: Profil,
     @ActiveUser() activeUser: ActiveUserData,
-  ): Promise<Profil> {
+  ): Promise<any> {
     if (+id !== activeUser.sub) {
       throw new BadRequestException('Vous ne pouvez pas modifier ce profil');
     }
@@ -74,7 +74,7 @@ export class ProfilsController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() activeUser: ActiveUserData,
-  ): Promise<Profil> {
+  ): Promise<any> {
     if (+id !== activeUser.sub) {
       throw new BadRequestException('Vous ne pouvez pas modifier ce profil');
     }

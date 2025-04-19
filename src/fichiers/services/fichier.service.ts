@@ -1,16 +1,11 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Fichier } from '../../database/core/fichier.entity';
-import { Repository } from 'typeorm';
+import { PrismaService } from '../../prisma/prisma.service';
 import { UploadToO2SwitchProvider } from '../providers/upload-to-o2switch.provider';
 import { ConfigService } from '@nestjs/config';
-import { UploadFile } from '../interfaces/upload-file.interface';
-import { fileTypes } from '../enums/file-types.enum';
 
 /**
  * Service de gestion des uploads
@@ -21,13 +16,12 @@ export class FichierService {
    * Constructeur
    * @param uploadToAwsProvider
    * @param configService
-   * @param uploadsRepository
+   * @param prisma
    */
   constructor(
     private readonly uploadToAwsProvider: UploadToO2SwitchProvider,
     private readonly configService: ConfigService,
-    @InjectRepository(Fichier)
-    private readonly uploadsRepository: Repository<Fichier>,
+    private readonly prisma: PrismaService,
   ) {}
 
   /**
@@ -35,7 +29,7 @@ export class FichierService {
    * @param file
    * @returns
    */
-  public async uploadFile(file: Express.Multer.File): Promise<Fichier> {
+  public async uploadFile(file: Express.Multer.File) {
     if (
       !['image/gif', 'image/jpg', 'image/jpeg', 'image/png'].includes(
         file.mimetype,
@@ -45,8 +39,17 @@ export class FichierService {
     }
 
     try {
-      const fichier = await this.uploadToAwsProvider.uploadFile(file);
-      return this.uploadsRepository.save(fichier);
+      const fichierData = await this.uploadToAwsProvider.uploadFile(file);
+          return this.prisma.fichier.create({
+            data: {
+              nom: fichierData.nom,
+              url: fichierData.url,
+              mime: fichierData.mime,
+              type: fichierData.type as any, // Convertir en enum si nécessaire
+              taille: String(fichierData.taille), // Convertir en string
+            },
+          });
+
     } catch (error) {
       console.log(error);
       throw new ConflictException(error.message);

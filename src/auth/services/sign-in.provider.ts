@@ -22,7 +22,7 @@ import { ServerInfoService } from '../../logger/services/serveur-info';
 export class SignInProvider {
   /**
    * Constructeur
-   * @param userService
+   * @param membreService
    * @param jwtSercice
    * @param jwtConfiguration
    * @param hashingProvider

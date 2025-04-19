@@ -1,4 +1,4 @@
-name: Deploy NestJS to OVH VPS (Production)
+name: Deploy NestJS with Prisma to OVH VPS (Production)
 
 on:
   push:
@@ -119,39 +119,49 @@ jobs:
             echo "📊 État des services après déploiement:"
             docker-compose -f docker-compose.prod.yml ps
 
-            # Gestion des migrations
+            # Gestion des migrations avec Prisma
             if docker-compose -f docker-compose.prod.yml ps | grep -q "api"; then
-              echo "🔄 Gestion automatique des migrations..."
-              
-              # Créer le dossier migrations s'il n'existe pas
-              docker-compose -f docker-compose.prod.yml exec -T api mkdir -p dist/database/migrations
-              
-              # Étape 1: Compiler l'application pour s'assurer que dist/ est à jour
-              echo "🔨 Compilation du projet..."
-              docker-compose -f docker-compose.prod.yml exec -T api npm run build
-              
-              # Étape 2: Générer une nouvelle migration
-              echo "📝 Génération d'une nouvelle migration..."
-              TIMESTAMP=$(date +"%Y%m%d%H%M%S")
-              docker-compose -f docker-compose.prod.yml exec -T api npx typeorm migration:generate -d dist/config/typeorm.config.js dist/database/migrations/migration_${TIMESTAMP}
-              
-              # Étape 3: Exécuter les migrations
-              echo "🔄 Exécution des migrations..."
-              docker-compose -f docker-compose.prod.yml exec -T api npx typeorm migration:run -d dist/config/typeorm.config.js
-              
-              # Si les migrations échouent, essayer la synchronisation de schéma (uniquement pour les déploiements initiaux)
+              echo "🔄 Gestion des migrations Prisma..."
+
+              # Étape 1: Générer le client Prisma
+              echo "🔨 Génération du client Prisma..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx prisma generate
+
+              # Étape 2: Appliquer les migrations existantes
+              echo "🔄 Application des migrations Prisma..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+
+              # Si c'est la première exécution ou si le schéma a changé sans migration
               if [ $? -ne 0 ]; then
-                echo "⚠️ Échec des migrations. Tentative de synchronisation du schéma..."
-                docker-compose -f docker-compose.prod.yml exec -T api npx typeorm schema:sync -d dist/config/typeorm.config.js
+                echo "⚠️ Erreur lors de l'application des migrations. Vérification du schéma..."
+
+                # Vérifier si des migrations existent déjà
+                MIGRATIONS_EXIST=$(docker-compose -f docker-compose.prod.yml exec -T api ls -la prisma/migrations 2>/dev/null | grep -v "total" | wc -l)
+
+                if [ "$MIGRATIONS_EXIST" -eq "0" ]; then
+                  echo "🔧 Aucune migration existante. Création de la première migration..."
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate dev --name init --create-only
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+                else
+                  echo "🔍 Vérification de l'état de la base de données..."
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma db pull
+                  echo "📝 Création d'une migration de rattrapage..."
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate dev --name schema_sync --create-only
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+                fi
               fi
+
+              # Vérification finale
+              echo "🔍 Vérification de l'état des migrations Prisma..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate status
             else
               echo "⚠️ Le service api n'est pas en cours d'exécution, migrations ignorées"
             fi
-            
+
             # Vérifier les tables créées
             echo "📊 Vérification des tables de la base de données:"
             docker-compose -f docker-compose.prod.yml exec -T postgres-db psql -U postgres -d nestjs_db -c "\dt"
-            
+
             # Afficher les logs du service API
             echo "📃 Logs du service NestJS:"
             docker-compose -f docker-compose.prod.yml logs --tail=50 api

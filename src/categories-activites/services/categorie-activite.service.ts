@@ -1,10 +1,8 @@
 import { Injectable, Inject, LoggerService } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CategorieActivite } from '../../database/core/categorie_activite.entity';
-import { Repository } from 'typeorm';
 import { CreateCategorieActiviteDto } from '../dtos/create-categorie-activite.dto';
-import { Fichier } from '../../database/core/fichier.entity';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CategorieActivite } from 'generated/prisma';
 
 /**
  * Service de la catégorie d'activité
@@ -13,31 +11,35 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 export class CategorieActiviteService {
   /**
    * Constructeur de la catégorie d'activité
-   * @param categorieActiviteRepository
+   * @param prisma
    * @param logger
    */
   constructor(
-    @InjectRepository(CategorieActivite)
-    private readonly categorieActiviteRepository: Repository<CategorieActivite>,
+    private readonly prisma: PrismaService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
   ) {}
 
   /**
-   * Récupération de toutes les catégories d'activités
+   * Création d'une catégorie d'activité
+   * @param createCategorieActiviteDto
+   * @param imageId
    * @returns
    */
   public async createCategorieActivite(
     createCategorieActiviteDto: CreateCategorieActiviteDto,
-    image: Fichier | null,
+    imageId: number | null,
   ) {
-    const newCategorieActivite = this.categorieActiviteRepository.create({
-      ...createCategorieActiviteDto,
-      image: image,
+    const savedCategorieActivite = await this.prisma.categorieActivite.create({
+      data: {
+        ...createCategorieActiviteDto,
+        imageId: imageId,
+      },
+      include: {
+        image: true,
+      },
     });
 
-    const savedCategorieActivite =
-      await this.categorieActiviteRepository.save(newCategorieActivite);
     this.logger.log(
       `La catégorie d'activité suivante : ${savedCategorieActivite.lbl_categorie} created`,
     );
@@ -50,9 +52,11 @@ export class CategorieActiviteService {
    * @returns
    */
   public async findCategorieActiviteById(id: number) {
-    return this.categorieActiviteRepository.findOne({
-      relations: ['image'],
-      where:  {id: id}
+    return this.prisma.categorieActivite.findUnique({
+      where: { id },
+      include: {
+        image: true,
+      },
     });
   }
 
@@ -61,9 +65,9 @@ export class CategorieActiviteService {
    * @returns
    */
   public async findAllCategoriesActivites() {
-    return await this.categorieActiviteRepository.find({
-      order: {
-        lbl_categorie: 'ASC',
+    return await this.prisma.categorieActivite.findMany({
+      orderBy: {
+        lbl_categorie: 'asc',
       },
     });
   }
@@ -74,8 +78,14 @@ export class CategorieActiviteService {
    * @param updateData
    * @returns
    */
-  public async updateCategorieActivite(id: number, updateData: Partial<CategorieActivite>) {
-    await this.categorieActiviteRepository.update(id, updateData);
+  public async updateCategorieActivite(
+    id: number,
+    updateData: Partial<CategorieActivite>,
+  ) {
+    await this.prisma.categorieActivite.update({
+      where: { id },
+      data: updateData,
+    });
     return this.findCategorieActiviteById(id);
   }
 
@@ -86,11 +96,15 @@ export class CategorieActiviteService {
    */
   public async deleteCategorieActivite(id: number) {
     const categorieActivite = await this.findCategorieActiviteById(id);
-    // voir pour la suppression du fichier associé
+
     if (!categorieActivite) {
       throw new Error('CategorieActivite not found');
     }
-    await this.categorieActiviteRepository.delete(id);
+
+    await this.prisma.categorieActivite.delete({
+      where: { id },
+    });
+
     return categorieActivite;
   }
 }

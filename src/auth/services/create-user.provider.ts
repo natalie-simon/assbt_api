@@ -5,16 +5,15 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { CreateUserDto } from '../../membres/dtos/createMembre.dto';
-import { Repository } from 'typeorm';
-import { Membre } from '../../database/core/membre.entity';
 import { HashingProvider } from './hashing.provider';
-import { InjectRepository } from '@nestjs/typeorm';
 import { MembresService } from '../../membres/services/membres.service';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { MailService } from '../../mail/services/mail.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Membre } from 'generated/prisma';
 
 /**
  * Service de création d'un utilisateur
@@ -23,13 +22,12 @@ import { MailService } from '../../mail/services/mail.service';
 export class CreateUserProvider {
   /**
    * Constructeur
-   * @param usersRepository
+   * @param prisma
    * @param hashingProvider
    * @param userService
    */
   constructor(
-    @InjectRepository(Membre)
-    private readonly usersRepository: Repository<Membre>,
+    private readonly prisma: PrismaService,
     @Inject(forwardRef(() => HashingProvider))
     private readonly hashingProvider: HashingProvider,
     @Inject(forwardRef(() => MembresService))
@@ -53,14 +51,20 @@ export class CreateUserProvider {
       throw new BadRequestException('Cet email possède déjà un compte');
     }
 
-    const newUser = this.usersRepository.create({
-      ...createUserDto,
-      mot_de_passe: await this.hashingProvider.hashPassword(
-        createUserDto.mot_de_passe,
-      ),
-    });
+    const hashedPassword = await this.hashingProvider.hashPassword(
+      createUserDto.mot_de_passe,
+    );
 
-    const user = (await this.usersRepository.save(newUser)) as Membre;
+    const user = await this.prisma.membre.create({
+      data: {
+        email: createUserDto.email,
+        mot_de_passe: hashedPassword,
+      },
+      include: {
+        inscriptions: true,
+        profil: true,
+      },
+    });
 
     try {
       await this.mailService.sendInscriptionNouveauMembre(user);

@@ -2,7 +2,7 @@
  * Enumération des Roles
  */
 export enum RoleTypes {
-  USER = 'User',
-  ADMIN = 'Admin',
-  REDAC = 'Redacteur',
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+  REDAC = 'REDAC',
 }
