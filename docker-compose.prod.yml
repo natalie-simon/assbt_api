@@ -5,7 +5,7 @@ services:
     container_name: nestjs_api
     build:
       context: .
-      dockerfile: ./Dockerfile.minimal
+      dockerfile: ./Dockerfile
     restart: unless-stopped
     ports:
       - "3000:3000"
