@@ -1,53 +1,40 @@
-FROM node:18-alpine AS builder
-
-RUN apk add --no-cache python3 make g++ git
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install build dependencies
 COPY package*.json ./
-
 RUN npm ci
 
-COPY . .
+# Generate Prisma client
+COPY prisma ./prisma/
+RUN npx prisma generate
 
+# Copy source files and build the application
+COPY . .
 RUN npm run build
 
-RUN npm ci --only=production && npm cache clean --force
+# Production stage
+FROM node:20-alpine AS production
 
-# Créer les répertoires nécessaires pour les migrations
-RUN mkdir -p /app/dist/database/migrations
-
-FROM node:18-alpine AS production
-
-RUN addgroup -S nestjs && adduser -S nestjs -G nestjs
-
-RUN apk add --no-cache dumb-init
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /app
 
-# Copie des fichiers de build et node_modules de l'étape précédente
-COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/package*.json /app/
+# Copy package files and install production dependencies
+COPY package*.json ./
+RUN npm ci --only=production
 
-# Créer les répertoires nécessaires pour les migrations
-RUN mkdir -p /app/src/config /app/src/database/migrations
+# Copy Prisma schema and client (required at runtime)
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Copier les fichiers source nécessaires pour les migrations
-COPY --from=builder /app/src/config/typeorm.config.* /app/src/config/
-COPY --from=builder /app/tsconfig.json /app/
+# Copy compiled application
+COPY --from=builder /app/dist ./dist
 
-# Installer les dépendances nécessaires pour les migrations
-RUN npm install --no-save ts-node tsconfig-paths @types/node typescript
-
-# Changement d'utilisateur pour plus de sécurité
-USER nestjs
-
-# Exposition du port
+# Expose the application port
 EXPOSE 3000
 
-# Utilisation de dumb-init comme point d'entrée pour une meilleure gestion des signaux
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-
-# Commande de démarrage
+# Command to run the application
 CMD ["node", "dist/main"]

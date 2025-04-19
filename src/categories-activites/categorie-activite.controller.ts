@@ -192,5 +192,5 @@ export class CategorieActiviteController {
     }
     return this.categorieActiviteService.deleteCategorieActivite(id);
   }
- 
+
 }

@@ -6,13 +6,16 @@ services:
     build:
       context: .
       dockerfile: ./deploy/docker/Dockerfile.prod
+      args:
+        - NODE_ENV=production
     restart: unless-stopped
     depends_on:
       - postgres-db
     env_file:
       - ./.env
     volumes:
-      - ./.env:/app/.env  # Montage du fichier .env local dans le conteneur
+      - ./.env:/app/.env
+      - ./prisma:/app/prisma
     networks:
       - app-network
       - web
@@ -34,12 +37,16 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
