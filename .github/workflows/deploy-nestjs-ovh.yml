@@ -38,10 +38,10 @@ jobs:
             # Sauvegarde de la base de données si elle est en cours d'exécution
             if [ -f "${APP_DIR}/docker-compose.prod.yml" ]; then
               cd ${APP_DIR}
-              if docker-compose -f docker-compose.prod.yml ps postgres 2>&1 | grep -q "Up"; then
+              if docker-compose -f docker-compose.prod.yml ps postgres-db 2>&1 | grep -q "Up"; then
                 echo "📦 Sauvegarde de la base de données..."
                 mkdir -p ${APP_DIR}/backups
-                docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U postgres nestjs_db > ${APP_DIR}/backups/db_$(date +"%Y%m%d_%H%M%S").sql || echo "⚠️ Échec de sauvegarde, poursuite du déploiement"
+                docker-compose -f docker-compose.prod.yml exec -T postgres-db pg_dump -U ${DB_USERNAME:-postgres} ${DB_NAME:-nestjs_db} > ${APP_DIR}/backups/db_$(date +"%Y%m%d_%H%M%S").sql || echo "⚠️ Échec de sauvegarde, poursuite du déploiement"
               fi
             fi
 
@@ -119,23 +119,43 @@ jobs:
             # Vérifier l'état des services
             echo "📊 État des services après déploiement:"
             docker-compose -f docker-compose.prod.yml ps
+
             # Exécuter les migrations TypeORM
             if docker-compose -f docker-compose.prod.yml ps | grep -q "api"; then
               echo "🔄 Exécution des migrations TypeORM..."
-              docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run
+              
+              # Approche 1: Utiliser npx directement avec TypeORM
+              echo "🔄 Tentative d'exécution des migrations avec npx..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts
               MIGRATION_RESULT=$?
-
-              # Si une nouvelle migration est nécessaire, la générer et l'exécuter
+              
+              # Si cela échoue, essayer avec la commande npm run
+              if [ "$MIGRATION_RESULT" != "0" ]; then
+                echo "🔄 Tentative avec npm run migration:run..."
+                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run
+                MIGRATION_RESULT=$?
+              fi
+              
+              # Si les deux approches précédentes échouent, essayer de générer une nouvelle migration
               if [ "$MIGRATION_RESULT" != "0" ]; then
                 echo "🔄 Tentative de génération de nouvelles migrations..."
-                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:prod generate
-                docker-compose -f docker-compose.prod.yml exec -T api npm run migration:run:prod || echo "⚠️ Échec des migrations après génération"
+                
+                # Essayer avec npx d'abord
+                docker-compose -f docker-compose.prod.yml exec -T api npx typeorm-ts-node-commonjs migration:generate src/database/migrations/migration -d src/config/typeorm.config.ts
+                
+                # Puis exécuter la migration
+                docker-compose -f docker-compose.prod.yml exec -T api npx typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts || echo "⚠️ Échec des migrations après génération"
               fi
             else
               echo "⚠️ Le service api n'est pas en cours d'exécution, migrations ignorées"
             fi
-            # Afficher les logs Docker
-            echo "📃 Logs des containers:"
+            
+            # Afficher les logs spécifiques de l'API pour le débogage
+            echo "📃 Logs du service NestJS:"
+            docker-compose -f docker-compose.prod.yml logs --tail=50 api
+
+            # Afficher l'état des containers
+            echo "📊 État des containers:"
             docker ps
 
             # Nettoyage
