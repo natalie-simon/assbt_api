@@ -1,53 +1,31 @@
-FROM node:20-alpine AS builder
+# Créez le fichier Dockerfile.minimal
+echo 'FROM node:20-alpine
 
 WORKDIR /app
 
-# Installer les dépendances
-COPY package*.json ./
-RUN npm install
+# Installer express pour notre serveur minimal
+RUN npm install express
 
-# Créer les répertoires nécessaires
-RUN mkdir -p ./generated/prisma/
-
-# Créer un fichier de substitution pour les types Prisma
-RUN echo "export type Membre = any; export type Profil = any; export type Article = any; export type Fichier = any; export type CategorieActivite = any; export type Activite = any; export type MembreActivite = any;" > ./generated/prisma/index.ts
-
-# Copier le code source
-COPY . .
-
-# Pour éviter les erreurs de compilation avec Prisma, créons une version minimale du client
-RUN echo "export const PrismaClient = function() { return { $connect: () => {}, $disconnect: () => {} }; };" >> ./generated/prisma/index.ts
-
-# Compiler l'application
-RUN npm run build || echo "Continuing despite build errors"
-
-# Production stage
-FROM node:20-alpine AS production
-
-WORKDIR /app
-
-# Copier uniquement les fichiers nécessaires
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/generated ./generated
-
-# Créer un fichier main.js minimal si la compilation a échoué
-RUN if [ ! -f ./dist/main.js ]; then \
-  mkdir -p ./dist && \
-  echo "console.log('Application temporaire de démonstration'); \
-  const express = require('express'); \
+# Créer un fichier main.js minimal
+RUN mkdir -p ./dist && \
+  echo '"'"'console.log("Application temporaire de démonstration"); \
+  const express = require("express"); \
   const app = express(); \
-  app.get('/', (req, res) => { \
-  res.send('API temporaire - Migration Prisma en cours'); \
+  app.get("/", (req, res) => { \
+  res.send("API temporaire en cours de migration vers Prisma"); \
+  }); \
+  app.get("/accueil", (req, res) => { \
+  res.json({ message: "Page d'"'"'accueil temporaire" }); \
   }); \
   app.listen(3000, () => { \
-  console.log('Serveur temporaire démarré sur le port 3000'); \
-  });" > ./dist/main.js; \
-  fi
+  console.log("Serveur temporaire démarré sur le port 3000"); \
+  });'"'"' > ./dist/main.js
 
 # Exposer le port
 EXPOSE 3000
 
-# Démarrer l'application
-CMD ["node", "dist/main.js"]
+# Démarrer l'"'"'application
+CMD ["node", "dist/main.js"]' > Dockerfile.minimal
+
+# Déployez avec ce Dockerfile
+docker-compose -f docker-compose.prod.yml up -d
