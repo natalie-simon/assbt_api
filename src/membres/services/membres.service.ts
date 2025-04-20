@@ -59,7 +59,12 @@ export class MembresService {
    */
   public async findAllUsers() {
     return this.prisma.membre.findMany({
-      include: {
+      select: {
+        mot_de_passe: false,
+        id: true,
+        email: true,
+        est_supprime: true,
+        role: true,
         profil: true,
       },
     });
@@ -102,12 +107,16 @@ export class MembresService {
    * @param email
    * @returns
    */
-  public async findOneUserByEmailProvider(
-    email: string,
-  ): Promise<any> {
+  public async findOneUserByEmailProvider(email: string): Promise<any> {
     return this.findOneByEmailProvider.findOneUserByEmailProvider(email);
   }
 
+  /**
+   * Récupération du profil de l'utilisateur connecté avec filtres possibles
+   * @param id
+   * @param activites
+   * @returns
+   */
   public async findProfileByUserIdWithFilters(id: number, activites: boolean) {
     const now = new Date().toISOString();
 
@@ -133,6 +142,34 @@ export class MembresService {
     return this.prisma.membre.findUnique({
       where: { id },
       include,
+    });
+  }
+
+  /**
+   * Désactiver un utilisateur
+   * @param id
+   * @returns
+   */
+  public async desactiverUser(id: number) {
+    return this.prisma.membre.update({
+      where: { id },
+      data: {
+        est_supprime: true,
+      },
+    });
+  }
+
+  /**
+   * Restaurer un utilisateur
+   * @param id
+   * @returns
+   */
+  public async restorerUser(id: number) {
+    return this.prisma.membre.update({
+      where: { id },
+      data: {
+        est_supprime: false,
+      },
     });
   }
 }

@@ -71,6 +71,13 @@ export class SignInProvider {
       throw new UnauthorizedException();
     }
 
+    if (user.est_supprime) {
+      throw new RequestTimeoutException(null, {
+        description:
+          "Votre compte a été désactivé, veuillez contacter le président de l'association.",
+      });
+    }
+
     const accessToken = await this.jwtSercice.signAsync(
       {
         sub: user.id,

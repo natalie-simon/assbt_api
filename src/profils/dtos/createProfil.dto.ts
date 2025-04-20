@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import { IsString, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 
@@ -16,21 +16,19 @@ export class CreateProfilDto {
   @IsString()
   telephone: string;
 
-  @ApiProperty({ description: 'communication par mail' })
+  @ApiProperty({ description: 'Communication par mail' })
   @IsBoolean()
   @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
-    return value;
+    if (typeof value === 'boolean') return value;
+    return value === 'true';
   })
   communication_mail: boolean;
 
-  @ApiProperty({ description: 'communication par sms' })
+  @ApiProperty({ description: 'Communication par sms' })
   @IsBoolean()
   @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
-    return value;
+    if (typeof value === 'boolean') return value;
+    return value === 'true';
   })
   communication_sms: boolean;
   // Ajoutez d'autres propriétés selon vos besoins

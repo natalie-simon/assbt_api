@@ -8,6 +8,7 @@ import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { CategorieActiviteUploadService } from 'src/categories-activites/services/categorie-activite-upload.service';
 import { Profil } from '../../generated/prisma'; // Assurez-vous que le chemin est correct
+import { CreateProfilDto } from './dtos/createProfil.dto';
 
 
 @Controller('profils')
@@ -56,12 +57,13 @@ export class ProfilsController {
   ])
   @ApiResponse({ status: 201, description: 'Le profil créé' })
   async create(
-    @Body() createProfilDto: Profil,
+    @Body() createProfilDto: CreateProfilDto,
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() activeUser: ActiveUserData,
   ){
     let fichier = null;
     if(file){
+      console.log('file', file);
       fichier = await this.uploadService.uploadFile(file);
     }
     return this.profilsService.create(createProfilDto, fichier, activeUser);

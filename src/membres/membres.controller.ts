@@ -3,6 +3,7 @@ import {
   Controller,
   Post,
   Get,
+  Put,
   UseGuards,
   SetMetadata,
   Param,
@@ -93,5 +94,33 @@ export class MembresController {
       activeUser.sub,
       activites,
     );
+  }
+
+  /**
+   * Route pour la récupération d'un utilisateur par son id
+   * @param id
+   * @returns
+   */
+  @Put(':id/desactiver')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Désactiver un utilisateur' })
+  @ApiResponse({ status: 200, description: 'Utilisateur désactivé' })
+  async desactiverUser(@Param('id') id: string) {
+    return this.membreService.desactiverUser(+id);
+  }
+
+  /**
+   * Route pour la récupération d'un utilisateur par son id
+   * @param id
+   * @returns
+   */
+  @Put(':id/restorer')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Désactiver un utilisateur' })
+  @ApiResponse({ status: 200, description: 'Utilisateur désactivé' })
+  async restorerUser(@Param('id') id: string) {
+    return this.membreService.restorerUser(+id);
   }
 }

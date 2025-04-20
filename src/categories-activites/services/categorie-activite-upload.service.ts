@@ -12,7 +12,7 @@ export class CategorieActiviteUploadService {
 
   async uploadFile(file: Express.Multer.File) {
     const fichierData = await this.uploadProvider.uploadFile(file);
-
+console.log('fichierData', fichierData);
     // Créer manuellement un objet avec la structure exacte attendue par Prisma
     const created = await this.prisma.fichier.create({
       data: {

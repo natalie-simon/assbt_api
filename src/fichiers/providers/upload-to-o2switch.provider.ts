@@ -5,6 +5,7 @@ import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as ftp from 'basic-ftp';
 import { Readable } from 'stream';
+import { Fichier } from '../interfaces/fichier.interface';
 
 @Injectable()
 export class UploadToO2SwitchProvider {
@@ -15,7 +16,7 @@ export class UploadToO2SwitchProvider {
     const uniqueId = uuidv4();
     const extension = path.extname(originalName);
     const baseName = path.basename(originalName, extension);
-    
+
     // Nettoyer le nom de base
     const cleanBaseName = baseName
       .toLowerCase()
@@ -40,7 +41,7 @@ export class UploadToO2SwitchProvider {
         host,
         user: username,
         password,
-        secure: false
+        secure: false,
       });
 
       // Aller dans le répertoire web
@@ -56,15 +57,24 @@ export class UploadToO2SwitchProvider {
 
       // Générer le nom de fichier unique
       const fileName = this.generateFileName(file.originalname);
-      
+
       // Convertir le buffer en stream
       const stream = Readable.from(file.buffer);
-      
+
       // Upload du fichier
       await client.uploadFrom(stream, fileName);
 
       // Créer l'entité Fichier
-      const fichier = null;
+      const fichier: Fichier = {
+        nom: fileName,
+        url: `https://apitest.nataliesimon.fr/uploads/${fileName}`,
+        type: file.mimetype.startsWith('image/') ? 'image' : 'document',
+        mime: file.mimetype,
+        taille: file.size,
+        dateCreation: new Date(),
+        dateMaj: new Date(),
+      };
+
       fichier.nom = fileName;
       // URL complète vers le fichier
       fichier.url = `https://apitest.nataliesimon.fr/uploads/${fileName}`;
@@ -76,10 +86,10 @@ export class UploadToO2SwitchProvider {
 
       return fichier;
     } catch (error) {
-      console.error('Erreur lors de l\'upload FTP:', error);
+      console.error("Erreur lors de l'upload FTP:", error);
       throw error;
     } finally {
       client.close();
     }
   }
-} 
+}
