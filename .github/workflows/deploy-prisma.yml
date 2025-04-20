@@ -31,27 +31,50 @@ jobs:
             echo "📂 Contenu actuel du répertoire de déploiement:"
             ls -la ${APP_DIR}
 
-            # Sauvegarde de la base de données si elle est en cours d'exécution
+            # Nettoyage des conteneurs existants pour éviter les conflits
+            echo "🧹 Nettoyage des conteneurs existants..."
+            
+            # Arrêter les conteneurs existants dans le répertoire nestjs
+            if [ -d "${VPS_ROOT}/nestjs" ]; then
+              cd "${VPS_ROOT}/nestjs"
+              if [ -f "docker-compose.prod.yml" ]; then
+                echo "📦 Arrêt des conteneurs dans ${VPS_ROOT}/nestjs"
+                docker-compose -f docker-compose.prod.yml down || true
+              fi
+            fi
+            
+            # Arrêter les conteneurs existants dans le répertoire actuel
             if [ -f "${APP_DIR}/docker-compose.prisma.yml" ]; then
               cd ${APP_DIR}
-              if docker-compose -f docker-compose.prisma.yml ps db 2>&1 | grep -q "Up"; then
-                echo "📦 Sauvegarde de la base de données..."
-                mkdir -p ${APP_DIR}/backups
-                CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
-                
-                # Récupération des variables d'environnement depuis le fichier .env
-                if [ -f "${APP_DIR}/.env.dev" ]; then
-                  source ${APP_DIR}/.env.dev
-                  DB_USER=${DB_USERNAME:-postgres}
-                  DB_NAME=${DB_NAME:-Assbt}
-                else
-                  DB_USER="postgres"
-                  DB_NAME="Assbt"
-                fi
-                
-                echo "📊 Utilisation de la base de données: $DB_NAME avec l'utilisateur: $DB_USER"
-                docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U $DB_USER $DB_NAME > ${APP_DIR}/backups/db_${CURRENT_DATE}.sql || echo "⚠️ Échec de sauvegarde, poursuite du déploiement"
+              echo "📦 Arrêt des conteneurs dans ${APP_DIR}"
+              docker-compose -f docker-compose.prisma.yml down || true
+            fi
+            
+            # Suppression forcée de conteneurs spécifiques s'ils existent encore
+            echo "🗑️ Suppression forcée des conteneurs potentiellement conflictuels..."
+            docker rm -f postgres_db traefik api nestjs_api 2>/dev/null || true
+            
+            # Sauvegarde de la base de données si elle existe encore
+            CONTAINER_RUNNING=$(docker ps -q -f name=postgres_db)
+            if [ ! -z "$CONTAINER_RUNNING" ]; then
+              echo "📦 Sauvegarde de la base de données avant suppression forcée..."
+              mkdir -p ${APP_DIR}/backups
+              CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
+              
+              # Déterminer les paramètres de connexion
+              if [ -f "${APP_DIR}/.env.dev" ]; then
+                source ${APP_DIR}/.env.dev
+                DB_USER=${DB_USERNAME:-postgres}
+                DB_NAME=${DB_NAME:-Assbt}
+              else
+                DB_USER="postgres"
+                DB_NAME="Assbt"
               fi
+              
+              docker exec -t postgres_db pg_dump -U $DB_USER $DB_NAME > ${APP_DIR}/backups/db_${CURRENT_DATE}.sql || echo "⚠️ Échec de sauvegarde, poursuite du déploiement"
+              
+              # Suppression forcée après sauvegarde
+              docker rm -f postgres_db
             fi
 
             # Préserver les fichiers importants
@@ -191,32 +214,4 @@ jobs:
               fi
               
               # Vérification finale
-              echo "🔍 Vérification de l'état des migrations Prisma..."
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status
-            else
-              echo "⚠️ Le service api n'est pas en cours d'exécution, migrations ignorées"
-            fi
-            
-            # Vérifier les tables créées
-            echo "📊 Vérification des tables de la base de données:"
-            
-            # Récupération des variables d'environnement depuis le fichier .env
-            if [ -f "${APP_DIR}/.env.dev" ]; then
-              source ${APP_DIR}/.env.dev
-              DB_USER=${DB_USERNAME:-postgres}
-              DB_NAME=${DB_NAME:-Assbt}
-            else
-              DB_USER="postgres"
-              DB_NAME="Assbt"
-            fi
-            
-            echo "📊 Vérification des tables dans $DB_NAME avec l'utilisateur $DB_USER"
-            docker-compose -f docker-compose.prisma.yml exec -T db psql -U $DB_USER -d $DB_NAME -c "\dt" || echo "⚠️ Impossible de vérifier les tables"
-            
-            # Afficher les logs du service API
-            echo "📃 Logs du service NestJS:"
-            docker-compose -f docker-compose.prisma.yml logs --tail=50 api
-
-            # Nettoyage
-            echo "🧹 Nettoyage des images inutilisées..."
-            docker image prune -f
+              ec
