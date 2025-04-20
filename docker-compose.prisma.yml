@@ -78,13 +78,11 @@ services:
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
       - "traefik.docker.network=app_network"
-      # Dashboard Traefik
+      # Dashboard Traefik sans authentification
       - "traefik.http.routers.dashboard.rule=Host(`traefik.lesbulleurstoulonnais.fr`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$xyz..." # À remplacer par votre hash généré
 
 networks:
   app_network:
