@@ -51,7 +51,6 @@ export class MembresController {
     description: 'Enregistrer un nouvel utilisateur',
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
-    console.log('createUserDto', createUserDto);
     return this.membreService.createUser(createUserDto);
   }
 
