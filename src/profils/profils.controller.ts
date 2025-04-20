@@ -7,7 +7,9 @@ import { AuthTypes } from '../auth/enums/auth-types.enum';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { CategorieActiviteUploadService } from 'src/categories-activites/services/categorie-activite-upload.service';
-import { Profil } from '@prisma/client';
+import { Profil } from '../../generated/prisma'; // Assurez-vous que le chemin est correct
+
+
 @Controller('profils')
 @ApiTags('profils')
 export class ProfilsController {
