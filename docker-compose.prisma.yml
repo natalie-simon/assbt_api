@@ -1,33 +1,30 @@
 version: '3.8'
 
 services:
-  # Service pour l'API NestJS
+  # Service pour l'API NestJS - en utilisant une image précompilée
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    image: node:18-alpine  # Utiliser une image Node.js précompilée
     container_name: nestjs_api
     restart: always
+    working_dir: /app
+    volumes:
+      - ./:/app  # Monter le répertoire actuel dans le container
+    command: >
+      sh -c "npm install && npm run start:dev"
     env_file:
-      - .env.prod
+      - ./.env.${ENV:-dev}
     environment:
       - DB_HOST=db
+      - ORIGIN=*
       - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-admin}@db:5432/${DB_NAME:-Assbt}?schema=public
     ports:
-      - "127.0.0.1:3000:3000"  # Bind uniquement à localhost pour sécurité
+      - "${LISTEN_PORT:-3000}:3000"
     depends_on:
       - db
     networks:
       - app_network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
-      - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.api.loadbalancer.server.port=3000"
-      - "traefik.docker.network=app_network"
 
-  # Service pour la base de données PostgreSQL
+  # Base de données PostgreSQL
   db:
     image: postgres:15-alpine
     container_name: postgres_db
@@ -36,6 +33,8 @@ services:
       - POSTGRES_USER=${DB_USERNAME:-postgres}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-admin}
       - POSTGRES_DB=${DB_NAME:-Assbt}
+    ports:
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -47,7 +46,7 @@ services:
       retries: 5
       start_period: 10s
 
-  # Service pour Traefik (reverse proxy)
+  # Traefik (reverse proxy)
   traefik:
     image: traefik:v2.10
     container_name: traefik
@@ -69,18 +68,24 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.email=${MAIL_ADMIN:-contact@lesbulleurstoulonnais.fr}"
+      - "--certificatesresolvers.letsencrypt.acme.email=${MAIL_ADMIN:-ybah2201@gmail.com}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       - "--api.dashboard=true"
     labels:
       - "traefik.enable=true"
+      # Configuration pour l'API
+      - "traefik.http.routers.api.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.docker.network=app_network"
       # Dashboard Traefik
       - "traefik.http.routers.dashboard.rule=Host(`traefik.api-prod.lesbulleurstoulonnais.fr`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH:-admin:$$apr1$$xyz...}"
+      - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$xyz..." # À remplacer par votre hash généré
 
 networks:
   app_network:
