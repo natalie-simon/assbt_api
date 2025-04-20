@@ -59,4 +59,4 @@ docker logs nestjs_api --tail 20
 
 echo "✅ Déploiement terminé!"
 echo "🌐 Votre API est disponible à l'adresse: https://api-prod.lesbulleurstoulonnais.fr"
-echo "🔧 Dashboard Traefik: https://traefik.api-prod.lesbulleurstoulonnais.fr"
+echo "🔧 Dashboard Traefik: https://traefik.lesbulleurstoulonnais.fr"
