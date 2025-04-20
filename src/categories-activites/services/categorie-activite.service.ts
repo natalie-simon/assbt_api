@@ -82,9 +82,21 @@ export class CategorieActiviteService {
     id: number,
     updateData: Partial<CategorieActivite>,
   ) {
+
+    const categorieActivite = await this.findCategorieActiviteById(id);
+    if (!categorieActivite) {
+      throw new Error('CategorieActivite not found');
+    }
+console.log('90 - categorieActivite : ', updateData);
     await this.prisma.categorieActivite.update({
       where: { id },
-      data: updateData,
+      data: {
+        lbl_categorie: updateData.lbl_categorie,
+        imageId: updateData.imageId,
+        couleur: updateData.couleur,
+        avec_equipement: updateData.avec_equipement,
+        avec_notification: updateData.avec_notification,
+      },
     });
     return this.findCategorieActiviteById(id);
   }
