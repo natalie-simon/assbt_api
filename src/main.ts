@@ -21,7 +21,6 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true, // Conversion implicite
       },
-      forbidNonWhitelisted: true,
     }),
   );
 

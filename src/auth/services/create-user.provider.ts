@@ -47,6 +47,7 @@ export class CreateUserProvider {
     const existingUser = await this.membresService.findOneByEmail(
       createUserDto.email,
     );
+    console.log('50');
     if (existingUser) {
       throw new BadRequestException('Cet email possède déjà un compte');
     }
