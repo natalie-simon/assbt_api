@@ -214,4 +214,32 @@ jobs:
               fi
               
               # Vérification finale
-              ec
+              echo "🔍 Vérification de l'état des migrations Prisma..."
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status
+            else
+              echo "⚠️ Le service api n'est pas en cours d'exécution, migrations ignorées"
+            fi
+            
+            # Vérifier les tables créées
+            echo "📊 Vérification des tables de la base de données:"
+            
+            # Récupération des variables d'environnement depuis le fichier .env
+            if [ -f "${APP_DIR}/.env.dev" ]; then
+              source ${APP_DIR}/.env.dev
+              DB_USER=${DB_USERNAME:-postgres}
+              DB_NAME=${DB_NAME:-Assbt}
+            else
+              DB_USER="postgres"
+              DB_NAME="Assbt"
+            fi
+            
+            echo "📊 Vérification des tables dans $DB_NAME avec l'utilisateur $DB_USER"
+            docker-compose -f docker-compose.prisma.yml exec -T db psql -U $DB_USER -d $DB_NAME -c "\dt" || echo "⚠️ Impossible de vérifier les tables"
+            
+            # Afficher les logs du service API
+            echo "📃 Logs du service NestJS:"
+            docker-compose -f docker-compose.prisma.yml logs --tail=50 api
+
+            # Nettoyage
+            echo "🧹 Nettoyage des images inutilisées..."
+            docker image prune -f
