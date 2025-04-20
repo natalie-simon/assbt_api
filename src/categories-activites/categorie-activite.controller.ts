@@ -66,6 +66,7 @@ export class CategorieActiviteController {
     @UploadedFile() image?: Express.Multer.File,
   ) {
     let fichier = null;
+    console.log('69 data : ', createCategorieActiviteDto);
     if (image) {
       fichier = await this.uploadService.uploadFile(image);
     }

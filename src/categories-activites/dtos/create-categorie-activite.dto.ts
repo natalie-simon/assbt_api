@@ -46,7 +46,14 @@ export class CreateCategorieActiviteDto {
     type: Boolean,
   })
   @IsOptional()
-  @Transform(({ value }) => (value == 'true' ? true : false))
+  @Transform(({ value }) => {
+        console.log('Transform value avec equipement : ', value);
+
+    // Si c'est déjà un booléen, retourner sa valeur
+    if (typeof value === 'boolean') return value;
+    // Si c'est une chaîne, vérifier explicitement sa valeur
+    return value === 'true';
+  })
   @IsBoolean({ message: 'Le champ  avec_equipement doit être un booléen' })
   avec_equipement: boolean;
 
@@ -80,7 +87,13 @@ export class CreateCategorieActiviteDto {
     required: false,
     type: Boolean,
   })
-  @Transform(({ value }) => (value == 'true' ? true : false))
+  @Transform(({ value }) => {
+    console.log('Transform value avec notification : ', value);
+    // Si c'est déjà un booléen, retourner sa valeur
+    if (typeof value === 'boolean') return value;
+    // Si c'est une chaîne, vérifier explicitement sa valeur
+    return value === 'true';
+  })
   @IsOptional()
   @IsBoolean({ message: 'Le champ avec_notification doit être un booléen' })
   avec_notification: boolean;

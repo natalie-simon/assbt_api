@@ -87,7 +87,7 @@ export class CategorieActiviteService {
     if (!categorieActivite) {
       throw new Error('CategorieActivite not found');
     }
-
+console.log('90 - categorieActivite : ', updateData);
     await this.prisma.categorieActivite.update({
       where: { id },
       data: {
