@@ -47,11 +47,7 @@ export class CreateCategorieActiviteDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-        console.log('Transform value avec equipement : ', value);
-
-    // Si c'est déjà un booléen, retourner sa valeur
     if (typeof value === 'boolean') return value;
-    // Si c'est une chaîne, vérifier explicitement sa valeur
     return value === 'true';
   })
   @IsBoolean({ message: 'Le champ  avec_equipement doit être un booléen' })
@@ -88,10 +84,7 @@ export class CreateCategorieActiviteDto {
     type: Boolean,
   })
   @Transform(({ value }) => {
-    console.log('Transform value avec notification : ', value);
-    // Si c'est déjà un booléen, retourner sa valeur
     if (typeof value === 'boolean') return value;
-    // Si c'est une chaîne, vérifier explicitement sa valeur
     return value === 'true';
   })
   @IsOptional()

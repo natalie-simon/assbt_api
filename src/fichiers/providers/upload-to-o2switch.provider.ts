@@ -36,8 +36,6 @@ export class UploadToO2SwitchProvider {
       const username = this.configService.get<string>('FTP_USERNAME_API_TEST');
       const password = this.configService.get<string>('FTP_PASSWORD_API_TEST');
 
-      console.log('Tentative de connexion FTP avec:', { host, username });
-
       await client.access({
         host,
         user: username,
