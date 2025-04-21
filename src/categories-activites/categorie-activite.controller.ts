@@ -156,13 +156,23 @@ export class CategorieActiviteController {
     }
     const updatedCategorieActivite = {
       ...createCategorieActiviteDto,
-      image: fichier,
+      imageId: fichier,
     };
 
-    return this.categorieActiviteService.updateCategorieActivite(
+    const result = await this.categorieActiviteService.updateCategorieActivite(
       id,
       updatedCategorieActivite,
     );
+
+    if (
+      categorieActivite?.image.id !== null &&
+      createCategorieActiviteDto?.image_id === undefined
+    ) {
+      const fichier_a_effacer_id = categorieActivite.image.id;
+      this.uploadService.deleteFile(fichier_a_effacer_id);
+    }
+
+    return result;
   }
 
   /**
@@ -190,5 +200,4 @@ export class CategorieActiviteController {
     }
     return this.categorieActiviteService.deleteCategorieActivite(id);
   }
-
 }

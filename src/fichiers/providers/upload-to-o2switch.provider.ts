@@ -27,6 +27,11 @@ export class UploadToO2SwitchProvider {
     return `${cleanBaseName}-${timestamp}-${uniqueId}${extension}`;
   }
 
+  /**
+   * Méthode pour uploader un fichier sur le serveur FTP
+   * @param file
+   * @returns
+   */
   async uploadFile(file: Express.Multer.File): Promise<any> {
     const client = new ftp.Client();
     client.ftp.verbose = true;
@@ -87,6 +92,57 @@ export class UploadToO2SwitchProvider {
       return fichier;
     } catch (error) {
       console.error("Erreur lors de l'upload FTP:", error);
+      throw error;
+    } finally {
+      client.close();
+    }
+  }
+
+  /**
+   * Méthode pour supprimer un fichier sur le serveur FTP
+   * @param fileName
+   * @returns
+   */
+  async deleteFile(fileName: string): Promise<boolean> {
+    const client = new ftp.Client();
+    client.ftp.verbose = true;
+
+    try {
+      // Connexion FTP
+      const host = this.configService.get<string>('FTP_HOST_API_TEST');
+      const username = this.configService.get<string>('FTP_USERNAME_API_TEST');
+      const password = this.configService.get<string>('FTP_PASSWORD_API_TEST');
+
+      await client.access({
+        host,
+        user: username,
+        password,
+        secure: false,
+      });
+
+      // Naviguer vers le répertoire des uploads
+      await client.cd('/');
+      await client.cd('uploads');
+
+      // Vérifier si le fichier existe
+      const fileList = await client.list();
+      const fileExists = fileList.some((item) => item.name === fileName);
+
+      if (!fileExists) {
+        console.warn(`Fichier ${fileName} non trouvé sur le serveur FTP`);
+        return true; // Considérer comme un succès si le fichier n'existe pas déjà
+      }
+
+      // Supprimer le fichier
+      await client.remove(fileName);
+
+      console.log(`Fichier ${fileName} supprimé avec succès du serveur FTP`);
+      return true;
+    } catch (error) {
+      console.error(
+        `Erreur lors de la suppression du fichier ${fileName} sur FTP:`,
+        error,
+      );
       throw error;
     } finally {
       client.close();

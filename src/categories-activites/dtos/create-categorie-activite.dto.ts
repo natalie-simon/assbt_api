@@ -90,4 +90,19 @@ export class CreateCategorieActiviteDto {
   @IsOptional()
   @IsBoolean({ message: 'Le champ avec_notification doit être un booléen' })
   avec_notification: boolean;
+
+  /**
+   * L'identifiant du fichier associé à la catégorie
+   *
+   * @type {(number | null)}
+   * @memberof CreateCategorieActiviteDto
+   */
+  @ApiProperty({
+    description: "L'identifiant du fichier associé à la catégorie",
+    example: 1,
+    required: false,
+    type: Number,
+  })
+  @IsOptional()
+  image_id: number | null;
 }
