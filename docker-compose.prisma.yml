@@ -4,10 +4,6 @@ services:
   # Service pour l'API NestJS - en utilisant une image précompilée
   api:
     deploy:
-      resources:
-        limits:
-          memory: 400M  # Un peu moins que sa consommation actuelle
-          cpus: '0.5'
     image: node:18-alpine
     container_name: nestjs_api
     restart: always
