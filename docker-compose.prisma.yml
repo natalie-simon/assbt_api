@@ -3,6 +3,11 @@ version: '3.8'
 services:
   # Service pour l'API NestJS - en utilisant une image précompilée
   api:
+    deploy:
+    resources:
+      limits:
+        memory: 400M  # Un peu moins que sa consommation actuelle
+        cpus: '0.5'
     image: node:18-alpine
     container_name: nestjs_api
     restart: always
@@ -16,6 +21,8 @@ services:
       - DB_HOST=db
       - ORIGIN=*
       - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-admin}@db:5432/${DB_NAME:-Assbt}?schema=public
+      - NODE_OPTIONS: "--max-old-space-size=300 --max-semi-space-size=1"
+
     expose:
       - "3000"  # Seulement exposer, pas publier
     depends_on:
@@ -40,6 +47,20 @@ services:
   # Base de données PostgreSQL
   db:
     image: postgres:15-alpine
+    command:
+    - "postgres"
+    - "-c"
+    - "shared_buffers=64MB"     # Réduire considérablement
+    - "-c"
+    - "work_mem=2MB"            # Réduire
+    - "-c"
+    - "maintenance_work_mem=16MB" # Réduire
+    - "-c"
+    - "max_connections=20"      # Limiter les connexions
+    - "-c"
+    - "effective_cache_size=128MB" # Réduire
+    - "-c"
+    - "autovacuum=off"
     container_name: postgres_db
     restart: always
     environment:
