@@ -48,6 +48,16 @@ export class SignInProvider {
     let user = await this.membreService.findOneByEmail(signinDto.email);
     let isEqual: boolean = false;
 
+    if (!user) {
+      this.logger.log(`Erreur signin email inexistant`, {
+        serverUrl: this.serverInfoService.getServerUrl(),
+        email: signinDto.email,
+      });
+      throw new RequestTimeoutException( null, {
+        description: 'Erreur de connexion',
+      });
+    }
+
     try {
       isEqual = await this.hashingProvider.comparePassword(
         signinDto.mot_de_passe,
