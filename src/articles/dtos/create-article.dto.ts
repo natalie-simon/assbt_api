@@ -1,7 +1,5 @@
 import { IsNotEmpty, MaxLength, IsString, IsEnum } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { categorieArticleTypes } from "../enums/categorie-article-types.enum";
-import { statutArticleTypes } from "../enums/statut-article-types.enum";
 
 /**
  * DTO pour la création d'un article
@@ -54,7 +52,7 @@ export class CreateArticleDto {
     type: 'string',
     maxLength: 10,
   })
-  @IsEnum(statutArticleTypes, { message: 'Le statut doit être une des valeurs autorisées ' })
+  @IsString({ message: 'Le statut doit être une chaîne de caractères' })
   @IsNotEmpty({ message: "Le statut de l'article doit être renseigné." })
   statut: string;
 
@@ -71,7 +69,7 @@ export class CreateArticleDto {
     type: 'string',
     maxLength: 10,
   })
-  @IsEnum(categorieArticleTypes, { message: 'La categorie doit être une des valeurs autorisées.' })
+  @IsString({ message: 'La catégorie doit être une chaîne de caractères.' })
   @IsNotEmpty({ message: "La catégorie de l'article doit être renseignée" })
   categorie: string;
 }

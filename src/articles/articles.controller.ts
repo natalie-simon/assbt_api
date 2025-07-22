@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Param,
   ParseIntPipe,
@@ -41,7 +42,7 @@ export class ArticlesController {
    */
   constructor(
     private readonly articlesService: ArticlesService,
-    private readonly fichierService: FichierService,
+    private readonly uploadService: FichierService,
   ) {}
 
   /**
@@ -84,7 +85,7 @@ export class ArticlesController {
   @Post('create')
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.ADMIN)
-  @UseInterceptors(FileInterceptor('fichier'))
+  @UseInterceptors(FileInterceptor('image'))
   @ApiHeaders([
     { name: 'Content-Type', description: 'multipart/form-data' },
     { name: 'Authorization', description: 'Bearer Token' },
@@ -93,14 +94,19 @@ export class ArticlesController {
   @ApiResponse({ status: 201, description: "L'Article créé" })
   public async createArticle(
     @Body() createArticleDto: CreateArticleDto,
-    @UploadedFile() file: Express.Multer.File,
     @ActiveUser() user: ActiveUserData,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
+    let fichier = null;
     let imageId = null;
-    if (file) {
-      const image = await this.fichierService.uploadFile(file);
-      imageId = image.id; // On récupère seulement l'id
+    console.log("je passe la");
+    if (image) {
+      console.log("je passe ligne 104");
+      fichier = await this.uploadService.uploadFile(image);
+      imageId = fichier.id;
     }
+
+    console.log("imageId", imageId);
     return this.articlesService.createArticle(createArticleDto, user, imageId);
   }
 
@@ -109,12 +115,12 @@ export class ArticlesController {
    * @param id
    * @returns
    */
-  /*@ApiOperation({ summary: 'Supprimer un article par son id' })
+  @ApiOperation({ summary: 'Supprimer un article par son id' })
   @ApiResponse({ status: 200, description: "L'Article supprimé" })
   @Delete(':id')
   deleteArticleById(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.deleteArticleById(id);
-  }*/
+  }
 
   /**
    * Récupération des articles d'une catégorie

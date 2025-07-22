@@ -32,13 +32,32 @@ export class ArticlesService {
     imageId: number | null,
   ) {
     const user = await this.membresService.findUserById(activeUser['sub']);
+    const { StatutArticleTypes, CategorieArticleTypes } = require('@prisma/client');
+
+    // Validation et conversion du statut
+    const statutKey = Object.keys(StatutArticleTypes).find(
+      key => StatutArticleTypes[key].toLowerCase() === createArticleDto.statut.toLowerCase()
+    );
+    if (!statutKey) {
+      throw new Error(`Statut invalide : ${createArticleDto.statut}`);
+    }
+    const statutEnum = StatutArticleTypes[statutKey];
+
+    // Validation et conversion de la catégorie
+    const categorieKey = Object.keys(CategorieArticleTypes).find(
+      key => CategorieArticleTypes[key].toLowerCase() === createArticleDto.categorie.toLowerCase()
+    );
+    if (!categorieKey) {
+      throw new Error(`Catégorie invalide : ${createArticleDto.categorie}`);
+    }
+    const categorieEnum = CategorieArticleTypes[categorieKey];
 
     const savedArticle = await this.prisma.article.create({
       data: {
         titre: createArticleDto.titre,
         contenu: createArticleDto.contenu,
-        statut: createArticleDto.statut as any,
-        categorie: createArticleDto.categorie as any,
+        statut: statutEnum,
+        categorie: categorieEnum,
         redacteurId: user.id,
         imageId: imageId,
       },
@@ -118,7 +137,8 @@ export class ArticlesService {
         categorie === 'accueil'
           ? CategorieArticleTypes.INFORMATION
           : CategorieArticleTypes[categorie.toUpperCase()];
-
+console.log('test : ', categorie);
+console.log('categorie: ', CategorieArticleTypes);
       const test = await this.prisma.article.findMany({
         where: {
           categorie: categorieEnum,
@@ -155,9 +175,9 @@ export class ArticlesService {
    * @param id
    * @returns
    */
-  /*public async deleteArticleById(id: number) {
+  public async deleteArticleById(id: number) {
     return await this.prisma.article.delete({
       where: { id },
     });
-  }*/
+  }
 }
