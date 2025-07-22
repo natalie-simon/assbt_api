@@ -137,8 +137,7 @@ export class ArticlesService {
         categorie === 'accueil'
           ? CategorieArticleTypes.INFORMATION
           : CategorieArticleTypes[categorie.toUpperCase()];
-console.log('test : ', categorie);
-console.log('categorie: ', CategorieArticleTypes);
+
       const test = await this.prisma.article.findMany({
         where: {
           categorie: categorieEnum,
