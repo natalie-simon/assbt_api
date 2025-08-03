@@ -50,6 +50,15 @@ export class ActiviteAgendaDto {
   date_heure_fin: Date;
 
   /**
+   * Nombre d'inscrits à l'activité
+   *
+   * @type {number}
+   * @memberof ActiviteAgendaDto
+   */
+  @Expose()
+  nombreInscrits: number;
+
+  /**
    * Catégorie de l'activité
    *
    * @type {CategorieActiviteDto}

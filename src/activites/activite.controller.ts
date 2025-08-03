@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Put,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateActiviteDto } from './dtos/create-activite.dto';
@@ -131,6 +132,24 @@ export class ActiviteController {
     @ActiveUser() user: ActiveUserData,
   ) {
     return this.activiteService.desinscriptionActivite(id, user);
+  }
+
+   @Put(':id/annulation')
+   @Auth(AuthTypes.Bearer)
+   @Roles(RoleTypes.ADMIN)
+   @ApiOperation({ summary: 'Annuler une activité' })
+   @ApiResponse({
+     status: 200,
+     description: "L'activité a été annulée avec succès",
+   })
+   public async annulerActivite(@Param('id', ParseIntPipe) id: number) {
+    // récupération de l'activité
+    const activite = await this.activiteService.findOneActiviteWithFilters(id, false);
+    if (!activite) {
+      throw new NotFoundException('Activité non trouvée');
+    }
+    // annulation de l'activité
+    return this.activiteService.annulerActivite(id);
   }
 
   @Put(':id')

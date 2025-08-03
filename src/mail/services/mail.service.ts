@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
-import { Membre } from '../../../generated/prisma';
+import { Activite, Membre } from '../../../generated/prisma';
 import * as dotenv from 'dotenv';
 import { MembreWithRelations } from 'src/partage/types/prisma-type';
 dotenv.config();
@@ -66,6 +66,22 @@ export class MailService {
       template: './motDePasseModifie',
       context: {
         email: membre.email,
+      },
+    });
+  }
+
+  public async sendAnnulationActivite(activite: Activite, emailsParticipants: string[]): Promise<void> {
+    // Envoie un email à l'admin et en CCI à tous les participants
+    await this.mailerService.sendMail({
+      to: process.env.MAIL_ADMIN,
+      bcc: emailsParticipants, // CCI - les participants ne voient pas les emails des autres
+      from: process.env.MAIL_ADMIN,
+      subject: 'Annulation d\'une activité',
+      template: './annulationActivite',
+      context: {
+        titre: activite.titre,
+        date_heure_debut: activite.date_heure_debut,
+        date_heure_fin: activite.date_heure_fin,
       },
     });
   }

@@ -13,6 +13,7 @@ import { InscriptionActiviteDto } from '../dtos/inscription-activite.dto';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { MembresService } from '../../membres/services/membres.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from 'src/mail/services/mail.service';
 
 /**
  * Service de l'activité
@@ -31,6 +32,7 @@ export class ActiviteService {
     @Inject(WINSTON_MODULE_NEST_PROVIDER)
     private readonly logger: LoggerService,
     private readonly membresService: MembresService,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -41,10 +43,21 @@ export class ActiviteService {
     const activites = await this.prisma.activite.findMany({
       include: {
         categorie: true,
+        participants: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
-    return plainToInstance(ActiviteAgendaDto, activites, {
+    const activitesWithParticipantsCount = activites.map(activite => ({
+      ...activite,
+      nombreInscrits: activite.participants.length,
+      participants: undefined, // On retire les participants du retour final
+    }));
+
+    return plainToInstance(ActiviteAgendaDto, activitesWithParticipantsCount, {
       excludeExtraneousValues: true,
     });
   }
@@ -298,5 +311,54 @@ export class ActiviteService {
     }
 
     return activite;
+  }
+
+  /**
+   * Annulation d'une activité
+   * @param id
+   * @returns
+   */
+  public async annulerActivite(id: number) {
+    const activite = await this.prisma.activite.findUnique({
+      include: {
+        participants: {
+          include: {
+            membre: {
+              include: {
+                profil: true,
+              },
+            },
+          },
+        },
+      },
+      where: { id },
+    });
+
+    if (!activite) {
+      throw new BadRequestException('Activité non trouvée');
+    }
+
+    const emailsParticipants = activite.participants
+      .filter(participant => 
+        participant.membre.profil && 
+        participant.membre.profil.communication_mail === true
+      )
+      .map(participant => participant.membre.email);
+
+    if(emailsParticipants.length > 0){
+      try{
+        await this.mailService.sendAnnulationActivite(activite, emailsParticipants);
+      } catch (error) {
+        this.logger.error(error);
+        throw new BadRequestException(
+          `Erreur lors de l'annulation de l'activité: ${error.message}`,
+        );
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Activité annulée avec succès',
+    };
   }
 }
