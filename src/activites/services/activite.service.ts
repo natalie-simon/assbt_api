@@ -13,7 +13,7 @@ import { InscriptionActiviteDto } from '../dtos/inscription-activite.dto';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { MembresService } from '../../membres/services/membres.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { MailService } from 'src/mail/services/mail.service';
+import { MailService } from '../../mail/services/mail.service';
 
 /**
  * Service de l'activité

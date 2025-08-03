@@ -97,4 +97,23 @@ export class CreateActiviteDto {
   @IsNotEmpty({ message: "L'identifiant de la catégorie doit être renseigné" })
   @Type(() => Number)
   categorie: number;
+
+  @ApiProperty({
+    description: "Le nombre maximum de participants",
+    example: 10,
+    required: true,
+    type: Number,
+  })
+  @IsInt({ message: "Le nombre maximum de participants doit être un entier" })
+  @IsNotEmpty({ message: "Le nombre maximum de participants doit être renseigné" })
+  @Type(() => Number)
+  max_participant: number;
+
+  @ApiProperty({
+    description: "Le nombre de participants en attente",
+    example: 0,
+    required: true,
+    type: Number,
+  })
+  nbr_attente: number;
 }

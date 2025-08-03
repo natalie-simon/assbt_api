@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createMembre.dto';
+import { ContactDto } from './dtos/contact.dto';
 import { MembresService } from './services/membres.service';
 import {
   ApiTags,
@@ -53,6 +54,16 @@ export class MembresController {
   })
   registerUser(@Body() createUserDto: CreateUserDto) {
     return this.membreService.createUser(createUserDto);
+  }
+
+  @Post('contact')
+  @Auth(AuthTypes.None)
+  @ApiOperation({
+    summary: "Contactez-nous",
+    description: "Contactez-nous via le formulaire de contact",
+  })
+  contact(@Body() contactDto: ContactDto) {
+    return this.membreService.contact(contactDto);
   }
 
   /**

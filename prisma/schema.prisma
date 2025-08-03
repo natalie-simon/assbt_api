@@ -98,11 +98,15 @@ model Activite {
   contenu           String
   date_heure_debut  DateTime
   date_heure_fin    DateTime
+  motif_annulation  String? 
+  max_participant   Int       @default(99)
+  nbr_attente       Int       @default(0)
 
   // Relations
-  categorieId       Int
-  categorie         CategorieActivite @relation(fields: [categorieId], references: [id])
-  participants      MembreActivite[]
+  categorieId         Int
+  categorie           CategorieActivite @relation(fields: [categorieId], references: [id])
+  participants        MembreActivite[]
+
 }
 
 model MembreActivite {

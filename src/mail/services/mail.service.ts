@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Activite, Membre } from '../../../generated/prisma';
 import * as dotenv from 'dotenv';
 import { MembreWithRelations } from 'src/partage/types/prisma-type';
+import { ContactDto } from 'src/membres/dtos/contact.dto';
 dotenv.config();
 
 /**
@@ -82,6 +83,22 @@ export class MailService {
         titre: activite.titre,
         date_heure_debut: activite.date_heure_debut,
         date_heure_fin: activite.date_heure_fin,
+      },
+    });
+  }
+
+  public async sendContact(contactDto: ContactDto) {
+    await this.mailerService.sendMail({
+      to: process.env.MAIL_ADMIN,
+      from: contactDto.email,
+      subject: 'Contact via le formulaire de contact',
+      template: './contact',
+      context: {
+        nom: contactDto.nom,
+        prenom: contactDto.prenom,
+        email: contactDto.email,
+        telephone: contactDto.telephone,
+        message: contactDto.message,
       },
     });
   }

@@ -4,6 +4,8 @@ import { CreateUserProvider } from '../../auth/services/create-user.provider';
 import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client'; // Importer les types Prisma
+import { MailService } from '../../mail/services/mail.service';
+import { ContactDto } from '../dtos/contact.dto';
 
 
 /**
@@ -19,6 +21,7 @@ export class MembresService {
     private readonly prisma: PrismaService,
     private readonly createUserProvider: CreateUserProvider,
     private readonly findOneByEmailProvider: FindOneByEmailProvider,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -171,5 +174,14 @@ export class MembresService {
         est_supprime: false,
       },
     });
+  }
+
+  /**
+   * Gestion du formulaire de contact
+   * @param contactDto 
+   * @returns 
+   */
+  public async contact(contactDto: ContactDto) {
+    return this.mailService.sendContact(contactDto);
   }
 }
