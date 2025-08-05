@@ -1,4 +1,4 @@
-import { Injectable, Inject, LoggerService } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateCategorieActiviteDto } from '../dtos/create-categorie-activite.dto';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -12,12 +12,9 @@ export class CategorieActiviteService {
   /**
    * Constructeur de la catégorie d'activité
    * @param prisma
-   * @param logger
    */
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private readonly logger: LoggerService,
   ) {}
 
   /**
@@ -40,9 +37,6 @@ export class CategorieActiviteService {
       },
     });
 
-    this.logger.log(
-      `La catégorie d'activité suivante : ${savedCategorieActivite.lbl_categorie} created`,
-    );
     return savedCategorieActivite;
   }
 

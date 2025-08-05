@@ -1,7 +1,6 @@
 import {
   Injectable,
   Inject,
-  LoggerService,
   BadRequestException,
 } from '@nestjs/common';
 import { CreateActiviteDto } from '../dtos/create-activite.dto';
@@ -24,13 +23,10 @@ export class ActiviteService {
    * Constructeur
    * @param prisma
    * @param categorieActiviteService
-   * @param logger
    */
   constructor(
     private readonly prisma: PrismaService,
     private readonly categorieActiviteService: CategorieActiviteService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private readonly logger: LoggerService,
     private readonly membresService: MembresService,
     private readonly mailService: MailService,
   ) {}
@@ -128,10 +124,6 @@ export class ActiviteService {
       },
     });
 
-    this.logger.log(
-      `L'activité suivante : ${savedActivite.titre} a été créée.`,
-    );
-
     return savedActivite;
   }
 
@@ -180,10 +172,6 @@ export class ActiviteService {
       },
     });
 
-    this.logger.log(
-      `Le membre ${activeUser.email} s'est inscrit à l'activité ${activite.titre} - ${activite.date_heure_debut}`,
-    );
-
     return nouvelleInscription;
   }
 
@@ -220,10 +208,6 @@ export class ActiviteService {
     await this.prisma.membreActivite.delete({
       where: { id: inscription.id },
     });
-
-    this.logger.log(
-      `Le membre ${activeUser.email} s'est désinscrit de l'activité ${activite.titre} - ${activite.date_heure_debut}`,
-    );
 
     return {
       success: true,
@@ -300,11 +284,7 @@ export class ActiviteService {
         where: { id },
       });
 
-      this.logger.log(
-        `L'activité suivante : ${activite.titre} a été supprimée.`,
-      );
     } catch (error) {
-      this.logger.error(error);
       throw new BadRequestException(
         `Erreur lors de la suppression de l'activité: ${error.message}`,
       );
@@ -349,7 +329,6 @@ export class ActiviteService {
       try{
         await this.mailService.sendAnnulationActivite(activite, emailsParticipants);
       } catch (error) {
-        this.logger.error(error);
         throw new BadRequestException(
           `Erreur lors de l'annulation de l'activité: ${error.message}`,
         );

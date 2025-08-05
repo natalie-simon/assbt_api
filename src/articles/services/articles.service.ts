@@ -4,7 +4,6 @@ import { MembresService } from '../../membres/services/membres.service';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { ArticleStandardDto } from '../dtos/article-standard.dto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { StatutArticleTypes } from 'generated/prisma';
 
 /**
  * Service des articles
@@ -32,11 +31,16 @@ export class ArticlesService {
     imageId: number | null,
   ) {
     const user = await this.membresService.findUserById(activeUser['sub']);
-    const { StatutArticleTypes, CategorieArticleTypes } = require('@prisma/client');
+    const {
+      StatutArticleTypes,
+      CategorieArticleTypes,
+    } = require('@prisma/client');
 
     // Validation et conversion du statut
     const statutKey = Object.keys(StatutArticleTypes).find(
-      key => StatutArticleTypes[key].toLowerCase() === createArticleDto.statut.toLowerCase()
+      (key) =>
+        StatutArticleTypes[key].toLowerCase() ===
+        createArticleDto.statut.toLowerCase(),
     );
     if (!statutKey) {
       throw new Error(`Statut invalide : ${createArticleDto.statut}`);
@@ -45,7 +49,9 @@ export class ArticlesService {
 
     // Validation et conversion de la catégorie
     const categorieKey = Object.keys(CategorieArticleTypes).find(
-      key => CategorieArticleTypes[key].toLowerCase() === createArticleDto.categorie.toLowerCase()
+      (key) =>
+        CategorieArticleTypes[key].toLowerCase() ===
+        createArticleDto.categorie.toLowerCase(),
     );
     if (!categorieKey) {
       throw new Error(`Catégorie invalide : ${createArticleDto.categorie}`);
@@ -119,18 +125,18 @@ export class ArticlesService {
       select: {
         id: true,
         titre: true,
-        contenu:true,
+        contenu: true,
         image: {
-          select : {
+          select: {
             url: true,
-          }
+          },
         },
         redacteur: {
           select: {
             email: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -139,7 +145,11 @@ export class ArticlesService {
    * @param categorie
    * @returns
    */
-  public async findArticlePublieByCategorie(categorie) {
+  public async findArticlePublieByCategorie(
+    categorie: string,
+    search?: string,
+    statut?: string,
+  ) {
     try {
       // Importer les types d'énumération depuis @prisma/client
       const {
@@ -148,11 +158,21 @@ export class ArticlesService {
       } = require('@prisma/client');
 
       const categorieEnum = CategorieArticleTypes[categorie.toUpperCase()];
+      const statutEnum =
+        statut !== undefined ? StatutArticleTypes[statut.toUpperCase()] : null;
 
-      const test = await this.prisma.article.findMany({
+      const query = await this.prisma.article.findMany({
         where: {
           categorie: categorieEnum,
-          statut: StatutArticleTypes.VALIDE, // Ou la valeur qui correspond à "PUBLIE" dans votre schéma
+          ...(statutEnum && {
+            statut: statutEnum,
+          }),
+          ...(search && {
+            titre: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          }),
         },
         select: {
           id: true,
@@ -173,10 +193,9 @@ export class ArticlesService {
         },
       });
 
-      return test;
+      return query;
     } catch (error) {
       console.error('Error finding articles by category:', error);
-      throw error;
     }
   }
 

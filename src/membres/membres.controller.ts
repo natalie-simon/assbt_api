@@ -4,8 +4,6 @@ import {
   Post,
   Get,
   Put,
-  UseGuards,
-  SetMetadata,
   Param,
   Query,
   ClassSerializerInterceptor,
@@ -106,6 +104,41 @@ export class MembresController {
       activites,
     );
   }
+
+  /**
+   * Récupération des statistiques membres
+   * @param activeUser 
+   * @returns 
+   */
+  @Get('dashboard/statistiques')
+  @Auth(AuthTypes.Bearer)
+  @ApiOperation({summary: 'Récupérer les différents compteurs stats du membre connecté'})
+  @ApiResponse({status: 200, description: 'Les données'})
+  public async getDashboardStatistiques(
+    @ActiveUser() activeUser: ActiveUserData,
+  ){
+    return this.membreService.statistiques(
+      activeUser.sub,
+    );
+  }
+
+    /**
+   * Récupération des statistiques membres
+   * @param activeUser 
+   * @returns 
+   */
+    @Get('dashboard/compteurs')
+    @Auth(AuthTypes.Bearer)
+    @ApiOperation({summary: 'Récupérer différents compteurs'})
+    @ApiResponse({status: 200, description: 'Les données'})
+    public async getDashboardCompteurs(
+      @ActiveUser() activeUser: ActiveUserData,
+    ){
+      return this.membreService.compteurs(
+        activeUser.sub,
+      );
+    }
+
 
   /**
    * Route pour la récupération d'un utilisateur par son id

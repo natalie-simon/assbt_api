@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 
 import { ArticlesService } from './services/articles.service';
@@ -142,8 +143,10 @@ export class ArticlesController {
   })
   public async findArticlesByCategorie(
     @Param('categorie') categorie: categorieArticleTypes,
+    @Query('search') search?: string,
+    @Query('statut') statut?: string,
   ) {
-    return this.articlesService.findArticlePublieByCategorie(categorie);
+    return this.articlesService.findArticlePublieByCategorie(categorie, search, statut);
   }
 }
 

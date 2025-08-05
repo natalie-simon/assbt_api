@@ -11,7 +11,6 @@ import { AuthenticationGuard } from './auth/guards/authentication.guard';
 import { MailModule } from './mail/mail.module';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { FichiersModule } from './fichiers/fichiers.module';
-import { LoggerModule } from './logger/logger.module';
 import { CategoriesActivitesModule } from './categories-activites/categories-activites.module';
 import { ActivitesModule } from './activites/activites.module';
 import appConfig from './config/app.config';
@@ -19,7 +18,6 @@ import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
 import { MongooseModule } from '@nestjs/mongoose';
 import mailConfig from './config/mail.config';
-import loggerConfig from './config/logger.config';
 import { ProfilsModule } from './profils/profils.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -47,7 +45,7 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
-      load: [appConfig, databaseConfig, mailConfig, loggerConfig],
+      load: [appConfig, databaseConfig, mailConfig],
       validationSchema: environnementValidation,
     }),
     MembresModule,
@@ -55,7 +53,6 @@ const ENV = process.env.NODE_ENV;
     AuthModule,
     MailModule,
     FichiersModule,
-    LoggerModule,
     CategoriesActivitesModule,
     ActivitesModule,
     ProfilsModule,

@@ -3,11 +3,9 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  LoggerService,
-  Inject,
+  Controller,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
-import { Controller } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { SigninDto } from './dtos/signin.dto';
 import { AuthTypes } from './enums/auth-types.enum';
@@ -30,8 +28,6 @@ export class AuthController {
    */
   constructor(
     private readonly authService: AuthService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER)
-    private readonly logger: LoggerService,
   ) {}
 
   /**
@@ -62,7 +58,6 @@ export class AuthController {
     description: 'Un mail vient de vous être envoyé.',
   })
   public async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    this.logger.log(`Le membre : ${forgotPasswordDto.email} a demandé une réinitialisation de son mot de passe.`);
     return await this.authService.forgotPassword(forgotPasswordDto);
   }
 
@@ -84,8 +79,6 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
     @ActiveUser() user: ActiveUserData,
   ) {
-    this.logger.log(`Le membre : ${user.email} a changé son mot de passe.`,);
-
     return await this.authService.updatePassword(changePasswordDto, user);
   }
 }

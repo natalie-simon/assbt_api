@@ -184,4 +184,96 @@ export class MembresService {
   public async contact(contactDto: ContactDto) {
     return this.mailService.sendContact(contactDto);
   }
+
+  public async compteurs(id:number){
+    const now = new Date();
+    const nowIsoString = now.toISOString();
+
+    const prochainesInscription = await this.prisma.membre.findUnique({
+      where: { id: id },
+      include: {
+        inscriptions: {
+          where: {
+            activite: {
+              date_heure_debut: {
+                gte: nowIsoString,
+              },
+              motif_annulation: null
+            },
+          },
+        },
+      }
+    });
+
+    const prochainesActivite = await this.prisma.activite.findMany({
+      where: {
+        date_heure_debut: {
+          gte: nowIsoString
+        },
+        motif_annulation: null,
+      },
+      select: {
+        id: true,
+        titre: true,
+        contenu: true,
+        date_heure_debut: true,
+        categorie: true,
+        max_participant: true,
+        nbr_attente: true,
+        _count: {
+          select:{
+            participants: true,
+          }
+        }
+      },
+    });
+
+    return {
+      countProchainesInscription: prochainesInscription.inscriptions.length,
+      prochainesInscription: prochainesInscription.inscriptions,
+      countProchainesActivite: prochainesActivite.length,
+      prochainesActivites : prochainesActivite,
+    }
+  }
+
+  public async statistiques(id:number){
+    const now = new Date();
+    const firstJanuary = new Date(now.getFullYear(), 0, 1);
+    const isoString = firstJanuary.toISOString();
+
+    const activiteAnnee = await this.prisma.membre.findUnique({
+      where: { id: id },
+      include: {
+        inscriptions: {
+          where: {
+            activite: {
+              date_heure_debut: {
+                gt: isoString,
+              },
+              motif_annulation: null
+            },
+          },
+        },
+      }
+    });
+
+    const activiteHisto = await this.prisma.membre.findUnique({
+      where: { id: id },
+      include: {
+        inscriptions: {
+          where: {
+            activite: {
+              motif_annulation: null
+            },
+          },
+        },
+      }
+    });
+
+    return {
+      countActiviteHisto: activiteHisto.inscriptions.length,
+      countActiviteAnnee: activiteAnnee.inscriptions.length,
+
+    }
+  }
 }

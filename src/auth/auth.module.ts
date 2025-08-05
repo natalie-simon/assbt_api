@@ -8,7 +8,6 @@ import { SignInProvider } from './services/sign-in.provider';
 import { ConfigModule } from '@nestjs/config';
 import  jwtConfig  from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
-import { ServerInfoService } from '../logger/services/serveur-info';
 @Module({
   controllers: [AuthController],
   providers: [
@@ -18,12 +17,11 @@ import { ServerInfoService } from '../logger/services/serveur-info';
       useClass: BcryptProvider,
     },
     SignInProvider,
-    ServerInfoService,
   ],
   imports: [forwardRef(() => MembresModule),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
-  exports: [AuthService, HashingProvider, ServerInfoService],
+  exports: [AuthService, HashingProvider],
 })
 export class AuthModule {}
