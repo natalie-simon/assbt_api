@@ -1,5 +1,5 @@
 /**
- * Interface représentant les inforations pour l'utilisateur actif (connexté)
+ * Interface représentant les informations pour l'utilisateur actif (connecté)
  */
 export interface ActiveUserData {
   /**

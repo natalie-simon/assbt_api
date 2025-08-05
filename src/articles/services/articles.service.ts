@@ -116,6 +116,21 @@ export class ArticlesService {
   public async findArticleById(id: number) {
     return await this.prisma.article.findUnique({
       where: { id },
+      select: {
+        id: true,
+        titre: true,
+        contenu:true,
+        image: {
+          select : {
+            url: true,
+          }
+        },
+        redacteur: {
+          select: {
+            email: true,
+          }
+        }
+      }
     });
   }
 
@@ -132,11 +147,7 @@ export class ArticlesService {
         StatutArticleTypes,
       } = require('@prisma/client');
 
-      // Convertir les chaînes en valeurs d'énumération
-      const categorieEnum =
-        categorie === 'accueil'
-          ? CategorieArticleTypes.INFORMATION
-          : CategorieArticleTypes[categorie.toUpperCase()];
+      const categorieEnum = CategorieArticleTypes[categorie.toUpperCase()];
 
       const test = await this.prisma.article.findMany({
         where: {

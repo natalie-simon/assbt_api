@@ -39,10 +39,7 @@ export class ProfilsController {
     @Body() updateProfilDto: Profil,
     @ActiveUser() activeUser: ActiveUserData,
   ): Promise<any> {
-    if (+id !== activeUser.sub) {
-      throw new BadRequestException('Vous ne pouvez pas modifier ce profil');
-    }
-    return this.profilsService.update(updateProfilDto);
+    return this.profilsService.update(+id, activeUser.sub, updateProfilDto);
   }
 
   @Post('create')

@@ -68,8 +68,7 @@ export class ArticlesController {
    * @returns
    */
   @Get(':id')
-  @Auth(AuthTypes.Bearer)
-  @Roles(RoleTypes.ADMIN)
+  @Auth(AuthTypes.None)
   @ApiOperation({ summary: 'Récupérer un article par son id' })
   @ApiResponse({ status: 200, description: 'Un article' })
   findArticleById(@Param('id', ParseIntPipe) id: number) {
@@ -106,7 +105,6 @@ export class ArticlesController {
       imageId = fichier.id;
     }
 
-    console.log("imageId", imageId);
     return this.articlesService.createArticle(createArticleDto, user, imageId);
   }
 
@@ -129,10 +127,10 @@ export class ArticlesController {
    */
   @Get('categorie/:categorie')
   @ConditionalAuth((req) => {
-    const categorieSansAuth = 'accueil'; // Modifier selon besoin
-    return req.params?.categorie === categorieSansAuth
-      ? AuthTypes.None
-      : AuthTypes.Bearer;
+    const categorieSansAuth = ['accueil', 'visiteurs']; // Modifier selon besoin
+    return categorieSansAuth.includes(req.params?.categorie)
+    ? AuthTypes.None
+    : AuthTypes.Bearer;
   })
   @ApiOperation({
     summary:

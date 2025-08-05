@@ -18,9 +18,15 @@ export class ProfilsService {
     });
   }
 
-  async update(profil: any) {
+  async update(id: number, userId: number, profil: any) {
+    const profilActuel = await this.findOne(id);
+
+    if(profilActuel.membreId !== userId){
+      throw new BadRequestException("Vous ne pouvez pas modifier ce profil qui n'est pas le votre.")
+    }
+
     return this.prisma.profil.update({
-      where: { id: profil.id },
+      where: { id: id },
       data: profil,
     });
   }
@@ -47,6 +53,8 @@ export class ProfilsService {
     if (!profil) {
       throw new BadRequestException('Profil non trouvé');
     }
+
+    // penser à ajouter la suppression de l'ancien avatar (unlink);
 
     const fichier = await this.fichierService.uploadFile(file);
 

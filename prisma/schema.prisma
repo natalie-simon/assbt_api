@@ -24,6 +24,7 @@ enum CategorieArticleTypes {
   ACCUEIL
   ANNONCE
   INFOS
+  VISITEURS
 }
 
 enum FileTypes {
