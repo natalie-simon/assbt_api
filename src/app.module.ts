@@ -16,7 +16,6 @@ import { ActivitesModule } from './activites/activites.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import environnementValidation from './config/environnement.validation';
-import { MongooseModule } from '@nestjs/mongoose';
 import mailConfig from './config/mail.config';
 import { ProfilsModule } from './profils/profils.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -33,13 +32,6 @@ const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
     PrismaModule,
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-      }),
-      inject: [ConfigService],
-    }),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forRoot({

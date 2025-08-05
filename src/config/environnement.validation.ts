@@ -14,9 +14,7 @@ export default Joi.object({
     )
     .default(3000),
 
-  // Nouvelles variables pour le logging
-  PAPERTRAIL_HOST: Joi.string().default('logs5.papertrailapp.com'),
-  PAPERTRAIL_PORT: Joi.number().port().default(50878),
+  // Variables pour le logging
   LOG_LEVEL: Joi.string()
     .valid('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly')
     .default('info'),
@@ -27,9 +25,6 @@ export default Joi.object({
   DB_PORT: Joi.number().port().default(5432),
   DB_USERNAME: Joi.string().required(),
   DB_PASSWORD: Joi.string().required(),
-
-  // Variables MongoDB
-  MONGODB_URI: Joi.string().required(),
 
   // Variables JWT et authentification
   JWT_SECRET: Joi.string().required(),
