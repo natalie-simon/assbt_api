@@ -4,7 +4,7 @@ services:
   # Service pour l'API NestJS - en utilisant une image précompilée
   api:
     deploy:
-    image: node:18-alpine
+    image: node:18-slim
     container_name: nestjs_api
     restart: always
     working_dir: /app
