@@ -1,7 +1,8 @@
 import {
   Injectable,
-  Inject,
   BadRequestException,
+  NotFoundException,
+  Body,
 } from '@nestjs/common';
 import { CreateActiviteDto } from '../dtos/create-activite.dto';
 import { CategorieActiviteService } from '../../categories-activites/services/categorie-activite.service';
@@ -13,6 +14,8 @@ import { MembresService } from '../../membres/services/membres.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/services/mail.service';
 import { InscriptionActiviteGroupeDto } from '../dtos/inscription-activite-groupe.dto';
+import { DesinscriptionActiviteAdminDto } from '../dtos/desinscription-activite-admin.dto';
+import { AnnulationActiviteDto } from '../dtos/annulation-activite.dto';
 
 /**
  * Service de l'activité
@@ -47,7 +50,7 @@ export class ActiviteService {
       },
     });
 
-    const activitesWithParticipantsCount = activites.map(activite => ({
+    const activitesWithParticipantsCount = activites.map((activite) => ({
       ...activite,
       nombreInscrits: activite.participants.length,
       participants: undefined, // On retire les participants du retour final
@@ -283,7 +286,6 @@ export class ActiviteService {
       await this.prisma.activite.delete({
         where: { id },
       });
-
     } catch (error) {
       throw new BadRequestException(
         `Erreur lors de la suppression de l'activité: ${error.message}`,
@@ -298,7 +300,10 @@ export class ActiviteService {
    * @param id
    * @returns
    */
-  public async annulerActivite(id: number) {
+  public async annulerActivite(
+    id: number,
+    annulationActiviteDto: AnnulationActiviteDto
+  ) {
     const activite = await this.prisma.activite.findUnique({
       include: {
         participants: {
@@ -318,16 +323,29 @@ export class ActiviteService {
       throw new BadRequestException('Activité non trouvée');
     }
 
-    const emailsParticipants = activite.participants
-      .filter(participant => 
-        participant.membre.profil && 
-        participant.membre.profil.communication_mail === true
-      )
-      .map(participant => participant.membre.email);
+    await this.prisma.activite.update({
+      where: {id},
+      data: {
+        motif_annulation: annulationActiviteDto.motif
+      }
+    });
 
-    if(emailsParticipants.length > 0){
-      try{
-        await this.mailService.sendAnnulationActivite(activite, emailsParticipants);
+    activite.motif_annulation = annulationActiviteDto.motif;
+
+    const emailsParticipants = activite.participants
+      .filter(
+        (participant) =>
+          participant.membre.profil &&
+          participant.membre.profil.communication_mail === true,
+      )
+      .map((participant) => participant.membre.email);
+
+    if (emailsParticipants.length > 0) {
+      try {
+        await this.mailService.sendAnnulationActivite(
+          activite,
+          emailsParticipants,
+        );
       } catch (error) {
         throw new BadRequestException(
           `Erreur lors de l'annulation de l'activité: ${error.message}`,
@@ -343,14 +361,14 @@ export class ActiviteService {
 
   /**
    * Inscription global en mode Admin
-   * @param id 
-   * @param inscriptionActiviteGroupeDto 
-   * @returns 
+   * @param id
+   * @param inscriptionActiviteGroupeDto
+   * @returns
    */
   public async inscriptionGroupe(
     id: number,
-    inscriptionActiviteGroupeDto: InscriptionActiviteGroupeDto
-  ): Promise<any>{
+    inscriptionActiviteGroupeDto: InscriptionActiviteGroupeDto,
+  ): Promise<any> {
     const activite = await this.prisma.activite.findUnique({
       where: { id },
     });
@@ -359,8 +377,10 @@ export class ActiviteService {
       throw new BadRequestException('Activité non trouvée');
     }
     let compteur = 0;
-    inscriptionActiviteGroupeDto.inscriptions.forEach(async inscription => {
-      const membre = await this.membresService.findUserById(inscription.membreId);
+    inscriptionActiviteGroupeDto.inscriptions.forEach(async (inscription) => {
+      const membre = await this.membresService.findUserById(
+        inscription.membreId,
+      );
       const isInscrit = await this.prisma.membreActivite.findFirst({
         where: {
           activiteId: activite.id,
@@ -368,7 +388,7 @@ export class ActiviteService {
         },
       });
 
-      if(!isInscrit){
+      if (!isInscrit) {
         const nouvelleInscription = await this.prisma.membreActivite.create({
           data: {
             membreId: membre.id,
@@ -381,11 +401,42 @@ export class ActiviteService {
           },
         });
 
-        if(nouvelleInscription){
-          compteur++
+        if (nouvelleInscription) {
+          compteur++;
         }
       }
     });
-    return {'message': `${compteur} nouveaux inscrits.`}
+    return { message: `${compteur} nouveaux inscrits.` };
+  }
+
+  public async desinscriptionAdmin(
+    id: number,
+    desinscriptionActiviteAdminDto: DesinscriptionActiviteAdminDto,
+  ): Promise<any> {
+    // récupération de l'activité
+    const activite = await this.prisma.activite.findUnique({
+      where: { id },
+    });
+
+    if (!activite) {
+      throw new NotFoundException('Activité non trouvée');
+    }
+
+    const inscription = await this.prisma.membreActivite.findFirst({
+      where: {
+        activiteId: activite.id,
+        membreId: desinscriptionActiviteAdminDto.membreId,
+      },
+    });
+
+    if (!inscription) {
+      throw new BadRequestException(
+        "Ce membre n'est pas inscrit à cette activité",
+      );
+    }
+
+    await this.prisma.membreActivite.delete({
+      where: { id: inscription.id },
+    });
   }
 }

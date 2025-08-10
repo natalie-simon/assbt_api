@@ -77,12 +77,13 @@ export class MailService {
       to: process.env.MAIL_ADMIN,
       bcc: emailsParticipants, // CCI - les participants ne voient pas les emails des autres
       from: process.env.MAIL_ADMIN,
-      subject: 'Annulation d\'une activité',
+      subject: `Annulation de l'activité : ${activite.titre}`,
       template: './annulationActivite',
       context: {
         titre: activite.titre,
         date_heure_debut: activite.date_heure_debut,
         date_heure_fin: activite.date_heure_fin,
+        motif_annulation: activite.motif_annulation,
       },
     });
   }
