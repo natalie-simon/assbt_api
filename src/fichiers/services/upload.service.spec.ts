@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FichierService } from './fichier.service';
-import { UploadToAwsProvider } from './upload-to-aws.provider';
+import { UploadToO2SwitchProvider } from '../providers/upload-to-o2switch.provider';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { Fichier } from '../../database/core/fichier.entity';
@@ -10,11 +10,11 @@ import { fileTypes } from '../enums/file-types.enum';
 
 describe('UploadService', () => {
   let service: FichierService;
-  let uploadToAwsProvider: UploadToAwsProvider;
+  let uploadProvider: UploadToO2SwitchProvider;
   let configService: ConfigService;
   let uploadsRepository: Repository<Fichier>;
 
-  const mockUploadToAwsProvider = {
+  const mockUploadProvider = {
     uploadFile: jest.fn(),
   };
 
@@ -32,8 +32,8 @@ describe('UploadService', () => {
       providers: [
         FichierService,
         {
-          provide: UploadToAwsProvider,
-          useValue: mockUploadToAwsProvider,
+          provide: UploadToO2SwitchProvider,
+          useValue: mockUploadProvider,
         },
         {
           provide: ConfigService,
@@ -47,7 +47,7 @@ describe('UploadService', () => {
     }).compile();
 
     service = module.get<FichierService>(FichierService);
-    uploadToAwsProvider = module.get<UploadToAwsProvider>(UploadToAwsProvider);
+    uploadProvider = module.get<UploadToO2SwitchProvider>(UploadToO2SwitchProvider);
     configService = module.get<ConfigService>(ConfigService);
     uploadsRepository = module.get<Repository<Fichier>>(
       getRepositoryToken(Fichier),
@@ -85,14 +85,14 @@ describe('UploadService', () => {
         taille: file.size,
       } as Fichier;
 
-      mockUploadToAwsProvider.uploadFile.mockResolvedValue(mockFileName);
+      mockUploadProvider.uploadFile.mockResolvedValue(mockFileName);
       mockConfigService.get.mockReturnValue(mockCloudfrontUrl);
       mockUploadsRepository.create.mockReturnValue(mockUpload);
       mockUploadsRepository.save.mockResolvedValue(mockUpload);
 
       const result = await service.uploadFile(file);
 
-      expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+      expect(uploadProvider.uploadFile).toHaveBeenCalledWith(file);
       expect(configService.get).toHaveBeenCalledWith(
         'appConfig.cloudfront_url',
       );
@@ -116,7 +116,7 @@ describe('UploadService', () => {
     } as Express.Multer.File;
 
     const errorMessage = 'Upload failed';
-    mockUploadToAwsProvider.uploadFile.mockRejectedValue(
+    mockUploadProvider.uploadFile.mockRejectedValue(
       new Error(errorMessage),
     );
 
@@ -126,7 +126,7 @@ describe('UploadService', () => {
     // Act & Assert
     await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
 
-    expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+    expect(uploadProvider.uploadFile).toHaveBeenCalledWith(file);
     expect(consoleLogSpy).toHaveBeenCalled();
 
     // Restore console.log
@@ -141,7 +141,7 @@ describe('UploadService', () => {
     } as Express.Multer.File;
 
     const errorMessage = 'Upload failed';
-    mockUploadToAwsProvider.uploadFile.mockRejectedValue(
+    mockUploadProvider.uploadFile.mockRejectedValue(
       new Error(errorMessage),
     );
 
@@ -151,7 +151,7 @@ describe('UploadService', () => {
     // Act & Assert
     await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
 
-    expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+    expect(uploadProvider.uploadFile).toHaveBeenCalledWith(file);
     expect(consoleLogSpy).toHaveBeenCalled();
 
     // Restore console.log
@@ -166,7 +166,7 @@ describe('UploadService', () => {
     } as Express.Multer.File;
 
     const errorMessage = 'Upload failed';
-    mockUploadToAwsProvider.uploadFile.mockRejectedValue(
+    mockUploadProvider.uploadFile.mockRejectedValue(
       new Error(errorMessage),
     );
 
@@ -176,7 +176,7 @@ describe('UploadService', () => {
     // Act & Assert
     await expect(service.uploadFile(file)).rejects.toThrow(ConflictException);
 
-    expect(uploadToAwsProvider.uploadFile).toHaveBeenCalledWith(file);
+    expect(uploadProvider.uploadFile).toHaveBeenCalledWith(file);
     expect(consoleLogSpy).toHaveBeenCalled();
 
     // Restore console.log

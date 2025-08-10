@@ -20,6 +20,9 @@ import { RoleTypes } from '../auth/enums/role-types.enum';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { InscriptionActiviteDto } from './dtos/inscription-activite.dto';
+import { InscriptionActiviteGroupeDto } from './dtos/inscription-activite-groupe.dto';
+import { DesinscriptionActiviteAdminDto } from './dtos/desinscription-activite-admin.dto';
+import { AnnulationActiviteDto } from './dtos/annulation-activite.dto';
 
 /**
  * Contrôleur des Activités
@@ -115,6 +118,30 @@ export class ActiviteController {
   }
 
   /**
+   * inscription multiple Admin
+   * @param id 
+   * @param inscriptionActiviteGroupeDto 
+   * @returns 
+   */
+  @Post(':id/inscription/admin/groupe')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Inscription de plusieurs membres à une activité' })
+  @ApiResponse({
+    status: 201,
+    description: 'A définir',
+  })
+  public async inscriptionAdminGroupe(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() inscriptionActiviteGroupeDto: InscriptionActiviteGroupeDto,
+  ) {
+    return this.activiteService.inscriptionGroupe(
+      id,
+      inscriptionActiviteGroupeDto,
+    );
+  }
+
+  /**
    * désinscription d'une activité
    * @param id
    * @param user
@@ -134,24 +161,64 @@ export class ActiviteController {
     return this.activiteService.desinscriptionActivite(id, user);
   }
 
-   @Put(':id/annulation')
-   @Auth(AuthTypes.Bearer)
-   @Roles(RoleTypes.ADMIN)
-   @ApiOperation({ summary: 'Annuler une activité' })
-   @ApiResponse({
-     status: 200,
-     description: "L'activité a été annulée avec succès",
-   })
-   public async annulerActivite(@Param('id', ParseIntPipe) id: number) {
+  /**
+   * Désinscription à une activité par un Admin
+   * @param id 
+   * @param desinscriptionActiviteAdminDto 
+   * @returns 
+   */
+  @Put(':id/desinscription/admin')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Désinscription par un admin' })
+  @ApiResponse({
+    status: 200,
+    description: 'Désinscription du membre Toto efféctuée',
+  })
+  public async desinscriptionActiviteAdmin(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() desinscriptionActiviteAdminDto: DesinscriptionActiviteAdminDto,
+  ) {
+    return this.activiteService.desinscriptionAdmin(
+      id,
+      desinscriptionActiviteAdminDto,
+    );
+  }
+
+  /**
+   * Annulation d'une activité
+   * @param id 
+   * @returns 
+   */
+  @Put(':id/annulation')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({ summary: 'Annuler une activité' })
+  @ApiResponse({
+    status: 200,
+    description: "L'activité a été annulée avec succès",
+  })
+  public async annulerActivite(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() annulationActiviteDto: AnnulationActiviteDto) {
     // récupération de l'activité
-    const activite = await this.activiteService.findOneActiviteWithFilters(id, false);
+    const activite = await this.activiteService.findOneActiviteWithFilters(
+      id,
+      false,
+    );
     if (!activite) {
       throw new NotFoundException('Activité non trouvée');
     }
     // annulation de l'activité
-    return this.activiteService.annulerActivite(id);
+    return this.activiteService.annulerActivite(id, annulationActiviteDto);
   }
 
+  /**
+   * Mise à jour d'une activité
+   * @param id 
+   * @param updateActiviteDto 
+   * @returns 
+   */
   @Put(':id')
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.ADMIN)
@@ -167,6 +234,11 @@ export class ActiviteController {
     return this.activiteService.updateActivite(id, updateActiviteDto);
   }
 
+  /**
+   * Supression d'une activité
+   * @param id 
+   * @returns 
+   */
   @Delete(':id')
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.ADMIN)

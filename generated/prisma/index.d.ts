@@ -74,7 +74,8 @@ export type StatutArticleTypes = (typeof StatutArticleTypes)[keyof typeof Statut
 export const CategorieArticleTypes: {
   ACCUEIL: 'ACCUEIL',
   ANNONCE: 'ANNONCE',
-  INFOS: 'INFOS'
+  INFOS: 'INFOS',
+  VISITEURS: 'VISITEURS'
 };
 
 export type CategorieArticleTypes = (typeof CategorieArticleTypes)[keyof typeof CategorieArticleTypes]
@@ -124,7 +125,7 @@ export const FileTypes: typeof $Enums.FileTypes
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -360,8 +361,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.6.0
-   * Query Engine version: f676762280b54cd07c770017ed3711ddde35f37a
+   * Prisma Client JS version: 6.13.0
+   * Query Engine version: 361e86d0ea4987e9f53a565309b3eed797a6bcbd
    */
   export type PrismaVersion = {
     client: string
@@ -1332,16 +1333,24 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Defaults to stdout
+     * // Shorthand for `emit: 'stdout'`
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events
+     * // Emit as events only
      * log: [
-     *   { emit: 'stdout', level: 'query' },
-     *   { emit: 'stdout', level: 'info' },
-     *   { emit: 'stdout', level: 'warn' }
-     *   { emit: 'stdout', level: 'error' }
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
      * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1389,10 +1398,15 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
 
   export type QueryEvent = {
     timestamp: Date
@@ -6329,11 +6343,15 @@ export namespace Prisma {
 
   export type ActiviteAvgAggregateOutputType = {
     id: number | null
+    max_participant: number | null
+    nbr_attente: number | null
     categorieId: number | null
   }
 
   export type ActiviteSumAggregateOutputType = {
     id: number | null
+    max_participant: number | null
+    nbr_attente: number | null
     categorieId: number | null
   }
 
@@ -6343,6 +6361,9 @@ export namespace Prisma {
     contenu: string | null
     date_heure_debut: Date | null
     date_heure_fin: Date | null
+    motif_annulation: string | null
+    max_participant: number | null
+    nbr_attente: number | null
     categorieId: number | null
   }
 
@@ -6352,6 +6373,9 @@ export namespace Prisma {
     contenu: string | null
     date_heure_debut: Date | null
     date_heure_fin: Date | null
+    motif_annulation: string | null
+    max_participant: number | null
+    nbr_attente: number | null
     categorieId: number | null
   }
 
@@ -6361,6 +6385,9 @@ export namespace Prisma {
     contenu: number
     date_heure_debut: number
     date_heure_fin: number
+    motif_annulation: number
+    max_participant: number
+    nbr_attente: number
     categorieId: number
     _all: number
   }
@@ -6368,11 +6395,15 @@ export namespace Prisma {
 
   export type ActiviteAvgAggregateInputType = {
     id?: true
+    max_participant?: true
+    nbr_attente?: true
     categorieId?: true
   }
 
   export type ActiviteSumAggregateInputType = {
     id?: true
+    max_participant?: true
+    nbr_attente?: true
     categorieId?: true
   }
 
@@ -6382,6 +6413,9 @@ export namespace Prisma {
     contenu?: true
     date_heure_debut?: true
     date_heure_fin?: true
+    motif_annulation?: true
+    max_participant?: true
+    nbr_attente?: true
     categorieId?: true
   }
 
@@ -6391,6 +6425,9 @@ export namespace Prisma {
     contenu?: true
     date_heure_debut?: true
     date_heure_fin?: true
+    motif_annulation?: true
+    max_participant?: true
+    nbr_attente?: true
     categorieId?: true
   }
 
@@ -6400,6 +6437,9 @@ export namespace Prisma {
     contenu?: true
     date_heure_debut?: true
     date_heure_fin?: true
+    motif_annulation?: true
+    max_participant?: true
+    nbr_attente?: true
     categorieId?: true
     _all?: true
   }
@@ -6496,6 +6536,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date
     date_heure_fin: Date
+    motif_annulation: string | null
+    max_participant: number
+    nbr_attente: number
     categorieId: number
     _count: ActiviteCountAggregateOutputType | null
     _avg: ActiviteAvgAggregateOutputType | null
@@ -6524,6 +6567,9 @@ export namespace Prisma {
     contenu?: boolean
     date_heure_debut?: boolean
     date_heure_fin?: boolean
+    motif_annulation?: boolean
+    max_participant?: boolean
+    nbr_attente?: boolean
     categorieId?: boolean
     categorie?: boolean | CategorieActiviteDefaultArgs<ExtArgs>
     participants?: boolean | Activite$participantsArgs<ExtArgs>
@@ -6536,6 +6582,9 @@ export namespace Prisma {
     contenu?: boolean
     date_heure_debut?: boolean
     date_heure_fin?: boolean
+    motif_annulation?: boolean
+    max_participant?: boolean
+    nbr_attente?: boolean
     categorieId?: boolean
     categorie?: boolean | CategorieActiviteDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["activite"]>
@@ -6546,6 +6595,9 @@ export namespace Prisma {
     contenu?: boolean
     date_heure_debut?: boolean
     date_heure_fin?: boolean
+    motif_annulation?: boolean
+    max_participant?: boolean
+    nbr_attente?: boolean
     categorieId?: boolean
     categorie?: boolean | CategorieActiviteDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["activite"]>
@@ -6556,10 +6608,13 @@ export namespace Prisma {
     contenu?: boolean
     date_heure_debut?: boolean
     date_heure_fin?: boolean
+    motif_annulation?: boolean
+    max_participant?: boolean
+    nbr_attente?: boolean
     categorieId?: boolean
   }
 
-  export type ActiviteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "titre" | "contenu" | "date_heure_debut" | "date_heure_fin" | "categorieId", ExtArgs["result"]["activite"]>
+  export type ActiviteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "titre" | "contenu" | "date_heure_debut" | "date_heure_fin" | "motif_annulation" | "max_participant" | "nbr_attente" | "categorieId", ExtArgs["result"]["activite"]>
   export type ActiviteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     categorie?: boolean | CategorieActiviteDefaultArgs<ExtArgs>
     participants?: boolean | Activite$participantsArgs<ExtArgs>
@@ -6584,6 +6639,9 @@ export namespace Prisma {
       contenu: string
       date_heure_debut: Date
       date_heure_fin: Date
+      motif_annulation: string | null
+      max_participant: number
+      nbr_attente: number
       categorieId: number
     }, ExtArgs["result"]["activite"]>
     composites: {}
@@ -7015,6 +7073,9 @@ export namespace Prisma {
     readonly contenu: FieldRef<"Activite", 'String'>
     readonly date_heure_debut: FieldRef<"Activite", 'DateTime'>
     readonly date_heure_fin: FieldRef<"Activite", 'DateTime'>
+    readonly motif_annulation: FieldRef<"Activite", 'String'>
+    readonly max_participant: FieldRef<"Activite", 'Int'>
+    readonly nbr_attente: FieldRef<"Activite", 'Int'>
     readonly categorieId: FieldRef<"Activite", 'Int'>
   }
     
@@ -9787,6 +9848,9 @@ export namespace Prisma {
     contenu: 'contenu',
     date_heure_debut: 'date_heure_debut',
     date_heure_fin: 'date_heure_fin',
+    motif_annulation: 'motif_annulation',
+    max_participant: 'max_participant',
+    nbr_attente: 'nbr_attente',
     categorieId: 'categorieId'
   };
 
@@ -10263,6 +10327,9 @@ export namespace Prisma {
     contenu?: StringFilter<"Activite"> | string
     date_heure_debut?: DateTimeFilter<"Activite"> | Date | string
     date_heure_fin?: DateTimeFilter<"Activite"> | Date | string
+    motif_annulation?: StringNullableFilter<"Activite"> | string | null
+    max_participant?: IntFilter<"Activite"> | number
+    nbr_attente?: IntFilter<"Activite"> | number
     categorieId?: IntFilter<"Activite"> | number
     categorie?: XOR<CategorieActiviteScalarRelationFilter, CategorieActiviteWhereInput>
     participants?: MembreActiviteListRelationFilter
@@ -10274,6 +10341,9 @@ export namespace Prisma {
     contenu?: SortOrder
     date_heure_debut?: SortOrder
     date_heure_fin?: SortOrder
+    motif_annulation?: SortOrderInput | SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
     categorie?: CategorieActiviteOrderByWithRelationInput
     participants?: MembreActiviteOrderByRelationAggregateInput
@@ -10288,6 +10358,9 @@ export namespace Prisma {
     contenu?: StringFilter<"Activite"> | string
     date_heure_debut?: DateTimeFilter<"Activite"> | Date | string
     date_heure_fin?: DateTimeFilter<"Activite"> | Date | string
+    motif_annulation?: StringNullableFilter<"Activite"> | string | null
+    max_participant?: IntFilter<"Activite"> | number
+    nbr_attente?: IntFilter<"Activite"> | number
     categorieId?: IntFilter<"Activite"> | number
     categorie?: XOR<CategorieActiviteScalarRelationFilter, CategorieActiviteWhereInput>
     participants?: MembreActiviteListRelationFilter
@@ -10299,6 +10372,9 @@ export namespace Prisma {
     contenu?: SortOrder
     date_heure_debut?: SortOrder
     date_heure_fin?: SortOrder
+    motif_annulation?: SortOrderInput | SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
     _count?: ActiviteCountOrderByAggregateInput
     _avg?: ActiviteAvgOrderByAggregateInput
@@ -10316,6 +10392,9 @@ export namespace Prisma {
     contenu?: StringWithAggregatesFilter<"Activite"> | string
     date_heure_debut?: DateTimeWithAggregatesFilter<"Activite"> | Date | string
     date_heure_fin?: DateTimeWithAggregatesFilter<"Activite"> | Date | string
+    motif_annulation?: StringNullableWithAggregatesFilter<"Activite"> | string | null
+    max_participant?: IntWithAggregatesFilter<"Activite"> | number
+    nbr_attente?: IntWithAggregatesFilter<"Activite"> | number
     categorieId?: IntWithAggregatesFilter<"Activite"> | number
   }
 
@@ -10747,6 +10826,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     categorie: CategorieActiviteCreateNestedOneWithoutActivitesInput
     participants?: MembreActiviteCreateNestedManyWithoutActiviteInput
   }
@@ -10757,6 +10839,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     categorieId: number
     participants?: MembreActiviteUncheckedCreateNestedManyWithoutActiviteInput
   }
@@ -10766,6 +10851,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     categorie?: CategorieActiviteUpdateOneRequiredWithoutActivitesNestedInput
     participants?: MembreActiviteUpdateManyWithoutActiviteNestedInput
   }
@@ -10776,6 +10864,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     categorieId?: IntFieldUpdateOperationsInput | number
     participants?: MembreActiviteUncheckedUpdateManyWithoutActiviteNestedInput
   }
@@ -10786,6 +10877,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     categorieId: number
   }
 
@@ -10794,6 +10888,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
   }
 
   export type ActiviteUncheckedUpdateManyInput = {
@@ -10802,6 +10899,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     categorieId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -11352,11 +11452,16 @@ export namespace Prisma {
     contenu?: SortOrder
     date_heure_debut?: SortOrder
     date_heure_fin?: SortOrder
+    motif_annulation?: SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
   }
 
   export type ActiviteAvgOrderByAggregateInput = {
     id?: SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
   }
 
@@ -11366,6 +11471,9 @@ export namespace Prisma {
     contenu?: SortOrder
     date_heure_debut?: SortOrder
     date_heure_fin?: SortOrder
+    motif_annulation?: SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
   }
 
@@ -11375,11 +11483,16 @@ export namespace Prisma {
     contenu?: SortOrder
     date_heure_debut?: SortOrder
     date_heure_fin?: SortOrder
+    motif_annulation?: SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
   }
 
   export type ActiviteSumOrderByAggregateInput = {
     id?: SortOrder
+    max_participant?: SortOrder
+    nbr_attente?: SortOrder
     categorieId?: SortOrder
   }
 
@@ -12711,6 +12824,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     participants?: MembreActiviteCreateNestedManyWithoutActiviteInput
   }
 
@@ -12720,6 +12836,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     participants?: MembreActiviteUncheckedCreateNestedManyWithoutActiviteInput
   }
 
@@ -12794,6 +12913,9 @@ export namespace Prisma {
     contenu?: StringFilter<"Activite"> | string
     date_heure_debut?: DateTimeFilter<"Activite"> | Date | string
     date_heure_fin?: DateTimeFilter<"Activite"> | Date | string
+    motif_annulation?: StringNullableFilter<"Activite"> | string | null
+    max_participant?: IntFilter<"Activite"> | number
+    nbr_attente?: IntFilter<"Activite"> | number
     categorieId?: IntFilter<"Activite"> | number
   }
 
@@ -12919,6 +13041,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     categorie: CategorieActiviteCreateNestedOneWithoutActivitesInput
   }
 
@@ -12928,6 +13053,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
     categorieId: number
   }
 
@@ -12982,6 +13110,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     categorie?: CategorieActiviteUpdateOneRequiredWithoutActivitesNestedInput
   }
 
@@ -12991,6 +13122,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     categorieId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -13293,6 +13427,9 @@ export namespace Prisma {
     contenu: string
     date_heure_debut: Date | string
     date_heure_fin: Date | string
+    motif_annulation?: string | null
+    max_participant?: number
+    nbr_attente?: number
   }
 
   export type ActiviteUpdateWithoutCategorieInput = {
@@ -13300,6 +13437,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     participants?: MembreActiviteUpdateManyWithoutActiviteNestedInput
   }
 
@@ -13309,6 +13449,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
     participants?: MembreActiviteUncheckedUpdateManyWithoutActiviteNestedInput
   }
 
@@ -13318,6 +13461,9 @@ export namespace Prisma {
     contenu?: StringFieldUpdateOperationsInput | string
     date_heure_debut?: DateTimeFieldUpdateOperationsInput | Date | string
     date_heure_fin?: DateTimeFieldUpdateOperationsInput | Date | string
+    motif_annulation?: NullableStringFieldUpdateOperationsInput | string | null
+    max_participant?: IntFieldUpdateOperationsInput | number
+    nbr_attente?: IntFieldUpdateOperationsInput | number
   }
 
   export type MembreActiviteCreateManyActiviteInput = {
