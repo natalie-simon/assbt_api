@@ -20,6 +20,7 @@ import { RoleTypes } from '../auth/enums/role-types.enum';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { InscriptionActiviteDto } from './dtos/inscription-activite.dto';
+import { InscriptionActiviteGroupeDto } from './dtos/inscription-activite-groupe.dto'
 
 /**
  * Contrôleur des Activités
@@ -112,6 +113,23 @@ export class ActiviteController {
       inscriptionActiviteDto,
       user,
     );
+  }
+
+  //POST /activites/{id}/inscription/admin/groupe`
+
+  @Post(':id/inscription/admin/groupe')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({summary: 'Inscription de plusieurs membres à une activité'})
+  @ApiResponse({
+    status: 201,
+    description: "A définir",
+  })
+  public async inscriptionAdminGroupe(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() inscriptionActiviteGroupeDto: InscriptionActiviteGroupeDto,
+  ){
+    return this.activiteService.inscriptionGroupe(id, inscriptionActiviteGroupeDto);
   }
 
   /**

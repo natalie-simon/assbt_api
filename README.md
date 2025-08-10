@@ -1,85 +1,305 @@
+# 🏊‍♂️ API ASSBT - Association Sportive Saint-Barthélémy-Toirac
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<p align="center">API REST moderne construite avec NestJS pour la gestion d'une association sportive de plongée sous-marine.</p>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" alt="Node Version" />
+  <img src="https://img.shields.io/badge/TypeScript-5.1.3-blue" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/NestJS-10.0-red" alt="NestJS" />
+  <img src="https://img.shields.io/badge/Prisma-6.13-orange" alt="Prisma" />
+  <img src="https://img.shields.io/badge/PostgreSQL-15+-blue" alt="PostgreSQL" />
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🎯 Description
 
-## Project setup
+Cette API REST permet la gestion complète d'une association sportive de plongée sous-marine, incluant :
 
-```bash
-$ npm install
+- **Gestion des membres** et profils utilisateurs
+- **Système d'authentification** JWT avec rôles (Admin, User, Rédacteur)
+- **Gestion des activités** de plongée avec inscriptions
+- **Système d'articles** avec différents statuts et catégories
+- **Upload de fichiers** vers AWS S3 et serveurs FTP
+- **Notifications par email** avec templates EJS
+
+## 🏗️ Architecture
+
+### Technologies principales
+
+- **Framework** : NestJS 10.x (Node.js/TypeScript)
+- **Base de données** : PostgreSQL avec Prisma ORM
+- **Authentification** : JWT + bcrypt
+- **Validation** : class-validator + class-transformer
+- **Upload** : AWS S3 + FTP (O2Switch)
+- **Email** : Nodemailer avec templates EJS
+- **Documentation** : Swagger/OpenAPI
+
+### Structure du projet
+
+```
+src/
+├── activites/           # Gestion des activités de plongée
+├── articles/            # Système de publication d'articles
+├── auth/               # Authentification JWT + guards
+├── categories-activites/ # Catégories d'activités
+├── config/             # Configuration de l'application
+├── fichiers/           # Upload et gestion des fichiers
+├── mail/               # Service d'envoi d'emails
+├── membres/            # Gestion des membres
+├── prisma/             # Client Prisma ORM
+├── profils/            # Profils utilisateurs
+└── main.ts             # Point d'entrée de l'application
 ```
 
-## Compile and run the project
+## 🚀 Installation et configuration
+
+### Prérequis
+
+- Node.js >= 18.0.0
+- PostgreSQL >= 15
+- npm ou yarn
+
+### Installation
 
 ```bash
-# development
-$ npm run start
+# Cloner le repository
+git clone <url-du-repo>
+cd assbt_api
 
-# watch mode
-$ npm run start:dev
+# Installer les dépendances
+npm install
 
-# production mode
-$ npm run start:prod
+# Copier le fichier d'environnement
+cp .env.example .env
 ```
 
-## Run tests
+### Configuration des variables d'environnement
 
 ```bash
-# unit tests
-$ npm run test
+# Base de données
+DB_HOST_PRISMA="postgresql://username:password@localhost:5432/assbt_db"
 
-# e2e tests
-$ npm run test:e2e
+# JWT
+JWT_SECRET="votre-secret-jwt-super-secure"
+JWT_ACCESS_TOKEN_TTL=3600
 
-# test coverage
-$ npm run test:cov
+# AWS S3
+AWS_ACCESS_KEY_ID="your-access-key"
+AWS_SECRET_ACCESS_KEY="your-secret-key"
+AWS_REGION="eu-west-3"
+AWS_S3_BUCKET="your-bucket-name"
+
+# Email
+MAIL_HOST="smtp.your-provider.com"
+MAIL_PORT=587
+MAIL_USER="your-email@domain.com"
+MAIL_PASS="your-password"
+
+# FTP (O2Switch)
+FTP_HOST="your-ftp-host"
+FTP_USER="your-ftp-user"
+FTP_PASS="your-ftp-password"
 ```
 
-## Resources
+### Configuration de la base de données
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# Générer le client Prisma
+npm run prisma:generate
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Appliquer les migrations
+npm run prisma:deploy
 
-## Support
+# (Optionnel) Peupler la base avec des données de test
+npm run prisma:seed
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🏃‍♂️ Démarrage
 
-## Stay in touch
+```bash
+# Mode développement avec rechargement automatique
+npm run start:dev
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Mode production
+npm run start:prod
 
-## License
+# Mode debug
+npm run start:debug
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+L'API sera accessible sur `http://localhost:3000/api`
+
+## 📚 Documentation API
+
+### Swagger/OpenAPI
+
+Une fois l'application démarrée, la documentation interactive est disponible sur :
+- **Documentation Swagger** : `http://localhost:3000/documentation`
+
+### Endpoints principaux
+
+| Module | Endpoint | Description |
+|--------|----------|-------------|
+| **Auth** | `POST /api/auth/signin` | Connexion utilisateur |
+| **Auth** | `POST /api/auth/forgot-password` | Réinitialisation mot de passe |
+| **Membres** | `GET /api/membres` | Liste des membres |
+| **Membres** | `POST /api/membres` | Création d'un membre |
+| **Activités** | `GET /api/activites` | Liste des activités |
+| **Activités** | `POST /api/activites` | Création d'activité |
+| **Articles** | `GET /api/articles` | Liste des articles |
+| **Uploads** | `POST /api/uploads` | Upload de fichiers |
+
+### Authentification
+
+L'API utilise JWT Bearer tokens :
+
+```bash
+# Exemple de requête authentifiée
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     http://localhost:3000/api/membres
+```
+
+## 🧪 Tests
+
+```bash
+# Tests unitaires
+npm run test
+
+# Tests e2e
+npm run test:e2e
+
+# Couverture de code
+npm run test:cov
+
+# Tests en mode watch
+npm run test:watch
+```
+
+## 🔧 Scripts disponibles
+
+```bash
+# Développement
+npm run start:dev          # Démarrage avec rechargement automatique
+npm run start:debug        # Démarrage en mode debug
+
+# Base de données
+npm run prisma:generate    # Générer le client Prisma
+npm run prisma:deploy      # Appliquer les migrations
+npm run prisma:studio      # Interface graphique Prisma
+npm run prisma:reset       # Reset de la base de données
+
+# Qualité du code
+npm run lint              # Linting ESLint
+npm run format            # Formatage Prettier
+
+# Build
+npm run build             # Compilation TypeScript
+```
+
+## 🔐 Sécurité
+
+### Rôles et permissions
+
+- **ADMIN** : Accès complet à toutes les fonctionnalités
+- **REDAC** : Création et édition d'articles
+- **USER** : Consultation et inscription aux activités
+
+### Bonnes pratiques
+
+- Mots de passe hachés avec bcrypt (salt rounds: 12)
+- Validation stricte des données d'entrée
+- Protection CSRF via configuration CORS
+- Rate limiting sur les endpoints sensibles
+- Logs sécurisés sans exposition d'informations sensibles
+
+### Audit de sécurité
+
+Un audit de sécurité est disponible : `AUDIT_SECURITE_2025-08-08.md`
+
+## 🐳 Docker
+
+```bash
+# Développement
+docker-compose -f docker-compose.dev.yml up -d
+
+# Production
+docker-compose -f docker-compose.prod.yml up -d
+
+# Simple
+docker-compose -f docker-compose.simple.yml up -d
+```
+
+## 📦 Déploiement
+
+### Scripts de déploiement
+
+```bash
+# Déploiement production
+./deploy-prod.sh
+
+# Déploiement simple
+./deploy-simple.sh
+```
+
+### Variables d'environnement de production
+
+Assurez-vous de configurer :
+- Base de données PostgreSQL sécurisée
+- Certificats SSL/TLS
+- Variables d'environnement de production
+- Monitoring et logs centralisés
+
+## 🤝 Contribution
+
+### Workflow Git
+
+- **Branche principale** : `develop`
+- **Branches de fonctionnalités** : `feature/nom-fonctionnalite`
+- **Branches de correction** : `hotfix/nom-correction`
+
+### Standards de code
+
+- TypeScript strict activé
+- ESLint + Prettier pour le formatage
+- Tests unitaires requis pour les nouvelles fonctionnalités
+- Documentation des endpoints Swagger
+
+## 📝 Changelog
+
+### Version 0.0.1 (En cours)
+
+- ✅ Système d'authentification JWT
+- ✅ Gestion des membres et profils
+- ✅ CRUD activités avec inscriptions
+- ✅ Système d'articles avec catégories
+- ✅ Upload de fichiers (AWS S3 + FTP)
+- ✅ Notifications par email
+- 🔄 Évolution des activités (branche actuelle)
+
+## 👥 Équipe
+
+- **Développement** : Natalie Simon (admin@nataliesimon.fr)
+- **Association** : ASSBT - Association Sportive Saint-Barthélémy-Toirac
+
+## 📄 Licence
+
+Ce projet est sous licence UNLICENSED - voir le fichier package.json pour les détails.
+
+## 🆘 Support
+
+Pour toute question ou problème :
+
+1. Consultez la documentation Swagger : `/documentation`
+2. Vérifiez les logs de l'application
+3. Contactez l'équipe de développement
+
+---
+
+<p align="center">
+  Développé avec ❤️ pour l'ASSBT par l'équipe technique
+</p>
