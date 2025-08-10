@@ -37,14 +37,17 @@ WORKDIR /app
 # Set environment variable
 ENV NODE_ENV production
 
-# Install production dependencies for bcrypt
-RUN apk add --no-cache make g++
+# Install production dependencies for native modules
+RUN apk add --no-cache python3 make g++ libc6-compat
 
 # Copy necessary files from builder stage
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
+
+# Force rebuild bcrypt in production environment to ensure Alpine compatibility
+RUN npm rebuild bcrypt --build-from-source
 
 # Expose API port
 EXPOSE 3000
