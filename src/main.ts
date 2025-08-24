@@ -3,8 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
-import { ConfigService } from '@nestjs/config';
 
 dotenv.config();
 
@@ -45,17 +43,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
   SwaggerModule.setup('documentation', app, document);
-
-  // Configuration de l'accès à AWS
-  const configService = app.get(ConfigService);
-  const s3Config: S3ClientConfig = {
-    region: configService.get('appConfig.awsRegion'),
-    credentials: {
-      accessKeyId: configService.get('appConfig.awsAccessKeyId'),
-      secretAccessKey: configService.get('appConfig.awsSecretAccessKey'),
-    },
-  };
-  const s3Client = new S3Client(s3Config);
 
   await app.listen(3000, '0.0.0.0');
 }

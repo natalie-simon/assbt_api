@@ -13,7 +13,6 @@ import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { MailService } from '../../mail/services/mail.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Membre } from 'generated/prisma';
 
 /**
  * Service de création d'un utilisateur

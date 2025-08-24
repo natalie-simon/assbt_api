@@ -1,6 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateCategorieActiviteDto } from '../dtos/create-categorie-activite.dto';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CategorieActivite } from 'generated/prisma';
 

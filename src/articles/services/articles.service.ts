@@ -4,6 +4,7 @@ import { MembresService } from '../../membres/services/membres.service';
 import { ActiveUserData } from '../../auth/interfaces/active-user-data.interface';
 import { ArticleStandardDto } from '../dtos/article-standard.dto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StatutArticleTypes, CategorieArticleTypes } from '@prisma/client';
 
 /**
  * Service des articles
@@ -31,10 +32,6 @@ export class ArticlesService {
     imageId: number | null,
   ) {
     const user = await this.membresService.findUserById(activeUser['sub']);
-    const {
-      StatutArticleTypes,
-      CategorieArticleTypes,
-    } = require('@prisma/client');
 
     // Validation et conversion du statut
     const statutKey = Object.keys(StatutArticleTypes).find(
@@ -151,12 +148,6 @@ export class ArticlesService {
     statut?: string,
   ) {
     try {
-      // Importer les types d'énumération depuis @prisma/client
-      const {
-        CategorieArticleTypes,
-        StatutArticleTypes,
-      } = require('@prisma/client');
-
       const categorieEnum = CategorieArticleTypes[categorie.toUpperCase()];
       const statutEnum =
         statut !== undefined ? StatutArticleTypes[statut.toUpperCase()] : null;

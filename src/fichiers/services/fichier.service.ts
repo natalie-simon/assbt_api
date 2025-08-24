@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { UploadToO2SwitchProvider } from '../providers/upload-to-o2switch.provider';
 import { ConfigService } from '@nestjs/config';
+import { FileTypes } from '@prisma/client';
 
 /**
  * Service de gestion des uploads
@@ -40,7 +41,6 @@ export class FichierService {
 
     try {
       const fichierData = await this.uploadToAwsProvider.uploadFile(file);
-      const { FileTypes } = require('@prisma/client');
       let typeEnum = FileTypes.IMAGE; // par défaut
       if (file.mimetype.startsWith('video/')) typeEnum = FileTypes.VIDEO;
       else if (file.mimetype.startsWith('audio/')) typeEnum = FileTypes.AUDIO;

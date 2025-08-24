@@ -8,7 +8,6 @@ import { ForgotPasswordDto } from './dtos/forgotpassword.dto';
 import { ChangePasswordDto } from './dtos/changePassword.dto';
 import { ActiveUser } from './decorators/active-user.decorator';
 import { ActiveUserData } from './interfaces/active-user-data.interface';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 /**
  * Auth controller

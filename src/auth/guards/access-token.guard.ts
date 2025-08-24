@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
 import jwtConfig from '../config/jwt.config';
 import { Request } from 'express';
 import { REQUEST_USER_KEY } from '../constantes/auth.constants';
@@ -48,6 +47,7 @@ export class AccessTokenGuard implements CanActivate {
       );
       request[REQUEST_USER_KEY] = payload;
     } catch (error) {
+      console.log(error);
       throw new UnauthorizedException(`Access token is invalid`);
     }
 
@@ -60,7 +60,7 @@ export class AccessTokenGuard implements CanActivate {
    * @returns
    */
   private extractRequestFromHeaders(request: Request): string | undefined {
-    const [_, token] = request.headers['authorization']?.split(' ') ?? [];
+    const [, token] = request.headers['authorization']?.split(' ') ?? [];
     return token;
   }
 }

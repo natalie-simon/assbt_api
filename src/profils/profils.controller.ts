@@ -14,7 +14,6 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiHeader,
   ApiHeaders,
 } from '@nestjs/swagger';
 import { ProfilsService } from './services/profils.service';
