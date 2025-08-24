@@ -25,16 +25,16 @@ async function bootstrap() {
   );
 
   // Configuration CORS
-app.enableCors({
-  origin: '*', // Autorise toutes les origines
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  allowedHeaders: '*', // Autorise tous les en-têtes
-  exposedHeaders: '*', // Expose tous les en-têtes
-  credentials: true, // Autorise les credentials (cookies, auth)
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-  maxAge: 86400, // Cache la réponse preflight pendant 24h
-});
+  app.enableCors({
+    origin: '*', // Autorise toutes les origines
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*', // Autorise tous les en-têtes
+    exposedHeaders: '*', // Expose tous les en-têtes
+    credentials: true, // Autorise les credentials (cookies, auth)
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    maxAge: 86400, // Cache la réponse preflight pendant 24h
+  });
 
   // swagger configuration
   const swaggerConfig = new DocumentBuilder()

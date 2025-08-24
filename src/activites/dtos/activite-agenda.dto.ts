@@ -65,7 +65,6 @@ export class ActiviteAgendaDto {
    * @memberof ActiviteAgendaDto
    */
   @Expose()
-  @Type(()=> CategorieActiviteDto)
+  @Type(() => CategorieActiviteDto)
   categorie: CategorieActiviteDto;
 }
-

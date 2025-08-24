@@ -6,7 +6,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { CreateCategorieActiviteDto } from '../dtos/create-categorie-activite.dto';
 import { Fichier } from '../../database/core/fichier.entity';
-import { mockCategorieActivite, mockCreateCategorieActiviteDto } from '../mocks/categorie-activite.mock';
+import {
+  mockCategorieActivite,
+  mockCreateCategorieActiviteDto,
+} from '../mocks/categorie-activite.mock';
 
 describe('CategorieActiviteService', () => {
   let service: CategorieActiviteService;
@@ -84,11 +87,15 @@ describe('CategorieActiviteService', () => {
       expect(mockLogger.log).toHaveBeenCalled();
       expect(result).toBeDefined();
       expect(result.id).toBe(1);
-      expect(result.lbl_categorie).toBe(mockCreateCategorieActiviteDto.lbl_categorie);
+      expect(result.lbl_categorie).toBe(
+        mockCreateCategorieActiviteDto.lbl_categorie,
+      );
     });
 
     it('should create a new category activity without image', async () => {
-      mockCategorieActiviteRepository.create.mockReturnValue(mockCreateCategorieActiviteDto);
+      mockCategorieActiviteRepository.create.mockReturnValue(
+        mockCreateCategorieActiviteDto,
+      );
       mockCategorieActiviteRepository.save.mockResolvedValue({
         id: 1,
         ...mockCreateCategorieActiviteDto,
@@ -107,13 +114,17 @@ describe('CategorieActiviteService', () => {
       expect(mockLogger.log).toHaveBeenCalled();
       expect(result).toBeDefined();
       expect(result.id).toBe(1);
-      expect(result.lbl_categorie).toBe(mockCreateCategorieActiviteDto.lbl_categorie);
+      expect(result.lbl_categorie).toBe(
+        mockCreateCategorieActiviteDto.lbl_categorie,
+      );
     });
   });
 
   describe('findCategorieActiviteById', () => {
     it('should return a category activity by id', async () => {
-      mockCategorieActiviteRepository.findOne.mockResolvedValue(mockCategorieActivite);
+      mockCategorieActiviteRepository.findOne.mockResolvedValue(
+        mockCategorieActivite,
+      );
 
       const result = await service.findCategorieActiviteById(1);
 

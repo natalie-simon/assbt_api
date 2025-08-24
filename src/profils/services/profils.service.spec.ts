@@ -61,7 +61,9 @@ describe('ProfilsService', () => {
     }).compile();
 
     service = module.get<ProfilsService>(ProfilsService);
-    profilRepository = module.get<Repository<Profil>>(getRepositoryToken(Profil));
+    profilRepository = module.get<Repository<Profil>>(
+      getRepositoryToken(Profil),
+    );
     fichierService = module.get<FichierService>(FichierService);
   });
 
@@ -166,4 +168,4 @@ describe('ProfilsService', () => {
       expect(mockProfilRepository.save).not.toHaveBeenCalled();
     });
   });
-}); 
+});

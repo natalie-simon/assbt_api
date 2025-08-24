@@ -9,10 +9,7 @@ import { UploadModule } from '../fichiers/upload.module';
 @Module({
   controllers: [ArticlesController],
   providers: [ArticlesService, FichierService, UploadToAwsProvider],
-  imports: [
-    MembresModule,
-    UploadModule,
-  ],
+  imports: [MembresModule, UploadModule],
   exports: [ArticlesService],
 })
 export class ArticlesModule {}

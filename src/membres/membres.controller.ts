@@ -59,8 +59,8 @@ export class MembresController {
   @Post('contact')
   @Auth(AuthTypes.None)
   @ApiOperation({
-    summary: "Contactez-nous",
-    description: "Contactez-nous via le formulaire de contact",
+    summary: 'Contactez-nous',
+    description: 'Contactez-nous via le formulaire de contact',
   })
   contact(@Body() contactDto: ContactDto) {
     return this.membreService.contact(contactDto);
@@ -109,58 +109,51 @@ export class MembresController {
 
   /**
    * Récupération des statistiques membres
-   * @param activeUser 
-   * @returns 
+   * @param activeUser
+   * @returns
    */
   @Get('dashboard/statistiques')
   @Auth(AuthTypes.Bearer)
-  @ApiOperation({summary: 'Récupérer les différents compteurs stats du membre connecté'})
-  @ApiResponse({status: 200, description: 'Les données'})
+  @ApiOperation({
+    summary: 'Récupérer les différents compteurs stats du membre connecté',
+  })
+  @ApiResponse({ status: 200, description: 'Les données' })
   public async getDashboardStatistiques(
     @ActiveUser() activeUser: ActiveUserData,
-  ){
-    return this.membreService.statistiques(
-      activeUser.sub,
-    );
+  ) {
+    return this.membreService.statistiques(activeUser.sub);
   }
 
-    /**
+  /**
    * Récupération des statistiques membres
-   * @param activeUser 
-   * @returns 
+   * @param activeUser
+   * @returns
    */
-    @Get('dashboard/compteurs')
-    @Auth(AuthTypes.Bearer)
-    @ApiOperation({summary: 'Récupérer différents compteurs'})
-    @ApiResponse({status: 200, description: 'Les données'})
-    public async getDashboardCompteurs(
-      @ActiveUser() activeUser: ActiveUserData,
-    ){
-      return this.membreService.compteurs(
-        activeUser.sub,
-      );
-    }
+  @Get('dashboard/compteurs')
+  @Auth(AuthTypes.Bearer)
+  @ApiOperation({ summary: 'Récupérer différents compteurs' })
+  @ApiResponse({ status: 200, description: 'Les données' })
+  public async getDashboardCompteurs(@ActiveUser() activeUser: ActiveUserData) {
+    return this.membreService.compteurs(activeUser.sub);
+  }
 
   @Put(':id/admin')
   @Auth(AuthTypes.Bearer)
   @Roles(RoleTypes.ADMIN)
-  @ApiOperation({summary: "Modification d'un utilisateur"})
-  @ApiResponse({status: 200, description: 'Utilisateur modifié'})
+  @ApiOperation({ summary: "Modification d'un utilisateur" })
+  @ApiResponse({ status: 200, description: 'Utilisateur modifié' })
   async updateUser(
     @Param('id') id: number,
-    @Body() updateUser: UpdateMembreDto){
-      const membre = this.membreService.findUserById(id);
+    @Body() updateUser: UpdateMembreDto,
+  ) {
+    const membre = this.membreService.findUserById(id);
 
-      if(!membre){
-        throw new NotFoundException(
-          `Utilsateur avec l'id ${id} non trouvé`
-        );
-      }
+    if (!membre) {
+      throw new NotFoundException(`Utilsateur avec l'id ${id} non trouvé`);
+    }
 
-      return this.membreService.updateAdmin(id, updateUser)
+    return this.membreService.updateAdmin(id, updateUser);
   }
-
-
 
   /**
    * Route pour la récupération d'un utilisateur par son id

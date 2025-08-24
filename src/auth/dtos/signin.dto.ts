@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString, IsEmail } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsString, IsEmail } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * DTO pour la connexion d'un utilisateur
@@ -12,13 +12,13 @@ export class SigninDto {
    * @memberof SigninDto
    */
   @ApiProperty({
-    description: 'L\'adresse email de l\'utilisateur',
+    description: "L'adresse email de l'utilisateur",
     example: 'user@example.com',
     required: true,
     type: String,
   })
-  @IsEmail({}, { message: 'L\'adresse email doit être valide' })
-  @IsNotEmpty({ message: 'L\'adresse email doit être renseignée' })
+  @IsEmail({}, { message: "L'adresse email doit être valide" })
+  @IsNotEmpty({ message: "L'adresse email doit être renseignée" })
   email: string;
 
   /**
@@ -28,7 +28,7 @@ export class SigninDto {
    * @memberof SigninDto
    */
   @ApiProperty({
-    description: 'Le mot de passe de l\'utilisateur',
+    description: "Le mot de passe de l'utilisateur",
     example: 'password',
     required: true,
     type: String,

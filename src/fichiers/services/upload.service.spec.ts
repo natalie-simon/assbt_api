@@ -47,7 +47,9 @@ describe('UploadService', () => {
     }).compile();
 
     service = module.get<FichierService>(FichierService);
-    uploadProvider = module.get<UploadToO2SwitchProvider>(UploadToO2SwitchProvider);
+    uploadProvider = module.get<UploadToO2SwitchProvider>(
+      UploadToO2SwitchProvider,
+    );
     configService = module.get<ConfigService>(ConfigService);
     uploadsRepository = module.get<Repository<Fichier>>(
       getRepositoryToken(Fichier),
@@ -116,9 +118,7 @@ describe('UploadService', () => {
     } as Express.Multer.File;
 
     const errorMessage = 'Upload failed';
-    mockUploadProvider.uploadFile.mockRejectedValue(
-      new Error(errorMessage),
-    );
+    mockUploadProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
 
     // Spy on console.log
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -141,9 +141,7 @@ describe('UploadService', () => {
     } as Express.Multer.File;
 
     const errorMessage = 'Upload failed';
-    mockUploadProvider.uploadFile.mockRejectedValue(
-      new Error(errorMessage),
-    );
+    mockUploadProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
 
     // Spy on console.log
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
@@ -166,9 +164,7 @@ describe('UploadService', () => {
     } as Express.Multer.File;
 
     const errorMessage = 'Upload failed';
-    mockUploadProvider.uploadFile.mockRejectedValue(
-      new Error(errorMessage),
-    );
+    mockUploadProvider.uploadFile.mockRejectedValue(new Error(errorMessage));
 
     // Spy on console.log
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();

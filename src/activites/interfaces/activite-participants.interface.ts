@@ -1,7 +1,7 @@
 /**
  * Interface pour les activités avec les participants
  */
-interface ActiviteParticipants {
+export interface ActiviteParticipants {
   /**
    * identifiant
    */

@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-
 export class CreateProfilDto {
   @ApiProperty({ description: 'Nom du profil' })
   @IsString()

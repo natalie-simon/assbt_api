@@ -1,9 +1,9 @@
-import { fileTypes } from "../enums/file-types.enum";
+import { fileTypes } from '../enums/file-types.enum';
 
 /**
  * Interface représentant un fichier uploadé
  */
-export interface UploadFile{
+export interface UploadFile {
   /**
    * Nom du fichier
    */

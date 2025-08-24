@@ -6,8 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { MailService } from '../../mail/services/mail.service';
 import { ContactDto } from '../dtos/contact.dto';
 import { UpdateMembreDto } from '../dtos/updateMembre.dto';
-import { RoleTypes } from '@prisma/client'; 
-
+import { RoleTypes } from '@prisma/client';
 
 /**
  * Service de gestion des utilisateurs
@@ -163,7 +162,7 @@ export class MembresService {
     });
   }
 
-  public async updateAdmin(id: number, updateMembreDto: UpdateMembreDto){
+  public async updateAdmin(id: number, updateMembreDto: UpdateMembreDto) {
     let roleTypeEnum = null;
 
     switch (updateMembreDto.role) {
@@ -178,13 +177,13 @@ export class MembresService {
     }
 
     return this.prisma.membre.update({
-      where: {id},
+      where: { id },
       data: {
         role: roleTypeEnum,
         email: updateMembreDto.email,
         est_supprime: updateMembreDto.est_supprime,
-      }
-    })
+      },
+    });
   }
 
   /**
@@ -203,14 +202,14 @@ export class MembresService {
 
   /**
    * Gestion du formulaire de contact
-   * @param contactDto 
-   * @returns 
+   * @param contactDto
+   * @returns
    */
   public async contact(contactDto: ContactDto) {
     return this.mailService.sendContact(contactDto);
   }
 
-  public async compteurs(id:number){
+  public async compteurs(id: number) {
     const now = new Date();
     const nowIsoString = now.toISOString();
 
@@ -223,17 +222,17 @@ export class MembresService {
               date_heure_debut: {
                 gte: nowIsoString,
               },
-              motif_annulation: null
+              motif_annulation: null,
             },
           },
         },
-      }
+      },
     });
 
     const prochainesActivite = await this.prisma.activite.findMany({
       where: {
         date_heure_debut: {
-          gte: nowIsoString
+          gte: nowIsoString,
         },
         motif_annulation: null,
       },
@@ -246,10 +245,10 @@ export class MembresService {
         max_participant: true,
         nbr_attente: true,
         _count: {
-          select:{
+          select: {
             participants: true,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -257,11 +256,11 @@ export class MembresService {
       countProchainesInscription: prochainesInscription.inscriptions.length,
       prochainesInscription: prochainesInscription.inscriptions,
       countProchainesActivite: prochainesActivite.length,
-      prochainesActivites : prochainesActivite,
-    }
+      prochainesActivites: prochainesActivite,
+    };
   }
 
-  public async statistiques(id:number){
+  public async statistiques(id: number) {
     const now = new Date();
     const firstJanuary = new Date(now.getFullYear(), 0, 1);
     const isoString = firstJanuary.toISOString();
@@ -275,11 +274,11 @@ export class MembresService {
               date_heure_debut: {
                 gt: isoString,
               },
-              motif_annulation: null
+              motif_annulation: null,
             },
           },
         },
-      }
+      },
     });
 
     const activiteHisto = await this.prisma.membre.findUnique({
@@ -288,17 +287,16 @@ export class MembresService {
         inscriptions: {
           where: {
             activite: {
-              motif_annulation: null
+              motif_annulation: null,
             },
           },
         },
-      }
+      },
     });
 
     return {
       countActiviteHisto: activiteHisto.inscriptions.length,
       countActiviteAnnee: activiteAnnee.inscriptions.length,
-
-    }
+    };
   }
 }

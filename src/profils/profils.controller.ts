@@ -1,6 +1,22 @@
-import { Controller, Get, Post, Put, Body, Param, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiHeaders } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiHeader,
+  ApiHeaders,
+} from '@nestjs/swagger';
 import { ProfilsService } from './services/profils.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { AuthTypes } from '../auth/enums/auth-types.enum';
@@ -9,7 +25,6 @@ import { ActiveUserData } from '../auth/interfaces/active-user-data.interface';
 import { CategorieActiviteUploadService } from 'src/categories-activites/services/categorie-activite-upload.service';
 import { Profil } from '../../generated/prisma'; // Assurez-vous que le chemin est correct
 import { CreateProfilDto } from './dtos/createProfil.dto';
-
 
 @Controller('profils')
 @ApiTags('profils')
@@ -57,9 +72,9 @@ export class ProfilsController {
     @Body() createProfilDto: CreateProfilDto,
     @UploadedFile() file: Express.Multer.File,
     @ActiveUser() activeUser: ActiveUserData,
-  ){
+  ) {
     let fichier = null;
-    if(file){
+    if (file) {
       console.log('file', file);
       fichier = await this.uploadService.uploadFile(file);
     }
@@ -69,7 +84,7 @@ export class ProfilsController {
   @Post(':id/avatar')
   @Auth(AuthTypes.Bearer)
   @UseInterceptors(FileInterceptor('avatar'))
-  @ApiOperation({ summary: 'Mettre à jour l\'avatar d\'un profil' })
+  @ApiOperation({ summary: "Mettre à jour l'avatar d'un profil" })
   @ApiResponse({ status: 200, description: 'Le profil avec le nouvel avatar' })
   async updateAvatar(
     @Param('id') id: string,

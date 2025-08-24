@@ -56,7 +56,9 @@ export class AuthService {
    * @returns
    */
   public async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-    let user = await this.usersService.findOneByEmail(forgotPasswordDto.email);
+    const user = await this.usersService.findOneByEmail(
+      forgotPasswordDto.email,
+    );
     if (!user) {
       throw new BadRequestException("Il n'y a aucun membre avec cet email.");
     }

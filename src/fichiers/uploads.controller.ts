@@ -1,4 +1,9 @@
-import { Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiHeaders, ApiOperation } from '@nestjs/swagger';
 import { Express } from 'express';
@@ -25,7 +30,7 @@ export class UploadsController {
     { name: 'Authorization', description: 'Bearer Token' },
   ])
   @ApiOperation({ summary: 'Téléchargement de ficher sur le serveur S3 Aws' })
-  public uploadFile(@UploadedFile() file:Express.Multer.File){
+  public uploadFile(@UploadedFile() file: Express.Multer.File) {
     this.fichierService.uploadFile(file);
   }
 }

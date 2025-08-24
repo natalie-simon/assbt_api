@@ -13,9 +13,7 @@ export class CategorieActiviteService {
    * Constructeur de la catégorie d'activité
    * @param prisma
    */
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Création d'une catégorie d'activité
@@ -76,7 +74,6 @@ export class CategorieActiviteService {
     id: number,
     updateData: Partial<CategorieActivite>,
   ) {
-
     const categorieActivite = await this.findCategorieActiviteById(id);
     if (!categorieActivite) {
       throw new Error('CategorieActivite not found');

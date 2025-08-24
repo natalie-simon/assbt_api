@@ -152,9 +152,7 @@ export class CategorieActiviteController {
 
     let fichier = null;
     if (image) {
-      if (
-        categorieActivite?.image.id !== undefined
-      ) {
+      if (categorieActivite?.image.id !== undefined) {
         const fichier_a_effacer_id = categorieActivite.image.id;
         console.log(fichier_a_effacer_id);
         this.uploadService.deleteFile(fichier_a_effacer_id);

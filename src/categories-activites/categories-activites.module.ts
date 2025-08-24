@@ -5,14 +5,9 @@ import { CategorieActiviteUploadService } from './services/categorie-activite-up
 import { UploadModule } from '../fichiers/upload.module';
 
 @Module({
-  imports: [
-    UploadModule,
-  ],
+  imports: [UploadModule],
   controllers: [CategorieActiviteController],
-  providers: [
-    CategorieActiviteService,
-    CategorieActiviteUploadService,
-  ],
+  providers: [CategorieActiviteService, CategorieActiviteUploadService],
   exports: [CategorieActiviteService],
 })
 export class CategoriesActivitesModule {}

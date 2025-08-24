@@ -1,10 +1,4 @@
-import {
-  Post,
-  Body,
-  HttpCode,
-  HttpStatus,
-  Controller,
-} from '@nestjs/common';
+import { Post, Body, HttpCode, HttpStatus, Controller } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { SigninDto } from './dtos/signin.dto';
@@ -26,9 +20,7 @@ export class AuthController {
    * Constructeur
    * @param authService
    */
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   /**
    * Méthode de connexion

@@ -45,7 +45,9 @@ describe('ArticlesService', () => {
     }).compile();
 
     service = module.get<ArticlesService>(ArticlesService);
-    articleRepository = module.get<Repository<Article>>(getRepositoryToken(Article));
+    articleRepository = module.get<Repository<Article>>(
+      getRepositoryToken(Article),
+    );
     membresService = module.get<MembresService>(MembresService);
   });
 
@@ -57,7 +59,7 @@ describe('ArticlesService', () => {
     it('should create a new article with image', async () => {
       const createArticleDto: CreateArticleDto = {
         titre: 'Nouvel article',
-        contenu: 'Contenu de l\'article',
+        contenu: "Contenu de l'article",
         statut: statutArticleTypes.PUBLIE,
         categorie: categorieArticleTypes.ACCUEIL,
       };
@@ -91,7 +93,11 @@ describe('ArticlesService', () => {
         image: mockImage,
       });
 
-      const result = await service.createArticle(createArticleDto, activeUser, mockImage);
+      const result = await service.createArticle(
+        createArticleDto,
+        activeUser,
+        mockImage,
+      );
 
       expect(mockMembresService.findUserById).toHaveBeenCalledWith(1);
       expect(mockArticleRepository.create).toHaveBeenCalledWith({
@@ -110,7 +116,7 @@ describe('ArticlesService', () => {
     it('should create a new article without image', async () => {
       const createArticleDto: CreateArticleDto = {
         titre: 'Nouvel article',
-        contenu: 'Contenu de l\'article',
+        contenu: "Contenu de l'article",
         statut: statutArticleTypes.PUBLIE,
         categorie: categorieArticleTypes.ACCUEIL,
       };
@@ -133,7 +139,11 @@ describe('ArticlesService', () => {
         image: null,
       });
 
-      const result = await service.createArticle(createArticleDto, activeUser, null);
+      const result = await service.createArticle(
+        createArticleDto,
+        activeUser,
+        null,
+      );
 
       expect(mockMembresService.findUserById).toHaveBeenCalledWith(1);
       expect(mockArticleRepository.create).toHaveBeenCalledWith({
@@ -259,4 +269,4 @@ describe('ArticlesService', () => {
       expect(result).toEqual([]);
     });
   });
-}); 
+});

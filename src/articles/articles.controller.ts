@@ -128,8 +128,8 @@ export class ArticlesController {
   @ConditionalAuth((req) => {
     const categorieSansAuth = ['accueil', 'visiteurs']; // Modifier selon besoin
     return categorieSansAuth.includes(req.params?.categorie)
-    ? AuthTypes.None
-    : AuthTypes.Bearer;
+      ? AuthTypes.None
+      : AuthTypes.Bearer;
   })
   @ApiOperation({
     summary:
@@ -144,7 +144,10 @@ export class ArticlesController {
     @Query('search') search?: string,
     @Query('statut') statut?: string,
   ) {
-    return this.articlesService.findArticlePublieByCategorie(categorie, search, statut);
+    return this.articlesService.findArticlePublieByCategorie(
+      categorie,
+      search,
+      statut,
+    );
   }
 }
-

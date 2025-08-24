@@ -7,10 +7,7 @@ import { MembresModule } from '../membres/membres.module';
 @Module({
   controllers: [ActiviteController],
   providers: [ActiviteService],
-  imports: [
-    MembresModule,
-    CategoriesActivitesModule,
-  ],
+  imports: [MembresModule, CategoriesActivitesModule],
   exports: [ActiviteService],
 })
 export class ActivitesModule {}

@@ -76,7 +76,10 @@ describe('AuthService', () => {
 
   describe('signin', () => {
     it('should call signInProvider.signIn', async () => {
-      const dto = { email: 'admin@test.com', mot_de_passe: '1234567890' } as SigninDto;
+      const dto = {
+        email: 'admin@test.com',
+        mot_de_passe: '1234567890',
+      } as SigninDto;
       mockSignInProvider.signIn.mockResolvedValueOnce('mockeed-token');
       const result = await authService.signin(dto);
       expect(mockSignInProvider.signIn).toHaveBeenCalledWith(dto);

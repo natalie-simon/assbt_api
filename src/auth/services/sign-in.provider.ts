@@ -39,11 +39,11 @@ export class SignInProvider {
    * @returns
    */
   public async signIn(signinDto: SigninDto) {
-    let user = await this.membreService.findOneByEmail(signinDto.email);
+    const user = await this.membreService.findOneByEmail(signinDto.email);
     let isEqual: boolean = false;
 
     if (!user) {
-      throw new RequestTimeoutException( null, {
+      throw new RequestTimeoutException(null, {
         description: 'Erreur de connexion',
       });
     }

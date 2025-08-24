@@ -2,7 +2,6 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
-  Body,
 } from '@nestjs/common';
 import { CreateActiviteDto } from '../dtos/create-activite.dto';
 import { CategorieActiviteService } from '../../categories-activites/services/categorie-activite.service';
@@ -302,7 +301,7 @@ export class ActiviteService {
    */
   public async annulerActivite(
     id: number,
-    annulationActiviteDto: AnnulationActiviteDto
+    annulationActiviteDto: AnnulationActiviteDto,
   ) {
     const activite = await this.prisma.activite.findUnique({
       include: {
@@ -324,10 +323,10 @@ export class ActiviteService {
     }
 
     await this.prisma.activite.update({
-      where: {id},
+      where: { id },
       data: {
-        motif_annulation: annulationActiviteDto.motif
-      }
+        motif_annulation: annulationActiviteDto.motif,
+      },
     });
 
     activite.motif_annulation = annulationActiviteDto.motif;

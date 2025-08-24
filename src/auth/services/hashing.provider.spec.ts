@@ -4,7 +4,6 @@ import { HashingProviderMock } from '../mocks/hashing.provider.mock';
 
 // Mock implementation of HashingProvider for testing
 
-
 describe('HashingProvider', () => {
   let provider: HashingProvider;
 

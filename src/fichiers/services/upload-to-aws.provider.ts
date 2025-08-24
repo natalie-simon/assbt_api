@@ -57,9 +57,9 @@ export class UploadToAwsProvider {
    * @returns
    */
   private generateFileName(file: Express.Multer.File): string {
-    let name = file.originalname.split('.')[0].replace(/\s/g, '').trimEnd();
-    let extension = path.extname(file.originalname);
-    let timestamp = new Date().getTime().toString().trim();
+    const name = file.originalname.split('.')[0].replace(/\s/g, '').trimEnd();
+    const extension = path.extname(file.originalname);
+    const timestamp = new Date().getTime().toString().trim();
 
     return `${name}-${timestamp}-${uuid4()}${extension}`;
   }

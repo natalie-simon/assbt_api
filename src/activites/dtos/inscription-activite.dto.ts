@@ -1,8 +1,4 @@
-import {
-  MaxLength,
-  IsString,
-  IsOptional,
-} from 'class-validator';
+import { MaxLength, IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -20,8 +16,12 @@ export class InscriptionActiviteDto {
     example: 'Besoin de matériel',
     required: false,
   })
-  @IsString({ message: 'Les observations doivent être une chaîne de caractères' })
+  @IsString({
+    message: 'Les observations doivent être une chaîne de caractères',
+  })
   @IsOptional()
-  @MaxLength(255, { message: 'Les observations ne doivent pas dépasser 255 caractères' })
+  @MaxLength(255, {
+    message: 'Les observations ne doivent pas dépasser 255 caractères',
+  })
   observations: string;
 }

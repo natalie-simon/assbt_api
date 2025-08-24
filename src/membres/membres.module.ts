@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MembresController } from './membres.controller';
-import { MembresService } from "./services/membres.service";
+import { MembresService } from './services/membres.service';
 import { CreateUserProvider } from '../auth/services/create-user.provider';
 import { AuthModule } from '../auth/auth.module';
 import { FindOneByEmailProvider } from '../auth/services/find-one-by-email.provider';

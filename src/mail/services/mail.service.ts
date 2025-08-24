@@ -21,7 +21,9 @@ export class MailService {
    * Envoie d'une mail pour l'inscription d'un nouveau membre
    * @param user
    */
-  public async sendInscriptionNouveauMembre(membre: MembreWithRelations): Promise<void> {
+  public async sendInscriptionNouveauMembre(
+    membre: MembreWithRelations,
+  ): Promise<void> {
     await this.mailerService.sendMail({
       to: process.env.MAIL_ADMIN,
       from: `Membre : ${membre.email}`,
@@ -71,7 +73,10 @@ export class MailService {
     });
   }
 
-  public async sendAnnulationActivite(activite: Activite, emailsParticipants: string[]): Promise<void> {
+  public async sendAnnulationActivite(
+    activite: Activite,
+    emailsParticipants: string[],
+  ): Promise<void> {
     // Envoie un email à l'admin et en CCI à tous les participants
     await this.mailerService.sendMail({
       to: process.env.MAIL_ADMIN,

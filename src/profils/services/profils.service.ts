@@ -21,8 +21,10 @@ export class ProfilsService {
   async update(id: number, userId: number, profil: any) {
     const profilActuel = await this.findOne(id);
 
-    if(profilActuel.membreId !== userId){
-      throw new BadRequestException("Vous ne pouvez pas modifier ce profil qui n'est pas le votre.")
+    if (profilActuel.membreId !== userId) {
+      throw new BadRequestException(
+        "Vous ne pouvez pas modifier ce profil qui n'est pas le votre.",
+      );
     }
 
     return this.prisma.profil.update({

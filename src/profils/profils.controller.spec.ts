@@ -36,14 +36,20 @@ describe('ProfilsController', () => {
     });
 
     it('should throw BadRequestException when profile is not found', async () => {
-      await expect(controller.findOne('999')).rejects.toThrow('Profil non trouvé');
+      await expect(controller.findOne('999')).rejects.toThrow(
+        'Profil non trouvé',
+      );
     });
   });
 
   describe('update', () => {
     it('should update a profile', async () => {
       const updatedProfil = { ...mockProfil, nom: 'Smith' };
-      const result = await controller.update('1', updatedProfil, mockActiveUser);
+      const result = await controller.update(
+        '1',
+        updatedProfil,
+        mockActiveUser,
+      );
 
       expect(result).toEqual(updatedProfil);
     });
@@ -51,7 +57,11 @@ describe('ProfilsController', () => {
 
   describe('updateAvatar', () => {
     it('should update profile avatar', async () => {
-      const result = await controller.updateAvatar('1', mockUploadedFile, mockActiveUser);
+      const result = await controller.updateAvatar(
+        '1',
+        mockUploadedFile,
+        mockActiveUser,
+      );
 
       expect(result).toEqual({
         ...mockProfil,
@@ -61,8 +71,9 @@ describe('ProfilsController', () => {
 
     it('should throw BadRequestException when user is not authorized', async () => {
       const unauthorizedUser = { ...mockActiveUser, sub: 999 };
-      await expect(controller.updateAvatar('1', mockUploadedFile, unauthorizedUser))
-        .rejects.toThrow('Vous ne pouvez pas modifier ce profil');
+      await expect(
+        controller.updateAvatar('1', mockUploadedFile, unauthorizedUser),
+      ).rejects.toThrow('Vous ne pouvez pas modifier ce profil');
     });
   });
-}); 
+});

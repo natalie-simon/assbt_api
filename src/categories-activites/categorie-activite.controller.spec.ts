@@ -181,8 +181,12 @@ describe('CategorieActiviteController', () => {
       ],
     }).compile();
 
-    controller = module.get<CategorieActiviteController>(CategorieActiviteController);
-    categorieActiviteService = module.get<CategorieActiviteService>(CategorieActiviteService);
+    controller = module.get<CategorieActiviteController>(
+      CategorieActiviteController,
+    );
+    categorieActiviteService = module.get<CategorieActiviteService>(
+      CategorieActiviteService,
+    );
     fichierService = module.get<FichierService>(FichierService);
   });
 
@@ -198,13 +202,17 @@ describe('CategorieActiviteController', () => {
         image: mockUpload,
       });
 
-      const result = await controller.createCategorieActivite(mockCreateCategorieActiviteDto, mockUploadedFile);
-
-      expect(mockFichierService.uploadFile).toHaveBeenCalledWith(mockUploadedFile);
-      expect(mockCategorieActiviteService.createCategorieActivite).toHaveBeenCalledWith(
+      const result = await controller.createCategorieActivite(
         mockCreateCategorieActiviteDto,
-        mockUpload,
+        mockUploadedFile,
       );
+
+      expect(mockFichierService.uploadFile).toHaveBeenCalledWith(
+        mockUploadedFile,
+      );
+      expect(
+        mockCategorieActiviteService.createCategorieActivite,
+      ).toHaveBeenCalledWith(mockCreateCategorieActiviteDto, mockUpload);
       expect(result).toEqual({
         ...mockCategorieActivite,
         image: mockUpload,
@@ -212,14 +220,18 @@ describe('CategorieActiviteController', () => {
     });
 
     it('should create a new category without image', async () => {
-      mockCategorieActiviteService.createCategorieActivite.mockResolvedValue(mockCategorieActivite);
+      mockCategorieActiviteService.createCategorieActivite.mockResolvedValue(
+        mockCategorieActivite,
+      );
 
-      const result = await controller.createCategorieActivite(mockCreateCategorieActiviteDto, null);
-
-      expect(mockCategorieActiviteService.createCategorieActivite).toHaveBeenCalledWith(
+      const result = await controller.createCategorieActivite(
         mockCreateCategorieActiviteDto,
         null,
       );
+
+      expect(
+        mockCategorieActiviteService.createCategorieActivite,
+      ).toHaveBeenCalledWith(mockCreateCategorieActiviteDto, null);
       expect(result).toEqual(mockCategorieActivite);
     });
 

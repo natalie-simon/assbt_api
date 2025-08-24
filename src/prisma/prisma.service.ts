@@ -9,7 +9,8 @@ export class PrismaService
   constructor() {
     super({
       log: ['query', 'info', 'warn', 'error'],
-      errorFormat: 'pretty',});
+      errorFormat: 'pretty',
+    });
   }
 
   async onModuleInit() {

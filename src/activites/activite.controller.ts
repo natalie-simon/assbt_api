@@ -119,9 +119,9 @@ export class ActiviteController {
 
   /**
    * inscription multiple Admin
-   * @param id 
-   * @param inscriptionActiviteGroupeDto 
-   * @returns 
+   * @param id
+   * @param inscriptionActiviteGroupeDto
+   * @returns
    */
   @Post(':id/inscription/admin/groupe')
   @Auth(AuthTypes.Bearer)
@@ -163,9 +163,9 @@ export class ActiviteController {
 
   /**
    * Désinscription à une activité par un Admin
-   * @param id 
-   * @param desinscriptionActiviteAdminDto 
-   * @returns 
+   * @param id
+   * @param desinscriptionActiviteAdminDto
+   * @returns
    */
   @Put(':id/desinscription/admin')
   @Auth(AuthTypes.Bearer)
@@ -187,8 +187,8 @@ export class ActiviteController {
 
   /**
    * Annulation d'une activité
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Put(':id/annulation')
   @Auth(AuthTypes.Bearer)
@@ -199,8 +199,9 @@ export class ActiviteController {
     description: "L'activité a été annulée avec succès",
   })
   public async annulerActivite(
-    @Param('id', ParseIntPipe) id: number, 
-    @Body() annulationActiviteDto: AnnulationActiviteDto) {
+    @Param('id', ParseIntPipe) id: number,
+    @Body() annulationActiviteDto: AnnulationActiviteDto,
+  ) {
     // récupération de l'activité
     const activite = await this.activiteService.findOneActiviteWithFilters(
       id,
@@ -215,9 +216,9 @@ export class ActiviteController {
 
   /**
    * Mise à jour d'une activité
-   * @param id 
-   * @param updateActiviteDto 
-   * @returns 
+   * @param id
+   * @param updateActiviteDto
+   * @returns
    */
   @Put(':id')
   @Auth(AuthTypes.Bearer)
@@ -236,8 +237,8 @@ export class ActiviteController {
 
   /**
    * Supression d'une activité
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   @Delete(':id')
   @Auth(AuthTypes.Bearer)

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MembresModule } from './membres/membres.module';
 import { ArticlesModule } from './articles/articles.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import jwtConfig from './auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
@@ -19,7 +19,6 @@ import environnementValidation from './config/environnement.validation';
 import mailConfig from './config/mail.config';
 import { ProfilsModule } from './profils/profils.module';
 import { PrismaModule } from './prisma/prisma.module';
-
 
 /**
  * Chargement des variables d'environnement

@@ -1,5 +1,5 @@
-import { IsNotEmpty, MaxLength, IsString, IsEnum } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, MaxLength, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * DTO pour la création d'un article

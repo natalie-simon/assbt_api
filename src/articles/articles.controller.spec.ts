@@ -15,7 +15,6 @@ import { mockUploadedFile } from '../fichiers/mocks/uploads.mock';
 
 describe('ArticlesController', () => {
   let controller: ArticlesController;
-  let articlesService: ArticlesService;
   let uploadService: FichierService;
 
   const mockActiveUser: ActiveUserData = {
@@ -43,7 +42,6 @@ describe('ArticlesController', () => {
     }).compile();
 
     controller = module.get<ArticlesController>(ArticlesController);
-    articlesService = module.get<ArticlesService>(ArticlesService);
     uploadService = module.get<FichierService>(FichierService);
   });
 
@@ -82,18 +80,28 @@ describe('ArticlesController', () => {
     };
 
     it('should create a new article with image', async () => {
-      const result = await controller.createArticle(createDto, mockUploadedFile, mockActiveUser);
+      const result = await controller.createArticle(
+        createDto,
+        mockUploadedFile,
+        mockActiveUser,
+      );
 
       expect(result).toEqual({
         id: 999,
         ...createDto,
-        image: { url: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg' },
+        image: {
+          url: 'https://bucket.s3.amazonaws.com/uploads/abc123-test-image.jpg',
+        },
         redacteur: { email: mockActiveUser.email },
       });
     });
 
     it('should create a new article without image', async () => {
-      const result = await controller.createArticle(createDto, null, mockActiveUser);
+      const result = await controller.createArticle(
+        createDto,
+        null,
+        mockActiveUser,
+      );
 
       expect(result).toEqual({
         id: 999,
@@ -104,7 +112,9 @@ describe('ArticlesController', () => {
     });
 
     it('should handle upload errors', async () => {
-      jest.spyOn(uploadService, 'uploadFile').mockRejectedValueOnce(new Error('Upload failed'));
+      jest
+        .spyOn(uploadService, 'uploadFile')
+        .mockRejectedValueOnce(new Error('Upload failed'));
 
       await expect(
         controller.createArticle(createDto, mockUploadedFile, mockActiveUser),

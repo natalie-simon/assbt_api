@@ -10,7 +10,7 @@ export default Joi.object({
     .try(
       Joi.number().port(),
       Joi.string().valid('passenger'),
-      Joi.string().pattern(/^\d+$/)
+      Joi.string().pattern(/^\d+$/),
     )
     .default(3000),
 

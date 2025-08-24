@@ -62,10 +62,16 @@ describe('MembresService', () => {
     }).compile();
 
     service = module.get<MembresService>(MembresService);
-    usersRepository = module.get<Repository<Membre>>(getRepositoryToken(Membre));
-    profilRepository = module.get<Repository<Profil>>(getRepositoryToken(Profil));
+    usersRepository = module.get<Repository<Membre>>(
+      getRepositoryToken(Membre),
+    );
+    profilRepository = module.get<Repository<Profil>>(
+      getRepositoryToken(Profil),
+    );
     createUserProvider = module.get<CreateUserProvider>(CreateUserProvider);
-    findOneByEmailProvider = module.get<FindOneByEmailProvider>(FindOneByEmailProvider);
+    findOneByEmailProvider = module.get<FindOneByEmailProvider>(
+      FindOneByEmailProvider,
+    );
   });
 
   it('should be defined', () => {
@@ -84,7 +90,9 @@ describe('MembresService', () => {
 
       const result = await service.createUser(createUserDto);
 
-      expect(mockCreateUserProvider.createUser).toHaveBeenCalledWith(createUserDto);
+      expect(mockCreateUserProvider.createUser).toHaveBeenCalledWith(
+        createUserDto,
+      );
       expect(result).toEqual(membresMock[0]);
     });
 
@@ -131,7 +139,9 @@ describe('MembresService', () => {
 
       const result = await service.findAllUsers();
 
-      expect(mockUsersRepository.find).toHaveBeenCalledWith({ relations: ['role'] });
+      expect(mockUsersRepository.find).toHaveBeenCalledWith({
+        relations: ['role'],
+      });
       expect(result).toEqual(membresMock);
     });
   });
@@ -158,7 +168,9 @@ describe('MembresService', () => {
 
       const result = await service.findUserById(1);
 
-      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
       expect(result).toEqual(membresMock[0]);
     });
 
@@ -167,18 +179,25 @@ describe('MembresService', () => {
 
       const result = await service.findUserById(999);
 
-      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({ where: { id: 999 } });
+      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 999 },
+      });
       expect(result).toBeNull();
     });
   });
 
   describe('findOneUserByEmailProvider', () => {
     it('should return user by email using provider', async () => {
-      mockFindOneByEmailProvider.findOneUserByEmailProvider.mockResolvedValue(membresMock[0]);
+      mockFindOneByEmailProvider.findOneUserByEmailProvider.mockResolvedValue(
+        membresMock[0],
+      );
 
-      const result = await service.findOneUserByEmailProvider('admin@example.com');
+      const result =
+        await service.findOneUserByEmailProvider('admin@example.com');
 
-      expect(mockFindOneByEmailProvider.findOneUserByEmailProvider).toHaveBeenCalledWith('admin@example.com');
+      expect(
+        mockFindOneByEmailProvider.findOneUserByEmailProvider,
+      ).toHaveBeenCalledWith('admin@example.com');
       expect(result).toEqual(membresMock[0]);
     });
   });
@@ -221,4 +240,4 @@ describe('MembresService', () => {
       expect(result).toEqual(mockUser);
     });
   });
-}); 
+});

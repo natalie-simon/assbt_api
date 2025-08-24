@@ -12,7 +12,6 @@ import { jwtConfigMock } from '../auth/mocks/jwt-config.mock';
 import { membresMock } from './mocks/membres.mock';
 import { CreateUserDto } from './dtos/createMembre.dto';
 
-
 describe('UsersController', () => {
   let controller: MembresController;
 
@@ -64,5 +63,4 @@ describe('UsersController', () => {
       expect(controller.getUsers()).resolves.toEqual(membresMock);
     });
   });*/
-
 });
