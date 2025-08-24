@@ -13,8 +13,9 @@ services:
     environment:
       - DB_HOST=db
       - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-admin}@db:5432/${DB_NAME:-Assbt}?schema=public
-    ports:
-      - "127.0.0.1:3000:3000"  # Bind uniquement à localhost pour sécurité
+    # SUPPRIMÉ: ports - pas besoin car Traefik s'en charge
+    # ports:
+    #   - "127.0.0.1:3000:3000"
     depends_on:
       - db
     networks:
@@ -25,6 +26,7 @@ services:
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
+      # AJOUTÉ: Spécifier le réseau pour Traefik
       - "traefik.docker.network=app_network"
 
   # Service pour la base de données PostgreSQL
@@ -63,6 +65,7 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=app_network"  # AJOUTÉ: Spécifier le réseau
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
@@ -72,6 +75,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.email=${MAIL_ADMIN:-contact@lesbulleurstoulonnais.fr}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       - "--api.dashboard=true"
+      - "--log.level=INFO"  # AJOUTÉ: Pour debug
     labels:
       - "traefik.enable=true"
       # Dashboard Traefik
