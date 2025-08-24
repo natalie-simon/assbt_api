@@ -41,7 +41,7 @@ export class FichierService {
 
     try {
       const fichierData = await this.uploadToAwsProvider.uploadFile(file);
-      let typeEnum = FileTypes.IMAGE; // par défaut
+      let typeEnum: FileTypes = FileTypes.IMAGE; // par défaut
       if (file.mimetype.startsWith('video/')) typeEnum = FileTypes.VIDEO;
       else if (file.mimetype.startsWith('audio/')) typeEnum = FileTypes.AUDIO;
       else if (file.mimetype.startsWith('application/'))
