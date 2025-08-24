@@ -99,9 +99,7 @@ export class ArticlesController {
   ) {
     let fichier = null;
     let imageId = null;
-    console.log("je passe la");
     if (image) {
-      console.log("je passe ligne 104");
       fichier = await this.uploadService.uploadFile(image);
       imageId = fichier.id;
     }

@@ -3,9 +3,10 @@ import { CreateUserDto } from '../dtos/createMembre.dto';
 import { CreateUserProvider } from '../../auth/services/create-user.provider';
 import { FindOneByEmailProvider } from '../../auth/services/find-one-by-email.provider';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client'; // Importer les types Prisma
 import { MailService } from '../../mail/services/mail.service';
 import { ContactDto } from '../dtos/contact.dto';
+import { UpdateMembreDto } from '../dtos/updateMembre.dto';
+import { RoleTypes } from '@prisma/client'; 
 
 
 /**
@@ -160,6 +161,30 @@ export class MembresService {
         est_supprime: true,
       },
     });
+  }
+
+  public async updateAdmin(id: number, updateMembreDto: UpdateMembreDto){
+    let roleTypeEnum = null;
+
+    switch (updateMembreDto.role) {
+      case 'REDAC':
+        roleTypeEnum = RoleTypes.REDAC;
+        break;
+      case 'ADMIN':
+        roleTypeEnum = RoleTypes.ADMIN;
+        break;
+      default:
+        roleTypeEnum = RoleTypes.USER;
+    }
+
+    return this.prisma.membre.update({
+      where: {id},
+      data: {
+        role: roleTypeEnum,
+        email: updateMembreDto.email,
+        est_supprime: updateMembreDto.est_supprime,
+      }
+    })
   }
 
   /**

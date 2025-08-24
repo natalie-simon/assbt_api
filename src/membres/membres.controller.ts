@@ -8,6 +8,7 @@ import {
   Query,
   ClassSerializerInterceptor,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/createMembre.dto';
 import { ContactDto } from './dtos/contact.dto';
@@ -24,6 +25,7 @@ import { RoleTypes } from '../auth/enums/role-types.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
+import { UpdateMembreDto } from './dtos/updateMembre.dto';
 
 /**
  * Users controller
@@ -138,6 +140,26 @@ export class MembresController {
         activeUser.sub,
       );
     }
+
+  @Put(':id/admin')
+  @Auth(AuthTypes.Bearer)
+  @Roles(RoleTypes.ADMIN)
+  @ApiOperation({summary: "Modification d'un utilisateur"})
+  @ApiResponse({status: 200, description: 'Utilisateur modifié'})
+  async updateUser(
+    @Param('id') id: number,
+    @Body() updateUser: UpdateMembreDto){
+      const membre = this.membreService.findUserById(id);
+
+      if(!membre){
+        throw new NotFoundException(
+          `Utilsateur avec l'id ${id} non trouvé`
+        );
+      }
+
+      return this.membreService.updateAdmin(id, updateUser)
+  }
+
 
 
   /**

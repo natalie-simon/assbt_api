@@ -152,6 +152,13 @@ export class CategorieActiviteController {
 
     let fichier = null;
     if (image) {
+      if (
+        categorieActivite?.image.id !== undefined
+      ) {
+        const fichier_a_effacer_id = categorieActivite.image.id;
+        console.log(fichier_a_effacer_id);
+        this.uploadService.deleteFile(fichier_a_effacer_id);
+      }
       fichier = await this.uploadService.uploadFile(image);
     }
     const updatedCategorieActivite = {
@@ -163,14 +170,6 @@ export class CategorieActiviteController {
       id,
       updatedCategorieActivite,
     );
-
-    if (
-      categorieActivite?.image.id !== null &&
-      createCategorieActiviteDto?.image_id === undefined
-    ) {
-      const fichier_a_effacer_id = categorieActivite.image.id;
-      this.uploadService.deleteFile(fichier_a_effacer_id);
-    }
 
     return result;
   }
