@@ -173,7 +173,7 @@ jobs:
             docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres postgres > "$BACKUP_FILE" || log "⚠️ Échec sauvegarde DB"
             
             log "🔍 Vérification du statut des migrations"
-            MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status --schema=prisma/schema.prisma 2>/dev/null || echo "error")
+            MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status --schema=prisma/schema.prisma 2>&1 || echo "error")
             
             if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
               log "✅ Base de données déjà à jour"
@@ -181,9 +181,41 @@ jobs:
               log "🔄 Déploiement des migrations en attente"
               docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy"
               log "✅ Migrations appliquées avec succès"
+            elif echo "$MIGRATION_STATUS" | grep -q "P3005"; then
+              log "🔧 Base existante détectée - Résolution conflit schéma"
+              log "🔄 Tentative de baseline de la base existante"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$(ls prisma/migrations | head -1)" || log "⚠️ Échec résolution baseline"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy après baseline"
+              log "✅ Migrations appliquées après résolution baseline"
+            elif echo "$MIGRATION_STATUS" | grep -q "schema is not empty"; then
+              log "🔧 Schéma non-vide détecté - Baseline requis"
+              FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | head -1 | tr -d '\r\n' || echo "")
+              if [ -n "$FIRST_MIGRATION" ]; then
+                log "📌 Marquage migration initiale comme appliquée: $FIRST_MIGRATION"
+                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION" || log "⚠️ Échec marquage baseline"
+                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy après baseline"
+                log "✅ Baseline et migrations appliquées"
+              else
+                log "⚠️ Aucune migration trouvée pour baseline"
+                deploy_failed "Impossible de résoudre le conflit baseline"
+              fi
             else
-              log "⚠️ Statut migrations unclear, forçage du déploiement"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy"
+              log "⚠️ Statut migrations unclear, tentative de déploiement"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee migration_output.log
+              if grep -q "P3005" migration_output.log; then
+                log "🔧 Erreur P3005 détectée, résolution automatique"
+                FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | head -1 | tr -d '\r\n' || echo "")
+                if [ -n "$FIRST_MIGRATION" ]; then
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION" || log "⚠️ Échec résolution"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec final migration deploy"
+                  log "✅ Migration résolue et appliquée"
+                else
+                  deploy_failed "Impossible de résoudre P3005"
+                fi
+              elif ! grep -q "success" migration_output.log; then
+                deploy_failed "Échec migration deploy"
+              fi
+              rm -f migration_output.log
             fi
             
             log "🔍 Vérification finale du schéma"
