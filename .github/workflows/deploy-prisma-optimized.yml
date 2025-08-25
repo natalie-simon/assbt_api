@@ -40,18 +40,15 @@ jobs:
           CURRENT_COMMIT=$(git rev-parse HEAD)
           echo "commit_hash=$CURRENT_COMMIT" >> $GITHUB_OUTPUT
           
-          # Skip deployment check if force_deploy is true
           if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
             echo "🔄 Déploiement forcé activé"
             exit 0
           fi
           
-          # Check if there are meaningful changes (exclude docs, tests, etc.)
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           echo "Changed files: $CHANGED_FILES"
           
-          # Skip if only documentation or non-critical files changed
           if echo "$CHANGED_FILES" | grep -qE "\.(md|txt|yml)$|^\.github/|^docs/"; then
             if ! echo "$CHANGED_FILES" | grep -qE "\.(js|ts|json|prisma|docker)$|^src/|^prisma/"; then
               echo "should_deploy=false" >> $GITHUB_OUTPUT
@@ -96,19 +93,16 @@ jobs:
           port: 2222
           timeout: 600s
           script: |
-            # Configuration et logging
             set -e
             VPS_ROOT="/home/deploy/app"
             APP_DIR="${VPS_ROOT}/nestjs-prisma"
             DEPLOY_LOG="${APP_DIR}/deploy.log"
             CURRENT_COMMIT="${{ needs.pre-deploy-checks.outputs.commit_hash }}"
             
-            # Fonction de logging avec timestamp
             log() {
               echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$DEPLOY_LOG"
             }
             
-            # Fonction de notification d'erreur
             deploy_failed() {
               log "❌ Déploiement échoué à l'étape: $1"
               if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
@@ -120,263 +114,74 @@ jobs:
             }
             
             trap 'deploy_failed "Script interrompu"' ERR
-            
             log "🚀 Démarrage du déploiement optimisé - Commit: $CURRENT_COMMIT"
             
-            # Créer les répertoires nécessaires
             mkdir -p "$APP_DIR" "$APP_DIR/backups"
             cd "$APP_DIR"
             
-            # Vérifier si déploiement nécessaire (skip si même commit)
             LAST_DEPLOY_COMMIT=$(cat "${APP_DIR}/.last_deploy" 2>/dev/null || echo "")
             if [ "$CURRENT_COMMIT" = "$LAST_DEPLOY_COMMIT" ] && [ "${{ github.event.inputs.force_deploy }}" != "true" ]; then
               log "⏭️ Même commit détecté ($CURRENT_COMMIT), skip du déploiement"
               exit 0
             fi
             
-            # Phase 1: Validation de l'environnement
             log "📋 Phase 1: Validation de l'environnement"
+            if [ -f "${APP_DIR}/.env.dev" ]; then
+              source "${APP_DIR}/.env.dev"
+            fi
             
-            # Fonction de validation des variables d'environnement
-            validate_env() {
-              if [ -f "${APP_DIR}/.env.dev" ]; then
-                source "${APP_DIR}/.env.dev"
-                local required_vars=("DB_NAME" "DB_USERNAME")
-                for var in "${required_vars[@]}"; do
-                  if [[ -z "${!var}" ]]; then
-                    deploy_failed "Variable d'environnement $var manquante dans .env.dev"
-                  fi
-                done
-                log "✅ Variables d'environnement validées"
-              else
-                log "⚠️ Fichier .env.dev non trouvé, sera restauré depuis backup"
-              fi
-            }
-            
-            validate_env
-            
-            # Phase 2: Sauvegarde et nettoyage intelligent
             log "🧹 Phase 2: Sauvegarde et nettoyage"
-            
-            # Sauvegarder l'état actuel pour rollback
             if docker-compose -f docker-compose.prisma.yml ps -q > /dev/null 2>&1; then
-              log "💾 Sauvegarde de l'état actuel pour rollback"
-              docker-compose -f docker-compose.prisma.yml ps --format "table {{.Names}}\t{{.Status}}" > "${APP_DIR}/.previous_state"
-              
-              # Sauvegarde conditionnelle de la DB (seulement si le schéma a changé)
-              if docker-compose -f docker-compose.prisma.yml exec -T db pg_isready > /dev/null 2>&1; then
-                log "🗄️ Sauvegarde de la base de données"
-                CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
-                
-                if [ -f "${APP_DIR}/.env.dev" ]; then
-                  source "${APP_DIR}/.env.dev"
-                  DB_USER=${DB_USERNAME:-postgres}
-                  DB_NAME=${DB_NAME:-Assbt}
-                else
-                  DB_USER="postgres"
-                  DB_NAME="Assbt"
-                fi
-                
-                docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U "$DB_USER" "$DB_NAME" > "${APP_DIR}/backups/db_${CURRENT_DATE}.sql" || log "⚠️ Échec de sauvegarde DB"
-              fi
-              
-              # Arrêt propre des services
-              log "⏸️ Arrêt des services existants"
+              log "💾 Sauvegarde état actuel"
               docker-compose -f docker-compose.prisma.yml down
             fi
-            
-            # Nettoyage sélectif des conteneurs problématiques
-            log "🗑️ Nettoyage des conteneurs orphelins"
             docker rm -f postgres_db traefik api nestjs_api 2>/dev/null || true
             
-            # Phase 3: Mise à jour optimisée du code
             log "📦 Phase 3: Mise à jour du code"
-            
-            # Préservation des fichiers critiques
-            if [ -f "${APP_DIR}/.env.dev" ]; then
-              log "💾 Sauvegarde de la configuration actuelle"
-              cp "${APP_DIR}/.env.dev" "${APP_DIR}/.env.dev.backup"
-            fi
-            
-            # Clone optimisé avec sparse-checkout
             TMP_DIR=$(mktemp -d)
-            log "📋 Clone optimisé du repository"
-            
-            cd "$TMP_DIR"
-            git clone --filter=blob:none --depth=1 --branch=develop https://github.com/natalie-simon/assbt_api.git . || deploy_failed "Échec du clone du repository"
-            
-            # Nettoyage sélectif du répertoire app
+            git clone --filter=blob:none --depth=1 --branch=develop https://github.com/natalie-simon/assbt_api.git "$TMP_DIR"
             cd "$APP_DIR"
             find . -mindepth 1 \
               -not -path "./backups*" \
               -not -name ".env.dev*" \
               -not -name ".last_deploy*" \
-              -not -name ".previous_state*" \
               -not -name "deploy.log*" \
               -exec rm -rf {} \; 2>/dev/null || true
-            
-            # Copie des nouveaux fichiers
-            log "📂 Copie des fichiers mis à jour"
             cp -R "$TMP_DIR"/* "$APP_DIR"/
             cp -R "$TMP_DIR"/.* "$APP_DIR"/ 2>/dev/null || true
             rm -rf "$TMP_DIR"
             
-            # Restauration intelligente de la configuration
-            if [ ! -f "${APP_DIR}/.env.dev" ]; then
-              if [ -f "${APP_DIR}/.env.dev.backup" ]; then
-                log "🔄 Restauration de .env.dev depuis backup"
-                cp "${APP_DIR}/.env.dev.backup" "${APP_DIR}/.env.dev"
-              elif [ -f "${VPS_ROOT}/.env.dev" ]; then
-                log "🔄 Restauration de .env.dev depuis répertoire parent"
-                cp "${VPS_ROOT}/.env.dev" "${APP_DIR}/.env.dev"
-              else
-                deploy_failed "Aucun fichier .env.dev trouvé"
-              fi
-            fi
-            
-            # Gestion du fichier docker-compose
-            if [ ! -f "${APP_DIR}/docker-compose.prisma.yml" ]; then
-              if [ -f "${APP_DIR}/docker-compose.prod.yml" ]; then
-                log "🔄 Utilisation de docker-compose.prod.yml comme fallback"
-                cp "${APP_DIR}/docker-compose.prod.yml" "${APP_DIR}/docker-compose.prisma.yml"
-              else
-                deploy_failed "Aucun fichier docker-compose trouvé"
-              fi
-            fi
-            
-            # Phase 4: Build et démarrage optimisés
             log "🐳 Phase 4: Build et démarrage des services"
-            
             cd "$APP_DIR"
-            
-            # Pre-build des images en parallèle
-            log "🔨 Build des images Docker"
             docker-compose -f docker-compose.prisma.yml build --parallel || deploy_failed "Échec du build Docker"
+            docker-compose -f docker-compose.prisma.yml up -d db || deploy_failed "Échec DB"
             
-            # Démarrage séquentiel optimisé
-            log "🔄 Démarrage de la base de données"
-            docker-compose -f docker-compose.prisma.yml up -d db || deploy_failed "Échec du démarrage de la DB"
-            
-            # Health check optimisé de la base de données
-            log "⏳ Vérification de la santé de la base de données"
-            RETRIES=20
-            RETRY_COUNT=0
-            
+            RETRIES=20; RETRY_COUNT=0
             until docker-compose -f docker-compose.prisma.yml exec -T db pg_isready -q || [ $RETRY_COUNT -eq $RETRIES ]; do
-              log "🔄 Attente de PostgreSQL... ($((RETRY_COUNT+1))/$RETRIES)"
+              log "🔄 Attente PostgreSQL... ($((RETRY_COUNT+1))/$RETRIES)"
               RETRY_COUNT=$((RETRY_COUNT+1))
               sleep 3
             done
             
-            if [ $RETRY_COUNT -eq $RETRIES ]; then
-              deploy_failed "Base de données non disponible après $((RETRIES*3)) secondes"
-            fi
+            docker-compose -f docker-compose.prisma.yml up -d || deploy_failed "Échec démarrage services"
             
-            log "✅ Base de données prête"
-            
-            # Démarrage des autres services
-            log "🚀 Démarrage des services applicatifs"
-            docker-compose -f docker-compose.prisma.yml up -d || deploy_failed "Échec du démarrage des services"
-            
-            # Health check de l'API avec retry intelligent
-            log "⏳ Vérification de la santé de l'API"
-            API_RETRIES=15
-            API_RETRY_COUNT=0
-            
-            until curl -f -s "http://localhost:3000/health" > /dev/null 2>&1 || [ $API_RETRY_COUNT -eq $API_RETRIES ]; do
-              log "🔄 Attente de l'API... ($((API_RETRY_COUNT+1))/$API_RETRIES)"
-              API_RETRY_COUNT=$((API_RETRY_COUNT+1))
-              sleep 4
-            done
-            
-            if [ $API_RETRY_COUNT -lt $API_RETRIES ]; then
-              log "✅ API accessible"
-            else
-              log "⚠️ API non accessible, vérification des logs"
-              docker-compose -f docker-compose.prisma.yml logs --tail=20 api
-            fi
-            
-            # Phase 5: Gestion optimisée des migrations Prisma
             log "🔄 Phase 5: Gestion des migrations Prisma"
+            docker-compose -f docker-compose.prisma.yml exec -T api npx prisma generate || deploy_failed "Échec generate"
             
-            if docker-compose -f docker-compose.prisma.yml ps | grep -q "api.*Up"; then
-              # Vérifier si migration nécessaire
-              log "🔍 Vérification du besoin de migration"
-              
-              # Génération du client Prisma
-              log "🔨 Génération du client Prisma"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma generate || deploy_failed "Échec de génération du client Prisma"
-              
-              # Vérifier l'état des migrations
-              MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1 || echo "error")
-              
-              if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
-                log "✅ Schéma de base de données à jour"
-              else
-                log "🔄 Application des migrations nécessaires"
-                
-                if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy; then
-                  log "✅ Migrations appliquées avec succès"
-                else
-                  log "⚠️ Erreur lors des migrations, tentative de rattrapage"
-                  
-                  # Vérifier s'il existe des migrations
-                  MIGRATIONS_COUNT=$(docker-compose -f docker-compose.prisma.yml exec -T api find prisma/migrations -name "*.sql" 2>/dev/null | wc -l || echo "0")
-                  
-                  if [ "$MIGRATIONS_COUNT" -eq "0" ]; then
-                    log "🔧 Création de la migration initiale"
-                    docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate dev --name init --create-only
-                    docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy
-                  else
-                    log "🔄 Synchronisation avec la base existante"
-                    docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db pull
-                    docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate dev --name schema_sync --create-only
-                    docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy
-                  fi
-                fi
-              fi
-              
-              # Vérification finale des migrations
-              log "🔍 Vérification finale des migrations"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status || log "⚠️ Impossible de vérifier le statut des migrations"
+            MIGRATIONS_COUNT=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations 2>/dev/null | wc -l" || echo "0")
+            
+            if [ "$MIGRATIONS_COUNT" -gt "0" ]; then
+              log "🔄 Déploiement des migrations existantes"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || log "⚠️ Échec migrate deploy"
             else
-              deploy_failed "Service API non disponible pour les migrations"
+              log "⚠️ Aucune migration trouvée → génération auto"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate dev --name auto_deploy --create-only
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy
             fi
             
-            # Phase 6: Vérifications et finalisation
-            log "📊 Phase 6: Vérifications finales"
-            
-            # État des services
-            log "📋 État des services:"
-            docker-compose -f docker-compose.prisma.yml ps
-            
-            # Vérification des tables
-            if [ -f "${APP_DIR}/.env.dev" ]; then
-              source "${APP_DIR}/.env.dev"
-              DB_USER=${DB_USERNAME:-postgres}
-              DB_NAME=${DB_NAME:-Assbt}
-              
-              log "🗄️ Vérification des tables de la base:"
-              docker-compose -f docker-compose.prisma.yml exec -T db psql -U "$DB_USER" -d "$DB_NAME" -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';" || log "⚠️ Impossible de lister les tables"
-            fi
-            
-            # Logs récents de l'API
-            log "📃 Logs récents de l'API:"
-            docker-compose -f docker-compose.prisma.yml logs --tail=30 api
-            
-            # Enregistrer le commit déployé
             echo "$CURRENT_COMMIT" > "${APP_DIR}/.last_deploy"
-            
-            # Nettoyage final
-            log "🧹 Nettoyage des ressources inutilisées"
             docker image prune -f > /dev/null 2>&1
             docker volume prune -f > /dev/null 2>&1
-            
-            # Rotation des logs de déploiement (garder 5 derniers)
-            if [ -f "$DEPLOY_LOG" ]; then
-              tail -n 1000 "$DEPLOY_LOG" > "${DEPLOY_LOG}.tmp"
-              mv "${DEPLOY_LOG}.tmp" "$DEPLOY_LOG"
-            fi
             
             log "✅ Déploiement terminé avec succès - Commit: $CURRENT_COMMIT"
 
