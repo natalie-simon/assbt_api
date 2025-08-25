@@ -165,12 +165,71 @@ jobs:
             
             docker-compose -f docker-compose.prisma.yml up -d || deploy_failed "Échec démarrage services"
             
-            log "🔄 Phase 5: Gestion avancée des migrations Prisma"
+            log "🔄 Phase 5: Système de migration PRODUCTION (Zéro perte de données)"
             docker-compose -f docker-compose.prisma.yml exec -T api npx prisma generate || deploy_failed "Échec generate"
             
-            log "💾 Sauvegarde de la base avant migration"
-            BACKUP_FILE="backups/db_backup_$(date +%Y%m%d_%H%M%S).sql"
-            docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres postgres > "$BACKUP_FILE" || log "⚠️ Échec sauvegarde DB"
+            # Fonction de sauvegarde multi-niveaux PRODUCTION
+            create_production_backup() {
+              local backup_timestamp=$(date +%Y%m%d_%H%M%S)
+              local backup_dir="backups/prod_backup_$backup_timestamp"
+              
+              log "🔒 PRODUCTION BACKUP - Sauvegarde multi-niveaux"
+              mkdir -p "$backup_dir"
+              
+              # 1. Sauvegarde SQL complète
+              log "📦 1/4 Sauvegarde SQL complète..."
+              if docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres -v postgres > "$backup_dir/full_database.sql"; then
+                BACKUP_SIZE=$(ls -lh "$backup_dir/full_database.sql" | awk '{print $5}')
+                log "✅ Sauvegarde SQL: $BACKUP_SIZE"
+              else
+                log "❌ ÉCHEC SAUVEGARDE SQL - ARRÊT IMMÉDIAT"
+                deploy_failed "Sauvegarde SQL échouée - données critiques"
+              fi
+              
+              # 2. Sauvegarde schéma seul
+              log "📋 2/4 Sauvegarde du schéma..."
+              docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres -s postgres > "$backup_dir/schema_only.sql" || log "⚠️ Échec schéma"
+              
+              # 3. Sauvegarde données seules
+              log "💾 3/4 Sauvegarde des données..."
+              docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres -a postgres > "$backup_dir/data_only.sql" || log "⚠️ Échec données"
+              
+              # 4. État des migrations Prisma
+              log "🔍 4/4 État des migrations..."
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status > "$backup_dir/migration_status.txt" 2>&1 || log "⚠️ Échec statut"
+              
+              # Vérification intégrité
+              log "🔍 Vérification intégrité des sauvegardes..."
+              if [ -s "$backup_dir/full_database.sql" ] && [ $(wc -l < "$backup_dir/full_database.sql") -gt 10 ]; then
+                log "✅ Sauvegarde PRODUCTION validée: $backup_dir"
+                echo "$backup_dir" > ".last_backup_path"
+                return 0
+              else
+                log "❌ SAUVEGARDE CORROMPUE - ARRÊT CRITIQUE"
+                deploy_failed "Sauvegarde invalide - protection des données"
+              fi
+            }
+            
+            # Fonction de restauration d'urgence
+            emergency_restore() {
+              local backup_path="$1"
+              log "🚨 RESTAURATION D'URGENCE depuis $backup_path"
+              
+              if [ -f "$backup_path/full_database.sql" ]; then
+                log "🔄 Restauration de la base complète..."
+                docker-compose -f docker-compose.prisma.yml exec -T db psql -U postgres -c "DROP DATABASE IF EXISTS postgres_restore;"
+                docker-compose -f docker-compose.prisma.yml exec -T db psql -U postgres -c "CREATE DATABASE postgres_restore;"
+                docker-compose -f docker-compose.prisma.yml exec -T db psql -U postgres postgres_restore < "$backup_path/full_database.sql"
+                log "✅ Base restaurée en postgres_restore - vérifiez avant de basculer"
+                return 0
+              else
+                log "❌ Sauvegarde introuvable"
+                return 1
+              fi
+            }
+            
+            # Exécution de la sauvegarde PRODUCTION
+            create_production_backup
             
             # Fonction de résolution intelligente des conflits
             resolve_migration_conflicts() {
@@ -205,10 +264,9 @@ jobs:
                   log "🔄 Nouvelle tentative après rollback"
                   return 0
                 else
-                  log "⚠️ Impossible d'identifier la migration échouée, reset complet"
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate reset --force --skip-seed || log "Échec reset"
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push || log "Échec push"
-                  return 2
+                  log "⚠️ Impossible d'identifier la migration échouée"
+                  log "🛑 Arrêt pour éviter la perte de données - intervention manuelle requise"
+                  return 1
                 fi
               fi
               
@@ -233,10 +291,10 @@ jobs:
                   docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$PENDING_MIGRATIONS"
                   return 0
                 else
-                  # Fallback: synchronisation directe
-                  log "🔄 Synchronisation directe du schéma"
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push --force-reset
-                  return 2  # Code spécial pour schéma push
+                  # Pas de fallback destructif
+                  log "⚠️ Impossible de résoudre automatiquement le conflit de schéma"
+                  log "🛑 Intervention manuelle requise pour préserver les données"
+                  return 1
                 fi
               fi
               
@@ -252,10 +310,9 @@ jobs:
                   docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$LATEST_MIGRATION"
                   return 0
                 else
-                  log "⚠️ Aucune migration valide trouvée, reset complet"
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate reset --force --skip-seed || log "Échec reset"
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push || log "Échec push"
-                  return 2
+                  log "⚠️ Aucune migration valide trouvée"
+                  log "🛑 Arrêt pour éviter la perte de données - vérification manuelle requise"
+                  return 1
                 fi
               fi
               
@@ -284,90 +341,140 @@ jobs:
                 return $?
               else
                 log "⚠️ Statut unclear, vérification manuelle"
-                # Comparaison schéma actuel vs attendu
-                log "🔍 Synchronisation finale du schéma"
-                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push --accept-data-loss
-                return $?
+                log "🛑 Synchronisation manuelle requise pour préserver les données"
+                return 1
               fi
             }
             
-            # Déploiement avec résolution automatique des conflits
-            deploy_with_conflict_resolution() {
+            # Déploiement PRODUCTION ultra-sécurisé
+            deploy_production_safe() {
+              local backup_path=$(cat ".last_backup_path" 2>/dev/null || echo "")
               local attempt=0
-              local max_attempts=5
+              local max_attempts=3  # Réduit pour production
               
-              while [ $attempt -lt $max_attempts ]; do
-                attempt=$((attempt + 1))
-                log "🚀 Tentative de déploiement $attempt/$max_attempts"
+              log "🔒 DÉPLOIEMENT PRODUCTION - Mode conservatif"
+              
+              # Validation préalable
+              log "🔍 Phase 1: Validation préalable"
+              CURRENT_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+              
+              if echo "$CURRENT_STATUS" | grep -q "Database schema is up to date"; then
+                log "✅ Base déjà synchronisée - Aucune migration requise"
+                return 0
+              fi
+              
+              # Lister les migrations en attente
+              log "📋 Phase 2: Analyse des migrations en attente"
+              PENDING_MIGRATIONS=$(echo "$CURRENT_STATUS" | grep -A20 "pending migration" | grep -E "[0-9]{14}_" || echo "")
+              
+              if [ -z "$PENDING_MIGRATIONS" ]; then
+                log "⚠️ Aucune migration en attente détectée"
                 
-                # Vérification du statut
-                MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
-                
-                if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
-                  log "✅ Base de données déjà à jour"
-                  ensure_all_migrations_applied
-                  return $?
-                fi
-                
-                # Tentative de déploiement
-                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee migration_attempt_$attempt.log
-                
-                if grep -q "successfully applied\|All migrations have been applied" migration_attempt_$attempt.log; then
-                  log "✅ Migrations appliquées avec succès"
-                  rm -f migration_attempt_*.log
-                  ensure_all_migrations_applied
-                  return $?
-                fi
-                
-                # Résolution des conflits
-                if resolve_migration_conflicts "migration_attempt_$attempt.log" $attempt; then
-                  resolve_result=$?
-                  if [ $resolve_result -eq 2 ]; then
-                    log "✅ Schéma synchronisé par push"
-                    rm -f migration_attempt_*.log
-                    ensure_all_migrations_applied
-                    return $?
-                  fi
-                  log "🔄 Conflit résolu, tentative d'application des migrations restantes"
+                # Vérification des migrations échouées
+                if echo "$CURRENT_STATUS" | grep -q "failed migration\|P3009"; then
+                  log "🚨 MIGRATIONS ÉCHOUÉES DÉTECTÉES"
+                  FAILED_MIGRATION=$(echo "$CURRENT_STATUS" | grep -oE "[0-9]{14}_[a-zA-Z0-9_]+" | head -1)
                   
-                  # Après résolution, tenter d'appliquer toutes les migrations
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee post_resolve_$attempt.log
-                  if grep -q "successfully applied\|All migrations have been applied\|Database schema is up to date" post_resolve_$attempt.log; then
-                    log "✅ Migrations appliquées après résolution"
-                    rm -f migration_attempt_*.log post_resolve_*.log
-                    ensure_all_migrations_applied
-                    return $?
+                  if [ -n "$FAILED_MIGRATION" ]; then
+                    log "🔧 Résolution SÉCURISÉE de la migration échouée: $FAILED_MIGRATION"
+                    log "📌 Marquage comme rolled-back (SANS perte de données)"
+                    
+                    if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION"; then
+                      log "✅ Migration échouée résolue"
+                      log "🔄 Nouvelle tentative d'application"
+                      if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy; then
+                        log "✅ Migrations appliquées après résolution"
+                        return 0
+                      else
+                        log "❌ Échec application après résolution"
+                        return 1
+                      fi
+                    else
+                      log "❌ Impossible de résoudre la migration échouée"
+                      log "🛑 ARRÊT SÉCURISÉ - Intervention manuelle requise"
+                      return 1
+                    fi
+                  else
+                    log "❌ Migration échouée non identifiable"
+                    log "🛑 ARRÊT SÉCURISÉ - Diagnostic manuel requis"
+                    return 1
                   fi
-                  rm -f post_resolve_*.log
-                  continue
                 else
-                  log "⚠️ Impossible de résoudre le conflit à la tentative $attempt"
+                  log "🔍 Tentative de synchronisation douce"
+                  if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy; then
+                    log "✅ Synchronisation réussie"
+                    return 0
+                  else
+                    log "❌ Synchronisation échouée"
+                    return 1
+                  fi
                 fi
-                
-                sleep 2
+              fi
+              
+              # Application sécurisée des migrations en attente
+              log "🔄 Phase 3: Application SÉCURISÉE des migrations"
+              log "📋 Migrations à appliquer:"
+              echo "$PENDING_MIGRATIONS" | while read -r migration; do
+                [ -n "$migration" ] && log "  - $migration"
               done
               
-              log "🚨 Échec après $max_attempts tentatives"
-              log "🔄 Tentative finale de synchronisation complète"
-              
-              # Dernière tentative : reset + push pour garantir la cohérence
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate reset --force --skip-seed || log "Échec reset final"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push --accept-data-loss || log "Échec push final"
-              
-              # Vérification finale
-              ensure_all_migrations_applied
-              final_result=$?
-              
-              cat migration_attempt_*.log | tail -20
-              rm -f migration_attempt_*.log
-              return $final_result
+              # Application avec monitoring
+              if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee production_migration.log; then
+                if grep -q "successfully applied\|All migrations have been applied" production_migration.log; then
+                  log "✅ TOUTES LES MIGRATIONS APPLIQUÉES AVEC SUCCÈS"
+                  
+                  # Vérification post-migration
+                  log "🔍 Vérification post-migration"
+                  FINAL_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+                  if echo "$FINAL_STATUS" | grep -q "Database schema is up to date"; then
+                    log "✅ DÉPLOIEMENT PRODUCTION RÉUSSI"
+                    rm -f production_migration.log
+                    return 0
+                  else
+                    log "⚠️ Statut final incertain"
+                    cat production_migration.log
+                    rm -f production_migration.log
+                    return 1
+                  fi
+                else
+                  log "⚠️ Migrations partiellement appliquées"
+                  cat production_migration.log
+                  rm -f production_migration.log
+                  return 1
+                fi
+              else
+                log "❌ ÉCHEC D'APPLICATION DES MIGRATIONS"
+                log "🔍 Analyse des erreurs:"
+                cat production_migration.log | tail -10
+                
+                # En cas d'échec, ne PAS tenter de résolution automatique
+                log "🛑 ARRÊT SÉCURISÉ POUR PROTECTION DES DONNÉES"
+                log "💾 Sauvegarde disponible: $backup_path"
+                log "🔧 Intervention manuelle requise"
+                
+                rm -f production_migration.log
+                return 1
+              fi
             }
             
-            # Exécution du déploiement intelligent
-            if deploy_with_conflict_resolution; then
-              log "✅ Déploiement des migrations réussi"
+            # Exécution du déploiement PRODUCTION
+            if deploy_production_safe; then
+              log "✅ DÉPLOIEMENT PRODUCTION RÉUSSI - Données préservées"
+              
+              # Nettoyage des anciennes sauvegardes (garde les 5 dernières)
+              log "🧹 Nettoyage des anciennes sauvegardes"
+              find backups/ -name "prod_backup_*" -type d | sort -r | tail -n +6 | xargs rm -rf 2>/dev/null || true
+              log "✅ Maintenance des sauvegardes terminée"
             else
-              deploy_failed "Échec final du déploiement des migrations"
+              log "❌ DÉPLOIEMENT PRODUCTION ÉCHOUÉ"
+              BACKUP_PATH=$(cat ".last_backup_path" 2>/dev/null || echo "AUCUNE")
+              log "💾 Sauvegarde disponible: $BACKUP_PATH"
+              log "🔧 Pour restauration d'urgence:"
+              log "   1. Connectez-vous au serveur"
+              log "   2. Utilisez: docker-compose exec db psql -U postgres < $BACKUP_PATH/full_database.sql"
+              log "   3. Redémarrez l'application"
+              
+              deploy_failed "Échec déploiement PRODUCTION - Données intactes"
             fi
             
             log "🔍 Vérification finale du schéma"
