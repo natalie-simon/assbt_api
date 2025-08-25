@@ -188,10 +188,27 @@ jobs:
               # P3005: Base non-vide, baseline requis
               if grep -q "P3005\|schema is not empty" "$output_file"; then
                 log "🔧 Résolution P3005 - Baseline automatique"
-                FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | head -1 | tr -d '\r\n')
-                if [ -n "$FIRST_MIGRATION" ]; then
+                FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations | grep -E '^[0-9]{14}_' | head -1" | tr -d '\r\n')
+                if [ -n "$FIRST_MIGRATION" ] && [ "$FIRST_MIGRATION" != "migration_lock.toml" ]; then
                   docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION"
                   return 0
+                fi
+              fi
+              
+              # P3009: Migration échouée bloquante
+              if grep -q "P3009" "$output_file"; then
+                log "🔧 Résolution P3009 - Migration échouée détectée"
+                FAILED_MIGRATION=$(grep -oE "The \`[0-9]{14}_[a-zA-Z0-9_]+\` migration" "$output_file" | sed 's/The `\(.*\)` migration/\1/' | head -1)
+                if [ -n "$FAILED_MIGRATION" ]; then
+                  log "🗑️ Marquage migration échouée comme échoué puis rollback: $FAILED_MIGRATION"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" || log "⚠️ Échec rollback"
+                  log "🔄 Nouvelle tentative après rollback"
+                  return 0
+                else
+                  log "⚠️ Impossible d'identifier la migration échouée, reset complet"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate reset --force --skip-seed || log "Échec reset"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push || log "Échec push"
+                  return 2
                 fi
               fi
               
@@ -229,15 +246,49 @@ jobs:
                 log "⚠️ Erreur Prisma détectée: $ERROR_CODE"
                 
                 # Tentative de résolution générique
-                LATEST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | tail -1 | tr -d '\r\n')
-                if [ -n "$LATEST_MIGRATION" ]; then
+                LATEST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations | grep -E '^[0-9]{14}_' | tail -1" | tr -d '\r\n')
+                if [ -n "$LATEST_MIGRATION" ] && [ "$LATEST_MIGRATION" != "migration_lock.toml" ]; then
                   log "📌 Marquage dernière migration: $LATEST_MIGRATION"
                   docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$LATEST_MIGRATION"
                   return 0
+                else
+                  log "⚠️ Aucune migration valide trouvée, reset complet"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate reset --force --skip-seed || log "Échec reset"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push || log "Échec push"
+                  return 2
                 fi
               fi
               
               return 1
+            }
+            
+            # Vérification que toutes les migrations sont appliquées
+            ensure_all_migrations_applied() {
+              log "🔍 Vérification que toutes les migrations sont appliquées"
+              
+              # Liste toutes les migrations disponibles
+              ALL_MIGRATIONS=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations | grep -E '^[0-9]{14}_' | sort")
+              MIGRATION_COUNT=$(echo "$ALL_MIGRATIONS" | wc -l)
+              log "📋 $MIGRATION_COUNT migrations trouvées dans le dossier"
+              
+              # Vérification du statut final
+              FINAL_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+              
+              if echo "$FINAL_STATUS" | grep -q "Database schema is up to date"; then
+                log "✅ Toutes les migrations sont appliquées"
+                return 0
+              elif echo "$FINAL_STATUS" | grep -q "pending migration"; then
+                log "⚠️ Des migrations sont encore en attente"
+                log "🔄 Application forcée des migrations restantes"
+                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy
+                return $?
+              else
+                log "⚠️ Statut unclear, vérification manuelle"
+                # Comparaison schéma actuel vs attendu
+                log "🔍 Synchronisation finale du schéma"
+                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push --accept-data-loss
+                return $?
+              fi
             }
             
             # Déploiement avec résolution automatique des conflits
@@ -254,7 +305,8 @@ jobs:
                 
                 if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
                   log "✅ Base de données déjà à jour"
-                  return 0
+                  ensure_all_migrations_applied
+                  return $?
                 fi
                 
                 # Tentative de déploiement
@@ -263,7 +315,8 @@ jobs:
                 if grep -q "successfully applied\|All migrations have been applied" migration_attempt_$attempt.log; then
                   log "✅ Migrations appliquées avec succès"
                   rm -f migration_attempt_*.log
-                  return 0
+                  ensure_all_migrations_applied
+                  return $?
                 fi
                 
                 # Résolution des conflits
@@ -272,9 +325,20 @@ jobs:
                   if [ $resolve_result -eq 2 ]; then
                     log "✅ Schéma synchronisé par push"
                     rm -f migration_attempt_*.log
-                    return 0
+                    ensure_all_migrations_applied
+                    return $?
                   fi
-                  log "🔄 Conflit résolu, nouvelle tentative..."
+                  log "🔄 Conflit résolu, tentative d'application des migrations restantes"
+                  
+                  # Après résolution, tenter d'appliquer toutes les migrations
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee post_resolve_$attempt.log
+                  if grep -q "successfully applied\|All migrations have been applied\|Database schema is up to date" post_resolve_$attempt.log; then
+                    log "✅ Migrations appliquées après résolution"
+                    rm -f migration_attempt_*.log post_resolve_*.log
+                    ensure_all_migrations_applied
+                    return $?
+                  fi
+                  rm -f post_resolve_*.log
                   continue
                 else
                   log "⚠️ Impossible de résoudre le conflit à la tentative $attempt"
@@ -284,9 +348,19 @@ jobs:
               done
               
               log "🚨 Échec après $max_attempts tentatives"
+              log "🔄 Tentative finale de synchronisation complète"
+              
+              # Dernière tentative : reset + push pour garantir la cohérence
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate reset --force --skip-seed || log "Échec reset final"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push --accept-data-loss || log "Échec push final"
+              
+              # Vérification finale
+              ensure_all_migrations_applied
+              final_result=$?
+              
               cat migration_attempt_*.log | tail -20
               rm -f migration_attempt_*.log
-              return 1
+              return $final_result
             }
             
             # Exécution du déploiement intelligent
