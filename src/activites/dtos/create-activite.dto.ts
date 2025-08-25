@@ -114,6 +114,17 @@ export class CreateActiviteDto {
   max_participant: number = 20;
 
   @ApiProperty({
+    description: "La date et l'heure de début de fin d'inscription",
+    example: '2021-08-20 14:00:00',
+    required: false,
+    type: Date,
+  })
+  @IsDate({ message: "La date et l'heure de début doit être une date" })
+  @IsNotEmpty({ message: "La date et l'heure de début doit être renseignée" })
+  @Type(() => Date)
+  date_heure_limite_inscription: Date;
+
+  @ApiProperty({
     description: 'Le nombre de participants en attente',
     example: 0,
     type: Number,

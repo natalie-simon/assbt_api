@@ -102,6 +102,8 @@ model Activite {
   motif_annulation  String? 
   max_participant   Int       @default(99)
   nbr_attente       Int       @default(0)
+  date_heure_limite_inscription    DateTime?
+
 
   // Relations
   categorieId         Int

@@ -119,6 +119,8 @@ export class ActiviteService {
         contenu: createActiviteDto.contenu,
         date_heure_debut: createActiviteDto.date_heure_debut,
         date_heure_fin: createActiviteDto.date_heure_fin,
+        date_heure_limite_inscription:
+          createActiviteDto.date_heure_limite_inscription,
         categorieId: categorie.id,
       },
       include: {
@@ -251,6 +253,8 @@ export class ActiviteService {
         contenu: updateActiviteDto.contenu,
         date_heure_debut: updateActiviteDto.date_heure_debut,
         date_heure_fin: updateActiviteDto.date_heure_fin,
+        date_heure_limite_inscription:
+          updateActiviteDto.date_heure_limite_inscription,
         categorieId: categorie.id,
       },
     });
