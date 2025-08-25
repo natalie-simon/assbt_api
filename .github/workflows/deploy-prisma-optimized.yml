@@ -168,16 +168,26 @@ jobs:
             log "🔄 Phase 5: Gestion des migrations Prisma"
             docker-compose -f docker-compose.prisma.yml exec -T api npx prisma generate || deploy_failed "Échec generate"
             
-            MIGRATIONS_COUNT=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations 2>/dev/null | wc -l" || echo "0")
+            log "💾 Sauvegarde de la base avant migration"
+            BACKUP_FILE="backups/db_backup_$(date +%Y%m%d_%H%M%S).sql"
+            docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres postgres > "$BACKUP_FILE" || log "⚠️ Échec sauvegarde DB"
             
-            if [ "$MIGRATIONS_COUNT" -gt "0" ]; then
-              log "🔄 Déploiement des migrations existantes"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || log "⚠️ Échec migrate deploy"
+            log "🔍 Vérification du statut des migrations"
+            MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status --schema=prisma/schema.prisma 2>/dev/null || echo "error")
+            
+            if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
+              log "✅ Base de données déjà à jour"
+            elif echo "$MIGRATION_STATUS" | grep -q "pending migration"; then
+              log "🔄 Déploiement des migrations en attente"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy"
+              log "✅ Migrations appliquées avec succès"
             else
-              log "⚠️ Aucune migration trouvée → génération auto"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate dev --name auto_deploy --create-only
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy
+              log "⚠️ Statut migrations unclear, forçage du déploiement"
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy"
             fi
+            
+            log "🔍 Vérification finale du schéma"
+            docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status || log "⚠️ Impossible de vérifier le statut final"
             
             echo "$CURRENT_COMMIT" > "${APP_DIR}/.last_deploy"
             docker image prune -f > /dev/null 2>&1
