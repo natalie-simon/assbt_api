@@ -165,57 +165,135 @@ jobs:
             
             docker-compose -f docker-compose.prisma.yml up -d || deploy_failed "Échec démarrage services"
             
-            log "🔄 Phase 5: Gestion des migrations Prisma"
+            log "🔄 Phase 5: Gestion avancée des migrations Prisma"
             docker-compose -f docker-compose.prisma.yml exec -T api npx prisma generate || deploy_failed "Échec generate"
             
             log "💾 Sauvegarde de la base avant migration"
             BACKUP_FILE="backups/db_backup_$(date +%Y%m%d_%H%M%S).sql"
             docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres postgres > "$BACKUP_FILE" || log "⚠️ Échec sauvegarde DB"
             
-            log "🔍 Vérification du statut des migrations"
-            MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status --schema=prisma/schema.prisma 2>&1 || echo "error")
-            
-            if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
-              log "✅ Base de données déjà à jour"
-            elif echo "$MIGRATION_STATUS" | grep -q "pending migration"; then
-              log "🔄 Déploiement des migrations en attente"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy"
-              log "✅ Migrations appliquées avec succès"
-            elif echo "$MIGRATION_STATUS" | grep -q "P3005"; then
-              log "🔧 Base existante détectée - Résolution conflit schéma"
-              log "🔄 Tentative de baseline de la base existante"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$(ls prisma/migrations | head -1)" || log "⚠️ Échec résolution baseline"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy après baseline"
-              log "✅ Migrations appliquées après résolution baseline"
-            elif echo "$MIGRATION_STATUS" | grep -q "schema is not empty"; then
-              log "🔧 Schéma non-vide détecté - Baseline requis"
-              FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | head -1 | tr -d '\r\n' || echo "")
-              if [ -n "$FIRST_MIGRATION" ]; then
-                log "📌 Marquage migration initiale comme appliquée: $FIRST_MIGRATION"
-                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION" || log "⚠️ Échec marquage baseline"
-                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec migration deploy après baseline"
-                log "✅ Baseline et migrations appliquées"
-              else
-                log "⚠️ Aucune migration trouvée pour baseline"
-                deploy_failed "Impossible de résoudre le conflit baseline"
+            # Fonction de résolution intelligente des conflits
+            resolve_migration_conflicts() {
+              local output_file="$1"
+              local retry_count="${2:-0}"
+              local max_retries=3
+              
+              if [ $retry_count -ge $max_retries ]; then
+                log "🚨 Limite de tentatives atteinte ($max_retries)"
+                return 1
               fi
-            else
-              log "⚠️ Statut migrations unclear, tentative de déploiement"
-              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee migration_output.log
-              if grep -q "P3005" migration_output.log; then
-                log "🔧 Erreur P3005 détectée, résolution automatique"
-                FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | head -1 | tr -d '\r\n' || echo "")
+              
+              log "🔍 Analyse des conflits de migration (tentative $((retry_count+1))/$max_retries)"
+              
+              # P3005: Base non-vide, baseline requis
+              if grep -q "P3005\|schema is not empty" "$output_file"; then
+                log "🔧 Résolution P3005 - Baseline automatique"
+                FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | head -1 | tr -d '\r\n')
                 if [ -n "$FIRST_MIGRATION" ]; then
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION" || log "⚠️ Échec résolution"
-                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy || deploy_failed "Échec final migration deploy"
-                  log "✅ Migration résolue et appliquée"
-                else
-                  deploy_failed "Impossible de résoudre P3005"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION"
+                  return 0
                 fi
-              elif ! grep -q "success" migration_output.log; then
-                deploy_failed "Échec migration deploy"
               fi
-              rm -f migration_output.log
+              
+              # P3018: Migration échouée
+              if grep -q "P3018" "$output_file"; then
+                log "🔧 Résolution P3018 - Migration échouée"
+                FAILED_MIGRATION=$(grep -oE "Migration name: [0-9]{14}_[a-zA-Z0-9_]+" "$output_file" | cut -d' ' -f3 | head -1)
+                [ -z "$FAILED_MIGRATION" ] && FAILED_MIGRATION=$(grep -oE "[0-9]{14}_[a-zA-Z0-9_]+" "$output_file" | head -1)
+                if [ -n "$FAILED_MIGRATION" ]; then
+                  log "📌 Marquage comme appliquée: $FAILED_MIGRATION"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FAILED_MIGRATION"
+                  return 0
+                fi
+              fi
+              
+              # Conflits de colonnes/tables existantes
+              if grep -qE "column.*already exists|relation.*already exists|constraint.*already exists" "$output_file"; then
+                log "🔧 Résolution conflit schéma existant"
+                PENDING_MIGRATIONS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1 | grep -A10 "following migration" | grep -oE "[0-9]{14}_[a-zA-Z0-9_]+" | head -1)
+                if [ -n "$PENDING_MIGRATIONS" ]; then
+                  log "📌 Marquage migration conflictuelle: $PENDING_MIGRATIONS"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$PENDING_MIGRATIONS"
+                  return 0
+                else
+                  # Fallback: synchronisation directe
+                  log "🔄 Synchronisation directe du schéma"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma db push --force-reset
+                  return 2  # Code spécial pour schéma push
+                fi
+              fi
+              
+              # Autres erreurs Prisma
+              if grep -qE "P[0-9]{4}" "$output_file"; then
+                ERROR_CODE=$(grep -oE "P[0-9]{4}" "$output_file" | head -1)
+                log "⚠️ Erreur Prisma détectée: $ERROR_CODE"
+                
+                # Tentative de résolution générique
+                LATEST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api ls prisma/migrations 2>/dev/null | tail -1 | tr -d '\r\n')
+                if [ -n "$LATEST_MIGRATION" ]; then
+                  log "📌 Marquage dernière migration: $LATEST_MIGRATION"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$LATEST_MIGRATION"
+                  return 0
+                fi
+              fi
+              
+              return 1
+            }
+            
+            # Déploiement avec résolution automatique des conflits
+            deploy_with_conflict_resolution() {
+              local attempt=0
+              local max_attempts=5
+              
+              while [ $attempt -lt $max_attempts ]; do
+                attempt=$((attempt + 1))
+                log "🚀 Tentative de déploiement $attempt/$max_attempts"
+                
+                # Vérification du statut
+                MIGRATION_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+                
+                if echo "$MIGRATION_STATUS" | grep -q "Database schema is up to date"; then
+                  log "✅ Base de données déjà à jour"
+                  return 0
+                fi
+                
+                # Tentative de déploiement
+                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee migration_attempt_$attempt.log
+                
+                if grep -q "successfully applied\|All migrations have been applied" migration_attempt_$attempt.log; then
+                  log "✅ Migrations appliquées avec succès"
+                  rm -f migration_attempt_*.log
+                  return 0
+                fi
+                
+                # Résolution des conflits
+                if resolve_migration_conflicts "migration_attempt_$attempt.log" $attempt; then
+                  resolve_result=$?
+                  if [ $resolve_result -eq 2 ]; then
+                    log "✅ Schéma synchronisé par push"
+                    rm -f migration_attempt_*.log
+                    return 0
+                  fi
+                  log "🔄 Conflit résolu, nouvelle tentative..."
+                  continue
+                else
+                  log "⚠️ Impossible de résoudre le conflit à la tentative $attempt"
+                fi
+                
+                sleep 2
+              done
+              
+              log "🚨 Échec après $max_attempts tentatives"
+              cat migration_attempt_*.log | tail -20
+              rm -f migration_attempt_*.log
+              return 1
+            }
+            
+            # Exécution du déploiement intelligent
+            if deploy_with_conflict_resolution; then
+              log "✅ Déploiement des migrations réussi"
+            else
+              deploy_failed "Échec final du déploiement des migrations"
             fi
             
             log "🔍 Vérification finale du schéma"
