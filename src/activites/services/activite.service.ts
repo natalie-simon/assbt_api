@@ -251,6 +251,8 @@ export class ActiviteService {
       data: {
         titre: updateActiviteDto.titre,
         contenu: updateActiviteDto.contenu,
+        nbr_attente: updateActiviteDto.nbr_attente,
+        max_participant: updateActiviteDto.max_participant,
         date_heure_debut: updateActiviteDto.date_heure_debut,
         date_heure_fin: updateActiviteDto.date_heure_fin,
         date_heure_limite_inscription:

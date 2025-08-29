@@ -119,8 +119,10 @@ export class CreateActiviteDto {
     required: false,
     type: Date,
   })
-  @IsDate({ message: "La date et l'heure de début doit être une date" })
-  @IsNotEmpty({ message: "La date et l'heure de début doit être renseignée" })
+  @IsDate({
+    message: "La date et l'heure de fin d'inscription doit être une date",
+  })
+  @IsOptional()
   @Type(() => Date)
   date_heure_limite_inscription: Date;
 
