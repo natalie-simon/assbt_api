@@ -3,7 +3,7 @@ name: Deploy NestJS with Prisma to IONOS VPS (Production)
 on:
   push:
     branches:
-      - prod
+      - master
   workflow_dispatch:
     inputs:
       force_deploy:
