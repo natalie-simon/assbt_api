@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  # Service pour la bdd PostgreSQL
+  postgres-db:
+    image: postgres:latest
+    container_name: api-postgres-db-test
+    env_file:
+      - .env.test
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Service pour l'API NestJs
+  nestjs-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-api-test
+    env_file:
+      - .env.test
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "${LISTEN_PORT}:${LISTEN_PORT}"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+
+volumes:
+  postgres-data-test:

@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Service pour l'API NestJS
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: nestjs_api
+    restart: always
+    env_file:
+      - .env.prod
+    environment:
+      - DB_HOST=db
+      - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-admin}@db:5432/${DB_NAME:-Assbt}?schema=public
+    # SUPPRIMÉ: ports - pas besoin car Traefik s'en charge
+    # ports:
+    #   - "127.0.0.1:3000:3000"
+    depends_on:
+      - db
+    networks:
+      - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      # AJOUTÉ: Spécifier le réseau pour Traefik
+      - "traefik.docker.network=app_network"
+
+  # Service pour la base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-admin}
+      - POSTGRES_DB=${DB_NAME:-Assbt}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-Assbt}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Service pour Traefik (reverse proxy)
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/etc/traefik/acme
+    networks:
+      - app_network
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=app_network"  # AJOUTÉ: Spécifier le réseau
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${MAIL_ADMIN:-contact@lesbulleurstoulonnais.fr}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
+      - "--api.dashboard=true"
+      - "--log.level=INFO"  # AJOUTÉ: Pour debug
+    labels:
+      - "traefik.enable=true"
+      # Dashboard Traefik
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH:-admin:$$apr1$$xyz...}"
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  traefik_data:

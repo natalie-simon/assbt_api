@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # Service pour l'API NestJS - en utilisant une image précompilée
+  api:
+    deploy:
+    image: node:18-slim
+    container_name: nestjs_api
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: sh /app/entrypoint.sh
+    env_file:
+      - ./.env.${ENV:-dev}
+    environment:
+      - DB_HOST=db
+      - ORIGIN=*
+      - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-admin}@db:5432/${DB_NAME:-Assbt}?schema=public
+      - NODE_OPTIONS=--max-old-space-size=300 --max-semi-space-size=1
+    expose:
+      - "3000"  # Seulement exposer, pas publier
+    depends_on:
+      - db
+    networks:
+      - app_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.routers.api.middlewares=cors-middleware"
+      # Définition du middleware CORS
+      - "traefik.http.middlewares.cors-middleware.headers.accessControlAllowOriginList=*"
+      - "traefik.http.middlewares.cors-middleware.headers.accessControlAllowMethods=GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS"
+      - "traefik.http.middlewares.cors-middleware.headers.accessControlAllowHeaders=*"
+      - "traefik.http.middlewares.cors-middleware.headers.accessControlAllowCredentials=true"
+      - "traefik.http.middlewares.cors-middleware.headers.accessControlMaxAge=86400"
+      - "traefik.http.middlewares.cors-middleware.headers.addVaryHeader=true"
+
+  # Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    command:
+    - "postgres"
+    - "-c"
+    - "shared_buffers=64MB"     # Réduire considérablement
+    - "-c"
+    - "work_mem=2MB"            # Réduire
+    - "-c"
+    - "maintenance_work_mem=16MB" # Réduire
+    - "-c"
+    - "max_connections=20"      # Limiter les connexions
+    - "-c"
+    - "effective_cache_size=128MB" # Réduire
+    - "-c"
+    - "autovacuum=off"
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-admin}
+      - POSTGRES_DB=${DB_NAME:-Assbt}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-Assbt}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Traefik (reverse proxy)
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/etc/traefik/acme
+    networks:
+      - app_network
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${MAIL_ADMIN:-ybah2201@gmail.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
+      - "--api.dashboard=true"
+    labels:
+      - "traefik.enable=true"
+      # Dashboard Traefik sans authentification
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  traefik_data:

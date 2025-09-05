@@ -1,0 +1,48 @@
+# Stage 1: Build
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Installation des dépendances de compilation nécessaires
+RUN apk add --no-cache python3 make g++
+
+# Copie des fichiers package
+COPY package*.json ./
+
+# Installation des dépendances
+RUN npm ci
+
+# Copie du code source
+COPY . .
+
+# Génération du client Prisma
+RUN npx prisma generate
+
+# Construction de l'application
+RUN npm run build
+
+# Stage 2: Production
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Set environment variable
+ENV NODE_ENV production
+
+# Dépendances pour les modules natifs
+RUN apk add --no-cache make g++
+
+# Installation des dépendances de production uniquement
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copier les fichiers de build et les configurations
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Expose API port
+EXPOSE 3000
+
+# Apply database migrations on startup and run the application
+CMD ["/bin/sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

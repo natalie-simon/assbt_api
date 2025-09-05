@@ -1,0 +1,3 @@
+GET http://localhost:3000/api/articles
+Authorization: Bearer 
+GET http://testassbtapi.nataliesimon.fr/api/articles/categorie/accueil

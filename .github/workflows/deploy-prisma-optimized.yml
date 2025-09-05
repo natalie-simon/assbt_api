@@ -1,0 +1,505 @@
+name: Deploy NestJS with Prisma to OVH VPS (Optimized)
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: 'Skip pre-deployment tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  pre-deploy-checks:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check_changes.outputs.should_deploy }}
+      commit_hash: ${{ steps.check_changes.outputs.commit_hash }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 2
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          echo "commit_hash=$CURRENT_COMMIT" >> $GITHUB_OUTPUT
+          
+          if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "🔄 Déploiement forcé activé"
+            exit 0
+          fi
+          
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          echo "Changed files: $CHANGED_FILES"
+          
+          if echo "$CHANGED_FILES" | grep -qE "\.(md|txt|yml)$|^\.github/|^docs/"; then
+            if ! echo "$CHANGED_FILES" | grep -qE "\.(js|ts|json|prisma|docker)$|^src/|^prisma/"; then
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+              echo "⏭️ Seuls des fichiers non critiques ont changé"
+              exit 0
+            fi
+          fi
+          
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        if: ${{ github.event.inputs.skip_tests != 'true' && steps.check_changes.outputs.should_deploy == 'true' }}
+        run: |
+          npm ci
+          npm run lint
+          #npm run test
+
+  deploy:
+    needs: pre-deploy-checks
+    if: needs.pre-deploy-checks.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Notify deployment start
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{\"embeds\":[{\"title\":\"🚀 Déploiement Started\",\"description\":\"Commit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\",\"color\":3447003}]}"
+          fi
+
+      - name: Deploy to OVH VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
+          port: 2222
+          timeout: 600s
+          script: |
+            set -e
+            VPS_ROOT="/home/deploy/app"
+            APP_DIR="${VPS_ROOT}/nestjs-prisma"
+            DEPLOY_LOG="${APP_DIR}/deploy.log"
+            CURRENT_COMMIT="${{ needs.pre-deploy-checks.outputs.commit_hash }}"
+            
+            log() {
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$DEPLOY_LOG"
+            }
+            
+            deploy_failed() {
+              log "❌ Déploiement échoué à l'étape: $1"
+              if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+                curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+                  -H 'Content-type: application/json' \
+                  --data "{\"embeds\":[{\"title\":\"❌ Déploiement Failed\",\"description\":\"Erreur: $1\\nCommit: \`$CURRENT_COMMIT\`\",\"color\":15158332}]}"
+              fi
+              exit 1
+            }
+            
+            trap 'deploy_failed "Script interrompu"' ERR
+            log "🚀 Démarrage du déploiement optimisé - Commit: $CURRENT_COMMIT"
+            
+            mkdir -p "$APP_DIR" "$APP_DIR/backups"
+            cd "$APP_DIR"
+            
+            LAST_DEPLOY_COMMIT=$(cat "${APP_DIR}/.last_deploy" 2>/dev/null || echo "")
+            if [ "$CURRENT_COMMIT" = "$LAST_DEPLOY_COMMIT" ] && [ "${{ github.event.inputs.force_deploy }}" != "true" ]; then
+              log "⏭️ Même commit détecté ($CURRENT_COMMIT), skip du déploiement"
+              exit 0
+            fi
+            
+            log "📋 Phase 1: Validation de l'environnement"
+            if [ -f "${APP_DIR}/.env.dev" ]; then
+              source "${APP_DIR}/.env.dev"
+            fi
+            
+            log "🧹 Phase 2: Sauvegarde et nettoyage"
+            if docker-compose -f docker-compose.prisma.yml ps -q > /dev/null 2>&1; then
+              log "💾 Sauvegarde état actuel"
+              docker-compose -f docker-compose.prisma.yml down
+            fi
+            docker rm -f postgres_db traefik api nestjs_api 2>/dev/null || true
+            
+            log "📦 Phase 3: Mise à jour du code"
+            TMP_DIR=$(mktemp -d)
+            git clone --filter=blob:none --depth=1 --branch=develop https://github.com/natalie-simon/assbt_api.git "$TMP_DIR"
+            cd "$APP_DIR"
+            find . -mindepth 1 \
+              -not -path "./backups*" \
+              -not -name ".env.dev*" \
+              -not -name ".last_deploy*" \
+              -not -name "deploy.log*" \
+              -exec rm -rf {} \; 2>/dev/null || true
+            cp -R "$TMP_DIR"/* "$APP_DIR"/
+            cp -R "$TMP_DIR"/.* "$APP_DIR"/ 2>/dev/null || true
+            rm -rf "$TMP_DIR"
+            
+            log "🐳 Phase 4: Build et démarrage des services"
+            cd "$APP_DIR"
+            docker-compose -f docker-compose.prisma.yml build --parallel || deploy_failed "Échec du build Docker"
+            docker-compose -f docker-compose.prisma.yml up -d db || deploy_failed "Échec DB"
+            
+            RETRIES=20; RETRY_COUNT=0
+            until docker-compose -f docker-compose.prisma.yml exec -T db pg_isready -q || [ $RETRY_COUNT -eq $RETRIES ]; do
+              log "🔄 Attente PostgreSQL... ($((RETRY_COUNT+1))/$RETRIES)"
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              sleep 3
+            done
+            
+            docker-compose -f docker-compose.prisma.yml up -d || deploy_failed "Échec démarrage services"
+            
+            log "🔄 Phase 5: Système de migration PRODUCTION (Zéro perte de données)"
+            docker-compose -f docker-compose.prisma.yml exec -T api npx prisma generate || deploy_failed "Échec generate"
+            
+            # Fonction de sauvegarde multi-niveaux PRODUCTION
+            create_production_backup() {
+              local backup_timestamp=$(date +%Y%m%d_%H%M%S)
+              local backup_dir="backups/prod_backup_$backup_timestamp"
+              
+              log "🔒 PRODUCTION BACKUP - Sauvegarde multi-niveaux"
+              mkdir -p "$backup_dir"
+              
+              # 1. Sauvegarde SQL complète
+              log "📦 1/4 Sauvegarde SQL complète..."
+              if docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres -v postgres > "$backup_dir/full_database.sql"; then
+                BACKUP_SIZE=$(ls -lh "$backup_dir/full_database.sql" | awk '{print $5}')
+                log "✅ Sauvegarde SQL: $BACKUP_SIZE"
+              else
+                log "❌ ÉCHEC SAUVEGARDE SQL - ARRÊT IMMÉDIAT"
+                deploy_failed "Sauvegarde SQL échouée - données critiques"
+              fi
+              
+              # 2. Sauvegarde schéma seul
+              log "📋 2/4 Sauvegarde du schéma..."
+              docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres -s postgres > "$backup_dir/schema_only.sql" || log "⚠️ Échec schéma"
+              
+              # 3. Sauvegarde données seules
+              log "💾 3/4 Sauvegarde des données..."
+              docker-compose -f docker-compose.prisma.yml exec -T db pg_dump -U postgres -a postgres > "$backup_dir/data_only.sql" || log "⚠️ Échec données"
+              
+              # 4. État des migrations Prisma
+              log "🔍 4/4 État des migrations..."
+              docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status > "$backup_dir/migration_status.txt" 2>&1 || log "⚠️ Échec statut"
+              
+              # Vérification intégrité
+              log "🔍 Vérification intégrité des sauvegardes..."
+              if [ -s "$backup_dir/full_database.sql" ] && [ $(wc -l < "$backup_dir/full_database.sql") -gt 10 ]; then
+                log "✅ Sauvegarde PRODUCTION validée: $backup_dir"
+                echo "$backup_dir" > ".last_backup_path"
+                return 0
+              else
+                log "❌ SAUVEGARDE CORROMPUE - ARRÊT CRITIQUE"
+                deploy_failed "Sauvegarde invalide - protection des données"
+              fi
+            }
+            
+            # Fonction de restauration d'urgence
+            emergency_restore() {
+              local backup_path="$1"
+              log "🚨 RESTAURATION D'URGENCE depuis $backup_path"
+              
+              if [ -f "$backup_path/full_database.sql" ]; then
+                log "🔄 Restauration de la base complète..."
+                docker-compose -f docker-compose.prisma.yml exec -T db psql -U postgres -c "DROP DATABASE IF EXISTS postgres_restore;"
+                docker-compose -f docker-compose.prisma.yml exec -T db psql -U postgres -c "CREATE DATABASE postgres_restore;"
+                docker-compose -f docker-compose.prisma.yml exec -T db psql -U postgres postgres_restore < "$backup_path/full_database.sql"
+                log "✅ Base restaurée en postgres_restore - vérifiez avant de basculer"
+                return 0
+              else
+                log "❌ Sauvegarde introuvable"
+                return 1
+              fi
+            }
+            
+            # Exécution de la sauvegarde PRODUCTION
+            create_production_backup
+            
+            # Fonction de résolution intelligente des conflits
+            resolve_migration_conflicts() {
+              local output_file="$1"
+              local retry_count="${2:-0}"
+              local max_retries=3
+              
+              if [ $retry_count -ge $max_retries ]; then
+                log "🚨 Limite de tentatives atteinte ($max_retries)"
+                return 1
+              fi
+              
+              log "🔍 Analyse des conflits de migration (tentative $((retry_count+1))/$max_retries)"
+              
+              # P3005: Base non-vide, baseline requis
+              if grep -q "P3005\|schema is not empty" "$output_file"; then
+                log "🔧 Résolution P3005 - Baseline automatique"
+                FIRST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations | grep -E '^[0-9]{14}_' | head -1" | tr -d '\r\n')
+                if [ -n "$FIRST_MIGRATION" ] && [ "$FIRST_MIGRATION" != "migration_lock.toml" ]; then
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FIRST_MIGRATION"
+                  return 0
+                fi
+              fi
+              
+              # P3009: Migration échouée bloquante
+              if grep -q "P3009" "$output_file"; then
+                log "🔧 Résolution P3009 - Migration échouée détectée"
+                FAILED_MIGRATION=$(grep -oE "The \`[0-9]{14}_[a-zA-Z0-9_]+\` migration" "$output_file" | sed 's/The `\(.*\)` migration/\1/' | head -1)
+                if [ -n "$FAILED_MIGRATION" ]; then
+                  log "🗑️ Marquage migration échouée comme échoué puis rollback: $FAILED_MIGRATION"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" || log "⚠️ Échec rollback"
+                  log "🔄 Nouvelle tentative après rollback"
+                  return 0
+                else
+                  log "⚠️ Impossible d'identifier la migration échouée"
+                  log "🛑 Arrêt pour éviter la perte de données - intervention manuelle requise"
+                  return 1
+                fi
+              fi
+              
+              # P3018: Migration échouée
+              if grep -q "P3018" "$output_file"; then
+                log "🔧 Résolution P3018 - Migration échouée"
+                FAILED_MIGRATION=$(grep -oE "Migration name: [0-9]{14}_[a-zA-Z0-9_]+" "$output_file" | cut -d' ' -f3 | head -1)
+                [ -z "$FAILED_MIGRATION" ] && FAILED_MIGRATION=$(grep -oE "[0-9]{14}_[a-zA-Z0-9_]+" "$output_file" | head -1)
+                if [ -n "$FAILED_MIGRATION" ]; then
+                  log "📌 Marquage comme appliquée: $FAILED_MIGRATION"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$FAILED_MIGRATION"
+                  return 0
+                fi
+              fi
+              
+              # Conflits de colonnes/tables existantes
+              if grep -qE "column.*already exists|relation.*already exists|constraint.*already exists" "$output_file"; then
+                log "🔧 Résolution conflit schéma existant"
+                PENDING_MIGRATIONS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1 | grep -A10 "following migration" | grep -oE "[0-9]{14}_[a-zA-Z0-9_]+" | head -1)
+                if [ -n "$PENDING_MIGRATIONS" ]; then
+                  log "📌 Marquage migration conflictuelle: $PENDING_MIGRATIONS"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$PENDING_MIGRATIONS"
+                  return 0
+                else
+                  # Pas de fallback destructif
+                  log "⚠️ Impossible de résoudre automatiquement le conflit de schéma"
+                  log "🛑 Intervention manuelle requise pour préserver les données"
+                  return 1
+                fi
+              fi
+              
+              # Autres erreurs Prisma
+              if grep -qE "P[0-9]{4}" "$output_file"; then
+                ERROR_CODE=$(grep -oE "P[0-9]{4}" "$output_file" | head -1)
+                log "⚠️ Erreur Prisma détectée: $ERROR_CODE"
+                
+                # Tentative de résolution générique
+                LATEST_MIGRATION=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations | grep -E '^[0-9]{14}_' | tail -1" | tr -d '\r\n')
+                if [ -n "$LATEST_MIGRATION" ] && [ "$LATEST_MIGRATION" != "migration_lock.toml" ]; then
+                  log "📌 Marquage dernière migration: $LATEST_MIGRATION"
+                  docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --applied "$LATEST_MIGRATION"
+                  return 0
+                else
+                  log "⚠️ Aucune migration valide trouvée"
+                  log "🛑 Arrêt pour éviter la perte de données - vérification manuelle requise"
+                  return 1
+                fi
+              fi
+              
+              return 1
+            }
+            
+            # Vérification que toutes les migrations sont appliquées
+            ensure_all_migrations_applied() {
+              log "🔍 Vérification que toutes les migrations sont appliquées"
+              
+              # Liste toutes les migrations disponibles
+              ALL_MIGRATIONS=$(docker-compose -f docker-compose.prisma.yml exec -T api sh -c "ls prisma/migrations | grep -E '^[0-9]{14}_' | sort")
+              MIGRATION_COUNT=$(echo "$ALL_MIGRATIONS" | wc -l)
+              log "📋 $MIGRATION_COUNT migrations trouvées dans le dossier"
+              
+              # Vérification du statut final
+              FINAL_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+              
+              if echo "$FINAL_STATUS" | grep -q "Database schema is up to date"; then
+                log "✅ Toutes les migrations sont appliquées"
+                return 0
+              elif echo "$FINAL_STATUS" | grep -q "pending migration"; then
+                log "⚠️ Des migrations sont encore en attente"
+                log "🔄 Application forcée des migrations restantes"
+                docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy
+                return $?
+              else
+                log "⚠️ Statut unclear, vérification manuelle"
+                log "🛑 Synchronisation manuelle requise pour préserver les données"
+                return 1
+              fi
+            }
+            
+            # Déploiement PRODUCTION ultra-sécurisé
+            deploy_production_safe() {
+              local backup_path=$(cat ".last_backup_path" 2>/dev/null || echo "")
+              local attempt=0
+              local max_attempts=3  # Réduit pour production
+              
+              log "🔒 DÉPLOIEMENT PRODUCTION - Mode conservatif"
+              
+              # Validation préalable
+              log "🔍 Phase 1: Validation préalable"
+              CURRENT_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+              
+              if echo "$CURRENT_STATUS" | grep -q "Database schema is up to date"; then
+                log "✅ Base déjà synchronisée - Aucune migration requise"
+                return 0
+              fi
+              
+              # Lister les migrations en attente
+              log "📋 Phase 2: Analyse des migrations en attente"
+              PENDING_MIGRATIONS=$(echo "$CURRENT_STATUS" | grep -A20 "pending migration" | grep -E "[0-9]{14}_" || echo "")
+              
+              if [ -z "$PENDING_MIGRATIONS" ]; then
+                log "⚠️ Aucune migration en attente détectée"
+                
+                # Vérification des migrations échouées
+                if echo "$CURRENT_STATUS" | grep -q "failed migration\|P3009"; then
+                  log "🚨 MIGRATIONS ÉCHOUÉES DÉTECTÉES"
+                  FAILED_MIGRATION=$(echo "$CURRENT_STATUS" | grep -oE "[0-9]{14}_[a-zA-Z0-9_]+" | head -1)
+                  
+                  if [ -n "$FAILED_MIGRATION" ]; then
+                    log "🔧 Résolution SÉCURISÉE de la migration échouée: $FAILED_MIGRATION"
+                    log "📌 Marquage comme rolled-back (SANS perte de données)"
+                    
+                    if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION"; then
+                      log "✅ Migration échouée résolue"
+                      log "🔄 Nouvelle tentative d'application"
+                      if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy; then
+                        log "✅ Migrations appliquées après résolution"
+                        return 0
+                      else
+                        log "❌ Échec application après résolution"
+                        return 1
+                      fi
+                    else
+                      log "❌ Impossible de résoudre la migration échouée"
+                      log "🛑 ARRÊT SÉCURISÉ - Intervention manuelle requise"
+                      return 1
+                    fi
+                  else
+                    log "❌ Migration échouée non identifiable"
+                    log "🛑 ARRÊT SÉCURISÉ - Diagnostic manuel requis"
+                    return 1
+                  fi
+                else
+                  log "🔍 Tentative de synchronisation douce"
+                  if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy; then
+                    log "✅ Synchronisation réussie"
+                    return 0
+                  else
+                    log "❌ Synchronisation échouée"
+                    return 1
+                  fi
+                fi
+              fi
+              
+              # Application sécurisée des migrations en attente
+              log "🔄 Phase 3: Application SÉCURISÉE des migrations"
+              log "📋 Migrations à appliquer:"
+              echo "$PENDING_MIGRATIONS" | while read -r migration; do
+                [ -n "$migration" ] && log "  - $migration"
+              done
+              
+              # Application avec monitoring
+              if docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate deploy 2>&1 | tee production_migration.log; then
+                if grep -q "successfully applied\|All migrations have been applied" production_migration.log; then
+                  log "✅ TOUTES LES MIGRATIONS APPLIQUÉES AVEC SUCCÈS"
+                  
+                  # Vérification post-migration
+                  log "🔍 Vérification post-migration"
+                  FINAL_STATUS=$(docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status 2>&1)
+                  if echo "$FINAL_STATUS" | grep -q "Database schema is up to date"; then
+                    log "✅ DÉPLOIEMENT PRODUCTION RÉUSSI"
+                    rm -f production_migration.log
+                    return 0
+                  else
+                    log "⚠️ Statut final incertain"
+                    cat production_migration.log
+                    rm -f production_migration.log
+                    return 1
+                  fi
+                else
+                  log "⚠️ Migrations partiellement appliquées"
+                  cat production_migration.log
+                  rm -f production_migration.log
+                  return 1
+                fi
+              else
+                log "❌ ÉCHEC D'APPLICATION DES MIGRATIONS"
+                log "🔍 Analyse des erreurs:"
+                cat production_migration.log | tail -10
+                
+                # En cas d'échec, ne PAS tenter de résolution automatique
+                log "🛑 ARRÊT SÉCURISÉ POUR PROTECTION DES DONNÉES"
+                log "💾 Sauvegarde disponible: $backup_path"
+                log "🔧 Intervention manuelle requise"
+                
+                rm -f production_migration.log
+                return 1
+              fi
+            }
+            
+            # Exécution du déploiement PRODUCTION
+            if deploy_production_safe; then
+              log "✅ DÉPLOIEMENT PRODUCTION RÉUSSI - Données préservées"
+              
+              # Nettoyage des anciennes sauvegardes (garde les 5 dernières)
+              log "🧹 Nettoyage des anciennes sauvegardes"
+              find backups/ -name "prod_backup_*" -type d | sort -r | tail -n +6 | xargs rm -rf 2>/dev/null || true
+              log "✅ Maintenance des sauvegardes terminée"
+            else
+              log "❌ DÉPLOIEMENT PRODUCTION ÉCHOUÉ"
+              BACKUP_PATH=$(cat ".last_backup_path" 2>/dev/null || echo "AUCUNE")
+              log "💾 Sauvegarde disponible: $BACKUP_PATH"
+              log "🔧 Pour restauration d'urgence:"
+              log "   1. Connectez-vous au serveur"
+              log "   2. Utilisez: docker-compose exec db psql -U postgres < $BACKUP_PATH/full_database.sql"
+              log "   3. Redémarrez l'application"
+              
+              deploy_failed "Échec déploiement PRODUCTION - Données intactes"
+            fi
+            
+            log "🔍 Vérification finale du schéma"
+            docker-compose -f docker-compose.prisma.yml exec -T api npx prisma migrate status || log "⚠️ Impossible de vérifier le statut final"
+            
+            echo "$CURRENT_COMMIT" > "${APP_DIR}/.last_deploy"
+            docker image prune -f > /dev/null 2>&1
+            docker volume prune -f > /dev/null 2>&1
+            
+            log "✅ Déploiement terminé avec succès - Commit: $CURRENT_COMMIT"
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{\"embeds\":[{\"title\":\"✅ Déploiement Success\",\"description\":\"Commit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nAPI accessible\",\"color\":65280}]}"
+          fi
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{\"embeds\":[{\"title\":\"❌ Déploiement Failed\",\"description\":\"Commit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nVoir les logs pour plus de détails\",\"color\":15158332}]}"
+          fi

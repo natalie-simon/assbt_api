@@ -1,0 +1,50 @@
+http:
+  middlewares:
+    basicHeaders:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+    
+    redirectToHttps:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  routers:
+    # Router HTTP (pour redirection vers HTTPS)
+    api-http:
+      rule: "Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      service: "api-service"
+      entrypoints:
+        - http
+      middlewares:
+        - redirectToHttps
+    
+    # Router HTTPS
+    api-https:
+      rule: "Host(`api-prod.lesbulleurstoulonnais.fr`)"
+      service: "api-service"
+      entrypoints:
+        - https
+      middlewares:
+        - basicHeaders
+      tls:
+        certResolver: letsencrypt
+    
+    # Router Traefik Dashboard
+    dashboard-https:
+      rule: "Host(`traefik.lesbulleurstoulonnais.fr`)"
+      service: api@internal
+      entrypoints:
+        - https
+      middlewares:
+        - basicHeaders
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://nestjs_api:3000/"

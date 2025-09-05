@@ -1,0 +1,244 @@
+name: Deploy NestJS with Prisma to OVH VPS (Production)
+
+on:
+  push:
+    branches:
+      - production
+    paths-ignore:
+      - '**.md'
+      - '.github/ISSUE_TEMPLATE/**'
+  workflow_dispatch:  # permet de déclencher manuellement
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+       - name: Run linter
+         run: npm run lint
+
+      #- name: Run unit tests
+      #  run: npm test
+
+      - name: Run build
+        run: npm run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to OVH VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
+          port: 2222  # ou votre port SSH personnalisé
+          script: |
+            # Définition du répertoire racine sur le VPS
+            VPS_ROOT="/home/deploy/app"
+            APP_DIR="${VPS_ROOT}/nestjs"
+
+            # S'assurer que le répertoire d'application existe
+            mkdir -p ${APP_DIR}
+
+            # Vérifier l'état actuel
+            echo "📂 Contenu actuel du répertoire de déploiement:"
+            ls -la ${APP_DIR}
+
+            # Sauvegarde de la base de données si elle est en cours d'exécution
+            if [ -f "${APP_DIR}/docker-compose.prod.yml" ]; then
+              cd ${APP_DIR}
+              if docker-compose -f docker-compose.prod.yml ps postgres-db 2>&1 | grep -q "Up"; then
+                echo "📦 Sauvegarde de la base de données..."
+                mkdir -p ${APP_DIR}/backups
+                CURRENT_DATE=$(date +"%Y%m%d_%H%M%S")
+                
+                # Récupération des variables d'environnement depuis le fichier .env
+                if [ -f "${APP_DIR}/.env" ]; then
+                  source ${APP_DIR}/.env
+                  DB_USER=${DB_USERNAME:-postgres}
+                  DB_NAME=${DB_NAME:-nestjs_db}
+                else
+                  DB_USER="postgres"
+                  DB_NAME="nestjs_db"
+                fi
+                
+                echo "📊 Utilisation de la base de données: $DB_NAME avec l'utilisateur: $DB_USER"
+                docker-compose -f docker-compose.prod.yml exec -T postgres-db pg_dump -U $DB_USER $DB_NAME > ${APP_DIR}/backups/db_${CURRENT_DATE}.sql || echo "⚠️ Échec de sauvegarde, poursuite du déploiement"
+              fi
+            fi
+
+            # Préserver les fichiers importants
+            cd ${APP_DIR}
+            if [ -f "${APP_DIR}/.env" ]; then
+              echo "💾 Sauvegarde du fichier .env actuel"
+              cp ${APP_DIR}/.env ${APP_DIR}/.env.backup
+            fi
+
+            # Créer un répertoire temporaire pour le clone
+            TMP_DIR=$(mktemp -d)
+            echo "📋 Clonage du dépôt dans ${TMP_DIR}..."
+
+            # Clone du dépôt GitHub (utiliser la branche production)
+            git clone --depth=1 --branch=develop https://github.com/natalie-simon/assbt_api.git ${TMP_DIR}
+
+            # Vérifier si le clone a réussi
+            if [ $? -ne 0 ]; then
+              echo "❌ Échec du clonage du dépôt"
+              exit 1
+            fi
+
+            # Nettoyer le répertoire de l'application mais préserver .env et backups
+            echo "🧹 Nettoyage du répertoire de déploiement..."
+            find ${APP_DIR} -mindepth 1 -not -path "${APP_DIR}/backups*" -not -name ".env" -not -name ".env.backup" -not -name "docker-compose.prod.yml" -exec rm -rf {} \; 2>/dev/null || true
+
+            # Copier les fichiers du dépôt cloné vers le répertoire de l'application
+            echo "📋 Copie des fichiers du projet..."
+            cp -R ${TMP_DIR}/* ${APP_DIR}/
+            cp -R ${TMP_DIR}/.* ${APP_DIR}/ 2>/dev/null || true
+
+            # Supprimer le répertoire temporaire
+            rm -rf ${TMP_DIR}
+
+            # Gestion du fichier .env
+            if [ ! -f "${APP_DIR}/.env" ]; then
+              echo "🔍 Fichier .env non trouvé, recherche d'alternatives..."
+
+              # Vérifier si .env.backup existe
+              if [ -f "${APP_DIR}/.env.backup" ]; then
+                echo "✅ Restauration du fichier .env.backup"
+                cp ${APP_DIR}/.env.backup ${APP_DIR}/.env
+              # Vérifier si .env.prod existe dans le répertoire racine
+              elif [ -f "${VPS_ROOT}/.env.prod" ]; then
+                echo "✅ Copie du fichier .env.prod depuis ${VPS_ROOT}"
+                cp ${VPS_ROOT}/.env.prod ${APP_DIR}/.env
+              else
+                echo "⚠️ Aucun fichier .env trouvé! Le déploiement pourrait échouer."
+              fi
+            fi
+
+            # Vérifier le contenu après la copie
+            echo "📂 Contenu du répertoire après copie:"
+            ls -la ${APP_DIR}
+
+            # Vérifier que docker-compose.prod.yml existe
+            if [ ! -f "${APP_DIR}/docker-compose.prod.yml" ]; then
+              echo "❌ Fichier docker-compose.prod.yml non trouvé!"
+              exit 1
+            fi
+
+            # Déployer l'application
+            cd ${APP_DIR}
+            echo "🚀 Déploiement de l'application..."
+            docker-compose -f docker-compose.prod.yml down || true
+            
+            # Démarrer d'abord la base de données seule
+            echo "🔄 Démarrage de la base de données..."
+            docker-compose -f docker-compose.prod.yml up -d postgres-db
+            
+            # Attendre que la base de données soit prête
+            echo "⏳ Attente que la base de données soit prête..."
+            RETRIES=20
+            RETRY_COUNT=0
+            
+            until docker-compose -f docker-compose.prod.yml exec -T postgres-db pg_isready || [ $RETRY_COUNT -eq $RETRIES ]; do
+              echo "🔄 En attente de la base de données... ($RETRY_COUNT/$RETRIES)"
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              sleep 5
+            done
+            
+            if [ $RETRY_COUNT -eq $RETRIES ]; then
+              echo "⚠️ Base de données non disponible après $RETRIES tentatives. Poursuite du déploiement..."
+            else
+              echo "✅ Base de données prête"
+            fi
+            
+            # Démarrer le reste des services
+            echo "🚀 Démarrage des autres services..."
+            docker-compose -f docker-compose.prod.yml up -d --build
+            
+            # Attendre que l'API se lance
+            echo "⏳ Attente du démarrage de l'API..."
+            sleep 30
+
+            # Vérifier l'état des services
+            echo "📊 État des services après déploiement:"
+            docker-compose -f docker-compose.prod.yml ps
+
+            # Gestion des migrations avec Prisma
+            if docker-compose -f docker-compose.prod.yml ps | grep -q "api"; then
+              echo "🔄 Gestion des migrations Prisma..."
+              
+              # Étape 1: Générer le client Prisma
+              echo "🔨 Génération du client Prisma..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx prisma generate
+              
+              # Étape 2: Appliquer les migrations existantes
+              echo "🔄 Application des migrations Prisma..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+              
+              # Si c'est la première exécution ou si le schéma a changé sans migration
+              if [ $? -ne 0 ]; then
+                echo "⚠️ Erreur lors de l'application des migrations. Vérification du schéma..."
+                
+                # Vérifier si des migrations existent déjà
+                MIGRATIONS_EXIST=$(docker-compose -f docker-compose.prod.yml exec -T api ls -la prisma/migrations 2>/dev/null | grep -v "total" | wc -l)
+                
+                if [ "$MIGRATIONS_EXIST" -eq "0" ]; then
+                  echo "🔧 Aucune migration existante. Création de la première migration..."
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate dev --name init --create-only
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+                else
+                  echo "🔍 Vérification de l'état de la base de données..."
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma db pull
+                  echo "📝 Création d'une migration de rattrapage..."
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate dev --name schema_sync --create-only
+                  docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate deploy
+                fi
+              fi
+              
+              # Vérification finale
+              echo "🔍 Vérification de l'état des migrations Prisma..."
+              docker-compose -f docker-compose.prod.yml exec -T api npx prisma migrate status
+            else
+              echo "⚠️ Le service api n'est pas en cours d'exécution, migrations ignorées"
+            fi
+            
+            # Vérifier les tables créées
+            echo "📊 Vérification des tables de la base de données:"
+            
+            # Récupération des variables d'environnement depuis le fichier .env
+            if [ -f "${APP_DIR}/.env" ]; then
+              source ${APP_DIR}/.env
+              DB_USER=${DB_USERNAME:-postgres}
+              DB_NAME=${DB_NAME:-nestjs_db}
+            else
+              DB_USER="postgres"
+              DB_NAME="nestjs_db"
+            fi
+            
+            echo "📊 Vérification des tables dans $DB_NAME avec l'utilisateur $DB_USER"
+            docker-compose -f docker-compose.prod.yml exec -T postgres-db psql -U $DB_USER -d $DB_NAME -c "\dt" || echo "⚠️ Impossible de vérifier les tables"
+            
+            # Afficher les logs du service API
+            echo "📃 Logs du service NestJS:"
+            docker-compose -f docker-compose.prod.yml logs --tail=50 api
+
+            # Nettoyage
+            echo "🧹 Nettoyage des images inutilisées..."
+            docker image prune -f

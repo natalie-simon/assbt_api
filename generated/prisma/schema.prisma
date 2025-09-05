@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_HOST_PRISMA")
+}
+
+// Définition des énumérations
+enum RoleTypes {
+  ADMIN
+  USER
+  REDAC
+}
+
+enum StatutArticleTypes {
+  BROUILLON
+  PUBLIE
+  CORBEILLE
+}
+
+enum CategorieArticleTypes {
+  ACCUEIL
+  ANNONCE
+  INFOS
+  VISITEURS
+}
+
+enum FileTypes {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  AUTRE
+}
+
+model Fichier {
+  id           Int       @id @default(autoincrement())
+  nom          String    @db.VarChar(255)
+  url          String    @db.VarChar(1024)
+  type         FileTypes @default(IMAGE)
+  mime         String    @db.VarChar(128)
+  taille       String    @db.VarChar(1024)
+  dateCreation DateTime  @default(now())
+  dateMaj      DateTime  @updatedAt
+
+  // Relations
+  articles            Article[]
+  categoriesActivites CategorieActivite[]
+  profils             Profil[]
+}
+
+model Membre {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(96)
+  mot_de_passe String
+  est_supprime Boolean   @default(false)
+  role         RoleTypes @default(USER)
+
+  // Relations
+  inscriptions MembreActivite[]
+  profil       Profil?
+  articles     Article[]
+}
+
+model Profil {
+  id                 Int     @id @default(autoincrement())
+  nom                String  @db.VarChar(50)
+  prenom             String  @db.VarChar(50)
+  telephone          String? @db.VarChar(12)
+  communication_mail Boolean @default(false)
+  communication_sms  Boolean @default(false)
+
+  // Relations
+  avatarId Int?
+  avatar   Fichier? @relation(fields: [avatarId], references: [id])
+  membreId Int      @unique
+  membre   Membre   @relation(fields: [membreId], references: [id])
+}
+
+model CategorieActivite {
+  id                Int     @id @default(autoincrement())
+  lbl_categorie     String  @db.VarChar(20)
+  avec_equipement   Boolean @default(false)
+  couleur           String  @db.VarChar(6)
+  avec_notification Boolean @default(true)
+  is_supprime       Boolean @default(false)
+
+  // Relations
+  imageId   Int?
+  image     Fichier?   @relation(fields: [imageId], references: [id])
+  activites Activite[]
+}
+
+model Activite {
+  id               Int      @id @default(autoincrement())
+  titre            String   @db.VarChar(50)
+  contenu          String
+  date_heure_debut DateTime
+  date_heure_fin   DateTime
+  motif_annulation String?
+  max_participant  Int      @default(99)
+  nbr_attente      Int      @default(0)
+
+  // Relations
+  categorieId  Int
+  categorie    CategorieActivite @relation(fields: [categorieId], references: [id])
+  participants MembreActivite[]
+}
+
+model MembreActivite {
+  id              Int      @id @default(autoincrement())
+  observations    String?
+  dateInscription DateTime @default(now())
+
+  // Relations
+  membreId   Int
+  membre     Membre   @relation(fields: [membreId], references: [id])
+  activiteId Int
+  activite   Activite @relation(fields: [activiteId], references: [id])
+}
+
+model Article {
+  id        Int                   @id @default(autoincrement())
+  titre     String                @db.VarChar(25)
+  contenu   String
+  statut    StatutArticleTypes
+  categorie CategorieArticleTypes
+
+  // Relations
+  imageId     Int?
+  image       Fichier? @relation(fields: [imageId], references: [id])
+  redacteurId Int
+  redacteur   Membre   @relation(fields: [redacteurId], references: [id])
+}

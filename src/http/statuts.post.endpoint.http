@@ -1,0 +1,6 @@
+POST http://localhost:3000/api/statuts/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoieWJhaDIyMDFAZ21haWwuY29tIiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzM5OTc2NTEwLCJleHAiOjE3Mzk5ODAxMTB9.elLdLISAoNkTR5Xv_KJoil-Xq5YLgGJUHBOqztKY6ac
+{
+  "lbl_statut": "test"
+}

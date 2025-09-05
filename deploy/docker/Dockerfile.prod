@@ -1,0 +1,59 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install build dependencies
+COPY package*.json ./
+RUN npm install
+
+# Generate Prisma client
+COPY prisma ./prisma/
+RUN mkdir -p ./generated
+
+RUN npx prisma generate
+
+# Copy source files and build the application
+COPY . .
+
+RUN chmod +x ./fix-imports.sh && ./fix-imports.sh
+
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine AS production
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /app
+
+# Ajouter curl pour le débogage
+RUN apk add --no-cache curl
+
+# Copy package files and install production dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy Prisma schema and client (required at runtime)
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Copy compiled application
+COPY --from=builder /app/dist ./dist
+
+# Expose the application port
+EXPOSE 3000
+
+# Script de démarrage pour désactiver CORS
+RUN echo '#!/bin/sh' > /usr/local/bin/start.sh && \
+  echo 'echo "Configuration CORS dans NestJS..."' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_ORIGINS="*"' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_METHODS="*"' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_ALLOWED_HEADERS="*"' >> /usr/local/bin/start.sh && \
+  echo 'export CORS_CREDENTIALS="true"' >> /usr/local/bin/start.sh && \
+  echo 'echo "Démarrage de l'application..."' >> /usr/local/bin/start.sh && \
+  echo 'node dist/main' >> /usr/local/bin/start.sh && \
+  chmod +x /usr/local/bin/start.sh
+
+# Remplace la commande originale
+CMD ["/usr/local/bin/start.sh"]

@@ -1,0 +1,28 @@
+# Configuration Traefik avec CORS entièrement ouvert
+# À placer dans deploy/docker/traefik/dynamic/cors.yml
+
+http:
+  middlewares:
+    # Middleware CORS complètement ouvert
+    cors-open:
+      headers:
+        accessControlAllowOriginList:
+          - "*"
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowHeaders:
+          - "*"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 86400
+        addVaryHeader: true
+
+    # Middleware pour la redirection HTTP vers HTTPS
+    redirectToHttps:
+      redirectScheme:
+        scheme: https
+        permanent: true

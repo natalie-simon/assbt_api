@@ -1,0 +1,119 @@
+name: Deploy Traefik to OVH VPS
+
+on:
+  push:
+    branches:
+    - develop
+
+jobs:
+  deploy-traefik:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Traefik directories
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY_OVH }}
+          port: 2222
+          script: |
+            echo "Creating Traefik directories..."
+            mkdir -p ~/app/traefik/config
+            mkdir -p ~/app/traefik/dynamic
+            mkdir -p ~/app/traefik/acme
+            touch ~/app/traefik/acme/acme.json
+            chmod 600 ~/app/traefik/acme/acme.json
+
+            echo "Creating traefik.yml..."
+            cat > ~/app/traefik/config/traefik.yml << 'EOL'
+            api:
+              dashboard: true
+              debug: true
+
+            entryPoints:
+              http:
+                address: ":80"
+                http:
+                  redirections:
+                    entryPoint:
+                      to: https
+                      scheme: https
+              https:
+                address: ":443"
+
+            providers:
+              docker:
+                endpoint: "unix:///var/run/docker.sock"
+                exposedByDefault: false
+                network: web
+              file:
+                directory: "/etc/traefik/dynamic"
+                watch: true
+
+            certificatesResolvers:
+              letsencrypt:
+                acme:
+                  email: nataliesimon2201@gmail.com
+                  storage: "/etc/traefik/acme/acme.json"
+                  httpChallenge:
+                    entryPoint: http
+            EOL
+
+            echo "Creating dynamic_conf.yml..."
+            cat > ~/app/traefik/dynamic/dynamic_conf.yml << 'EOL'
+            http:
+              middlewares:
+                secureHeaders:
+                  headers:
+                    sslRedirect: true
+                    forceSTSHeader: true
+                    stsIncludeSubdomains: true
+                    stsPreload: true
+                    stsSeconds: 31536000
+            EOL
+
+            echo "Creating docker-compose.yml..."
+            cat > ~/app/traefik/docker-compose.yml << 'EOL'
+            version: '3'
+
+            services:
+              traefik:
+                image: traefik:v2.9
+                container_name: traefik
+                restart: unless-stopped
+                security_opt:
+                  - no-new-privileges:true
+                ports:
+                  - "80:80"
+                  - "443:443"
+                volumes:
+                  - /var/run/docker.sock:/var/run/docker.sock:ro
+                  - ./config/:/etc/traefik/config/
+                  - ./dynamic/:/etc/traefik/dynamic/
+                  - ./acme:/etc/traefik/acme/
+                networks:
+                  - web
+                command:
+                  - "--configfile=/etc/traefik/config/traefik.yml"
+
+            networks:
+              web:
+                external: true
+            EOL
+            echo "Creating Docker network..."
+            docker network create web || true
+
+            echo "Starting Traefik..."
+            cd ~/app/traefik
+            docker-compose down
+            docker-compose up -d
+
+            echo "Checking if Traefik is running..."
+            sleep 5
+            if docker ps | grep -q traefik; then
+              echo "SUCCESS: Traefik is running"
+            else
+              echo "ERROR: Traefik failed to start"
+              docker-compose logs
+              exit 1
+            fi

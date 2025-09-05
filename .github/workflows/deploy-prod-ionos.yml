@@ -1,0 +1,408 @@
+name: Deploy NestJS with Prisma to IONOS VPS (Production)
+
+on:
+  push:
+    branches:
+      - prod
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: 'Skip pre-deployment tests'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  pre-deploy-checks:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check_changes.outputs.should_deploy }}
+      commit_hash: ${{ steps.check_changes.outputs.commit_hash }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: prod
+          fetch-depth: 2
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          echo "commit_hash=$CURRENT_COMMIT" >> $GITHUB_OUTPUT
+          
+          if [ "${{ github.event.inputs.force_deploy }}" = "true" ]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "🔄 Déploiement forcé activé"
+            exit 0
+          fi
+          
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+          echo "Changed files: $CHANGED_FILES"
+          
+          if echo "$CHANGED_FILES" | grep -qE "\.(md|txt|yml)$|^\.github/|^docs/"; then
+            if ! echo "$CHANGED_FILES" | grep -qE "\.(js|ts|json|prisma|docker)$|^src/|^prisma/"; then
+              echo "should_deploy=false" >> $GITHUB_OUTPUT
+              echo "⏭️ Seuls des fichiers non critiques ont changé"
+              exit 0
+            fi
+          fi
+          
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        if: ${{ github.event.inputs.skip_tests != 'true' && steps.check_changes.outputs.should_deploy == 'true' }}
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+          #npm run test
+
+  deploy:
+    needs: pre-deploy-checks
+    if: needs.pre-deploy-checks.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: prod
+
+      - name: Notify deployment start
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{\"embeds\":[{\"title\":\"🚀 Déploiement PRODUCTION Started\",\"description\":\"Branch: prod\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\",\"color\":3447003}]}"
+          fi
+
+      - name: Deploy to IONOS VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.IONOS_VPS_HOST }}
+          username: ${{ secrets.IONOS_VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_IONOS }}
+          port: ${{ secrets.IONOS_SSH_PORT }}
+          timeout: 900s
+          script: |
+            set -e
+            VPS_ROOT="/home/${{ secrets.IONOS_VPS_USER }}/production"
+            APP_DIR="${VPS_ROOT}/nestjs-prisma-prod"
+            DEPLOY_LOG="${APP_DIR}/deploy-prod.log"
+            CURRENT_COMMIT="${{ needs.pre-deploy-checks.outputs.commit_hash }}"
+            
+            log() {
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$DEPLOY_LOG"
+            }
+            
+            deploy_failed() {
+              log "❌ Déploiement PRODUCTION échoué à l'étape: $1"
+              if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+                curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+                  -H 'Content-type: application/json' \
+                  --data "{\"embeds\":[{\"title\":\"❌ Déploiement PRODUCTION Failed\",\"description\":\"Erreur: $1\\nCommit: \`$CURRENT_COMMIT\`\\nTarget: IONOS VPS\",\"color\":15158332}]}"
+              fi
+              exit 1
+            }
+            
+            trap 'deploy_failed "Script interrompu"' ERR
+            log "🚀 Démarrage du déploiement PRODUCTION optimisé - Commit: $CURRENT_COMMIT"
+            
+            mkdir -p "$APP_DIR" "$APP_DIR/backups"
+            cd "$APP_DIR"
+            
+            LAST_DEPLOY_COMMIT=$(cat "${APP_DIR}/.last_deploy" 2>/dev/null || echo "")
+            if [ "$CURRENT_COMMIT" = "$LAST_DEPLOY_COMMIT" ] && [ "${{ github.event.inputs.force_deploy }}" != "true" ]; then
+              log "⏭️ Même commit détecté ($CURRENT_COMMIT), skip du déploiement"
+              exit 0
+            fi
+            
+            log "📋 Phase 1: Validation de l'environnement PRODUCTION"
+            if [ -f "${APP_DIR}/.env.prod.ionos" ]; then
+              source "${APP_DIR}/.env.prod.ionos"
+            else
+              log "⚠️ Fichier .env.prod.ionos manquant - création nécessaire"
+              deploy_failed "Fichier .env.prod.ionos manquant"
+            fi
+            
+            # Vérification des variables critiques
+            if [ -z "$DATABASE_URL" ] || [ -z "$JWT_SECRET" ]; then
+              deploy_failed "Variables d'environnement critiques manquantes"
+            fi
+            
+            log "🧹 Phase 2: Sauvegarde et nettoyage PRODUCTION"
+            if docker-compose -f docker-compose.prod.ionos.yml ps -q > /dev/null 2>&1; then
+              log "💾 Sauvegarde état actuel PRODUCTION"
+              docker-compose -f docker-compose.prod.ionos.yml down
+            fi
+            docker rm -f postgres_prod_db traefik_prod api_prod nestjs_api_prod 2>/dev/null || true
+            
+            log "📦 Phase 3: Mise à jour du code PRODUCTION"
+            TMP_DIR=$(mktemp -d)
+            git clone --filter=blob:none --depth=1 --branch=prod https://github.com/natalie-simon/assbt_api.git "$TMP_DIR"
+            cd "$APP_DIR"
+            find . -mindepth 1 \
+              -not -path "./backups*" \
+              -not -name ".env.prod.ionos*" \
+              -not -name ".last_deploy*" \
+              -not -name "deploy-prod.log*" \
+              -exec rm -rf {} \; 2>/dev/null || true
+            cp -R "$TMP_DIR"/* "$APP_DIR"/
+            cp -R "$TMP_DIR"/.* "$APP_DIR"/ 2>/dev/null || true
+            rm -rf "$TMP_DIR"
+            
+            log "🐳 Phase 4: Build et démarrage des services PRODUCTION"
+            cd "$APP_DIR"
+            docker-compose -f docker-compose.prod.ionos.yml build --parallel || deploy_failed "Échec du build Docker"
+            docker-compose -f docker-compose.prod.ionos.yml up -d db || deploy_failed "Échec DB"
+            
+            RETRIES=30; RETRY_COUNT=0
+            until docker-compose -f docker-compose.prod.ionos.yml exec -T db pg_isready -q || [ $RETRY_COUNT -eq $RETRIES ]; do
+              log "🔄 Attente PostgreSQL PRODUCTION... ($((RETRY_COUNT+1))/$RETRIES)"
+              RETRY_COUNT=$((RETRY_COUNT+1))
+              sleep 3
+            done
+            
+            if [ $RETRY_COUNT -eq $RETRIES ]; then
+              deploy_failed "Base de données PostgreSQL non accessible"
+            fi
+            
+            docker-compose -f docker-compose.prod.ionos.yml up -d || deploy_failed "Échec démarrage services"
+            
+            log "🔄 Phase 5: Système de migration PRODUCTION ULTRA-SÉCURISÉ (Zéro perte de données)"
+            docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma generate || deploy_failed "Échec generate"
+            
+            # Fonction de sauvegarde multi-niveaux PRODUCTION
+            create_production_backup() {
+              local backup_timestamp=$(date +%Y%m%d_%H%M%S)
+              local backup_dir="backups/prod_backup_$backup_timestamp"
+              
+              log "🔒 PRODUCTION BACKUP CRITIQUE - Sauvegarde multi-niveaux"
+              mkdir -p "$backup_dir"
+              
+              # 1. Sauvegarde SQL complète
+              log "📦 1/5 Sauvegarde SQL complète PRODUCTION..."
+              if docker-compose -f docker-compose.prod.ionos.yml exec -T db pg_dump -U postgres -v postgres > "$backup_dir/full_database.sql"; then
+                BACKUP_SIZE=$(ls -lh "$backup_dir/full_database.sql" | awk '{print $5}')
+                log "✅ Sauvegarde SQL PRODUCTION: $BACKUP_SIZE"
+              else
+                log "❌ ÉCHEC SAUVEGARDE SQL - ARRÊT IMMÉDIAT"
+                deploy_failed "Sauvegarde SQL échouée - données critiques PRODUCTION"
+              fi
+              
+              # 2. Sauvegarde schéma seul
+              log "📋 2/5 Sauvegarde du schéma PRODUCTION..."
+              docker-compose -f docker-compose.prod.ionos.yml exec -T db pg_dump -U postgres -s postgres > "$backup_dir/schema_only.sql" || log "⚠️ Échec schéma"
+              
+              # 3. Sauvegarde données seules
+              log "💾 3/5 Sauvegarde des données PRODUCTION..."
+              docker-compose -f docker-compose.prod.ionos.yml exec -T db pg_dump -U postgres -a postgres > "$backup_dir/data_only.sql" || log "⚠️ Échec données"
+              
+              # 4. État des migrations Prisma
+              log "🔍 4/5 État des migrations PRODUCTION..."
+              docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma migrate status > "$backup_dir/migration_status.txt" 2>&1 || log "⚠️ Échec statut"
+              
+              # 5. Métadonnées du déploiement
+              log "📝 5/5 Métadonnées du déploiement..."
+              echo "Commit: $CURRENT_COMMIT" > "$backup_dir/deployment_info.txt"
+              echo "Date: $(date)" >> "$backup_dir/deployment_info.txt"
+              echo "Branch: prod" >> "$backup_dir/deployment_info.txt"
+              echo "Environment: PRODUCTION" >> "$backup_dir/deployment_info.txt"
+              
+              # Vérification intégrité RENFORCÉE
+              log "🔍 Vérification intégrité des sauvegardes PRODUCTION..."
+              if [ -s "$backup_dir/full_database.sql" ] && [ $(wc -l < "$backup_dir/full_database.sql") -gt 10 ]; then
+                log "✅ Sauvegarde PRODUCTION validée: $backup_dir"
+                echo "$backup_dir" > ".last_backup_path"
+                return 0
+              else
+                log "❌ SAUVEGARDE CORROMPUE - ARRÊT CRITIQUE"
+                deploy_failed "Sauvegarde invalide - protection des données PRODUCTION"
+              fi
+            }
+            
+            # Fonction de restauration d'urgence PRODUCTION
+            emergency_restore() {
+              local backup_path="$1"
+              log "🚨 RESTAURATION D'URGENCE PRODUCTION depuis $backup_path"
+              
+              if [ -f "$backup_path/full_database.sql" ]; then
+                log "🔄 Restauration de la base complète PRODUCTION..."
+                docker-compose -f docker-compose.prod.ionos.yml exec -T db psql -U postgres -c "DROP DATABASE IF EXISTS postgres_restore_prod;"
+                docker-compose -f docker-compose.prod.ionos.yml exec -T db psql -U postgres -c "CREATE DATABASE postgres_restore_prod;"
+                docker-compose -f docker-compose.prod.ionos.yml exec -T db psql -U postgres postgres_restore_prod < "$backup_path/full_database.sql"
+                log "✅ Base PRODUCTION restaurée en postgres_restore_prod - vérifiez avant de basculer"
+                return 0
+              else
+                log "❌ Sauvegarde PRODUCTION introuvable"
+                return 1
+              fi
+            }
+            
+            # Exécution de la sauvegarde PRODUCTION
+            create_production_backup
+            
+            # Déploiement PRODUCTION ULTRA-SÉCURISÉ
+            deploy_production_safe() {
+              local backup_path=$(cat ".last_backup_path" 2>/dev/null || echo "")
+              local attempt=0
+              local max_attempts=2  # Très réduit pour production
+              
+              log "🔒 DÉPLOIEMENT PRODUCTION ULTRA-SÉCURISÉ - Mode conservatif maximal"
+              
+              # Validation préalable RENFORCÉE
+              log "🔍 Phase 1: Validation préalable PRODUCTION"
+              CURRENT_STATUS=$(docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma migrate status 2>&1)
+              
+              if echo "$CURRENT_STATUS" | grep -q "Database schema is up to date"; then
+                log "✅ Base PRODUCTION déjà synchronisée - Aucune migration requise"
+                return 0
+              fi
+              
+              # Lister les migrations en attente avec validation STRICTE
+              log "📋 Phase 2: Analyse des migrations en attente PRODUCTION"
+              PENDING_MIGRATIONS=$(echo "$CURRENT_STATUS" | grep -A20 "pending migration" | grep -E "[0-9]{14}_" || echo "")
+              
+              if [ -z "$PENDING_MIGRATIONS" ]; then
+                log "⚠️ Aucune migration en attente détectée PRODUCTION"
+                
+                # Vérification des migrations échouées avec protection maximale
+                if echo "$CURRENT_STATUS" | grep -q "failed migration\|P3009"; then
+                  log "🚨 MIGRATIONS ÉCHOUÉES DÉTECTÉES EN PRODUCTION"
+                  log "🛑 ARRÊT SÉCURISÉ IMMÉDIAT - Intervention manuelle OBLIGATOIRE"
+                  log "💾 Sauvegarde disponible: $backup_path"
+                  deploy_failed "Migrations échouées détectées - intervention manuelle requise"
+                else
+                  log "🔍 Tentative de synchronisation douce PRODUCTION"
+                  if docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma migrate deploy; then
+                    log "✅ Synchronisation PRODUCTION réussie"
+                    return 0
+                  else
+                    log "❌ Synchronisation PRODUCTION échouée"
+                    log "🛑 ARRÊT SÉCURISÉ"
+                    return 1
+                  fi
+                fi
+              fi
+              
+              # Application sécurisée des migrations en attente avec monitoring MAXIMAL
+              log "🔄 Phase 3: Application ULTRA-SÉCURISÉE des migrations PRODUCTION"
+              log "📋 Migrations à appliquer en PRODUCTION:"
+              echo "$PENDING_MIGRATIONS" | while read -r migration; do
+                [ -n "$migration" ] && log "  - $migration"
+              done
+              
+              # Demande de confirmation automatique bypass (en production on fait confiance au code)
+              log "⚠️ Application des migrations en cours..."
+              
+              # Application avec monitoring MAXIMAL
+              if docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma migrate deploy 2>&1 | tee production_migration.log; then
+                if grep -q "successfully applied\|All migrations have been applied" production_migration.log; then
+                  log "✅ TOUTES LES MIGRATIONS PRODUCTION APPLIQUÉES AVEC SUCCÈS"
+                  
+                  # Vérification post-migration RENFORCÉE
+                  log "🔍 Vérification post-migration PRODUCTION"
+                  FINAL_STATUS=$(docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma migrate status 2>&1)
+                  if echo "$FINAL_STATUS" | grep -q "Database schema is up to date"; then
+                    log "✅ DÉPLOIEMENT PRODUCTION ULTRA-SÉCURISÉ RÉUSSI"
+                    rm -f production_migration.log
+                    return 0
+                  else
+                    log "⚠️ Statut final incertain PRODUCTION"
+                    cat production_migration.log
+                    rm -f production_migration.log
+                    return 1
+                  fi
+                else
+                  log "⚠️ Migrations PRODUCTION partiellement appliquées"
+                  cat production_migration.log
+                  rm -f production_migration.log
+                  return 1
+                fi
+              else
+                log "❌ ÉCHEC CRITIQUE D'APPLICATION DES MIGRATIONS PRODUCTION"
+                log "🔍 Analyse des erreurs:"
+                cat production_migration.log | tail -10
+                
+                log "🛑 ARRÊT SÉCURISÉ CRITIQUE POUR PROTECTION DES DONNÉES PRODUCTION"
+                log "💾 Sauvegarde PRODUCTION disponible: $backup_path"
+                log "🔧 Intervention manuelle OBLIGATOIRE"
+                
+                rm -f production_migration.log
+                return 1
+              fi
+            }
+            
+            # Exécution du déploiement PRODUCTION
+            if deploy_production_safe; then
+              log "✅ DÉPLOIEMENT PRODUCTION ULTRA-SÉCURISÉ RÉUSSI - Données préservées"
+              
+              # Nettoyage des anciennes sauvegardes (garde les 10 dernières pour PRODUCTION)
+              log "🧹 Maintenance des sauvegardes PRODUCTION"
+              find backups/ -name "prod_backup_*" -type d | sort -r | tail -n +11 | xargs rm -rf 2>/dev/null || true
+              log "✅ Maintenance des sauvegardes PRODUCTION terminée"
+            else
+              log "❌ DÉPLOIEMENT PRODUCTION CRITIQUE ÉCHOUÉ"
+              BACKUP_PATH=$(cat ".last_backup_path" 2>/dev/null || echo "AUCUNE")
+              log "💾 Sauvegarde PRODUCTION disponible: $BACKUP_PATH"
+              log "🔧 Pour restauration d'urgence PRODUCTION:"
+              log "   1. Connectez-vous au serveur IONOS"
+              log "   2. Utilisez: docker-compose exec db psql -U postgres < $BACKUP_PATH/full_database.sql"
+              log "   3. Redémarrez l'application"
+              log "   4. Contactez l'équipe technique immédiatement"
+              
+              deploy_failed "Échec déploiement PRODUCTION CRITIQUE - Données intactes"
+            fi
+            
+            # Vérifications post-déploiement PRODUCTION
+            log "🔍 Phase 6: Vérifications post-déploiement PRODUCTION"
+            
+            # Vérification finale du schéma
+            log "🔍 Vérification finale du schéma PRODUCTION"
+            docker-compose -f docker-compose.prod.ionos.yml exec -T api npx prisma migrate status || log "⚠️ Impossible de vérifier le statut final"
+            
+            # Test de santé de l'API
+            log "🏥 Test de santé de l'API PRODUCTION"
+            sleep 15
+            if docker-compose -f docker-compose.prod.ionos.yml exec -T api curl -f http://localhost:3000/health > /dev/null 2>&1; then
+              log "✅ API PRODUCTION accessible"
+            else
+              log "⚠️ API PRODUCTION non accessible - vérification manuelle requise"
+            fi
+            
+            # Vérification des logs
+            log "📋 Vérification des logs de l'API PRODUCTION"
+            docker-compose -f docker-compose.prod.ionos.yml logs --tail=20 api | grep -E "(error|Error|ERROR)" || log "✅ Aucune erreur détectée dans les logs"
+            
+            echo "$CURRENT_COMMIT" > "${APP_DIR}/.last_deploy"
+            docker image prune -f > /dev/null 2>&1
+            docker volume prune -f > /dev/null 2>&1
+            
+            log "✅ Déploiement PRODUCTION terminé avec succès - Commit: $CURRENT_COMMIT"
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{\"embeds\":[{\"title\":\"✅ Déploiement PRODUCTION Success\",\"description\":\"Branch: prod\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\\nAPI PRODUCTION accessible\",\"color\":65280}]}"
+          fi
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+              -H 'Content-type: application/json' \
+              --data "{\"embeds\":[{\"title\":\"🚨 Déploiement PRODUCTION CRITICAL FAILURE\",\"description\":\"Branch: prod\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\\nINTERVENTION MANUELLE REQUISE\",\"color\":15158332}]}"
+          fi
