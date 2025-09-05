@@ -31,7 +31,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: prod
+          ref: master
           fetch-depth: 2
 
       - name: Check for changes
@@ -75,14 +75,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: prod
+          ref: master
 
       - name: Notify deployment start
         run: |
           if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
             curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
               -H 'Content-type: application/json' \
-              --data "{\"embeds\":[{\"title\":\"🚀 Déploiement PRODUCTION Started\",\"description\":\"Branch: prod\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\",\"color\":3447003}]}"
+              --data "{\"embeds\":[{\"title\":\"🚀 Déploiement PRODUCTION Started\",\"description\":\"Branch: master\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\",\"color\":3447003}]}"
           fi
 
       - name: Deploy to IONOS VPS
@@ -148,7 +148,7 @@ jobs:
             
             log "📦 Phase 3: Mise à jour du code PRODUCTION"
             TMP_DIR=$(mktemp -d)
-            git clone --filter=blob:none --depth=1 --branch=prod https://github.com/natalie-simon/assbt_api.git "$TMP_DIR"
+            git clone --filter=blob:none --depth=1 --branch=master https://github.com/natalie-simon/assbt_api.git "$TMP_DIR"
             cd "$APP_DIR"
             find . -mindepth 1 \
               -not -path "./backups*" \
@@ -215,7 +215,7 @@ jobs:
               log "📝 5/5 Métadonnées du déploiement..."
               echo "Commit: $CURRENT_COMMIT" > "$backup_dir/deployment_info.txt"
               echo "Date: $(date)" >> "$backup_dir/deployment_info.txt"
-              echo "Branch: prod" >> "$backup_dir/deployment_info.txt"
+              echo "Branch: master" >> "$backup_dir/deployment_info.txt"
               echo "Environment: PRODUCTION" >> "$backup_dir/deployment_info.txt"
               
               # Vérification intégrité RENFORCÉE
@@ -395,7 +395,7 @@ jobs:
           if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
             curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
               -H 'Content-type: application/json' \
-              --data "{\"embeds\":[{\"title\":\"✅ Déploiement PRODUCTION Success\",\"description\":\"Branch: prod\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\\nAPI PRODUCTION accessible\",\"color\":65280}]}"
+              --data "{\"embeds\":[{\"title\":\"✅ Déploiement PRODUCTION Success\",\"description\":\"Branch: master\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\\nAPI PRODUCTION accessible\",\"color\":65280}]}"
           fi
 
       - name: Notify deployment failure
@@ -404,5 +404,5 @@ jobs:
           if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
             curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
               -H 'Content-type: application/json' \
-              --data "{\"embeds\":[{\"title\":\"🚨 Déploiement PRODUCTION CRITICAL FAILURE\",\"description\":\"Branch: prod\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\\nINTERVENTION MANUELLE REQUISE\",\"color\":15158332}]}"
+              --data "{\"embeds\":[{\"title\":\"🚨 Déploiement PRODUCTION CRITICAL FAILURE\",\"description\":\"Branch: master\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\\nINTERVENTION MANUELLE REQUISE\",\"color\":15158332}]}"
           fi
