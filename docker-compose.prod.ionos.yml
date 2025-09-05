@@ -57,7 +57,7 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
       # Spécifier le réseau pour Traefik
-      - "traefik.docker.network=ionos_prod_network"
+      - "traefik.docker.network=nestjs-prisma-prod_ionos_prod_network"
 
   traefik:
     image: traefik:v2.10
