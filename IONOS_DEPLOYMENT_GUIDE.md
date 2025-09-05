@@ -149,8 +149,8 @@ docker run hello-world
 
 ### 4.1 Créer l'arborescence
 ```bash
-mkdir -p ~/production/nestjs-prisma-prod/{backups,logs}
-cd ~/production/nestjs-prisma-prod
+mkdir -p ~/app/nestjs-prisma/{backups,logs}
+cd ~/app/nestjs-prisma
 ```
 
 ### 4.2 Créer le fichier .env.prod.ionos
@@ -212,8 +212,8 @@ chmod 600 .env.prod.ionos
 
 ### ✅ Test de validation ÉTAPE 4
 ```bash
-ls -la ~/production/nestjs-prisma-prod/
-cat ~/.env.prod.ionos  # Vérifier que le contenu est correct
+ls -la ~/app/nestjs-prisma/
+cat ~/app/nestjs-prisma/.env.prod.ionos  # Vérifier que le contenu est correct
 ```
 
 ---
@@ -250,7 +250,7 @@ Copiez tout le contenu (y compris `-----BEGIN` et `-----END`)
 
 ### 6.1 Créer le fichier docker-compose
 ```bash
-cd ~/production/nestjs-prisma-prod
+cd ~/app/nestjs-prisma
 nano docker-compose.prod.ionos.yml
 ```
 

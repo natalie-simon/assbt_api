@@ -95,8 +95,8 @@ jobs:
           timeout: 900s
           script: |
             set -e
-            VPS_ROOT="/home/${{ secrets.IONOS_VPS_USER }}/app"
-            APP_DIR="${VPS_ROOT}/nestjs-prisma"
+            VPS_ROOT="/home/${{ secrets.IONOS_VPS_USER }}/production"
+            APP_DIR="${VPS_ROOT}/nestjs-prisma-prod"
             DEPLOY_LOG="${APP_DIR}/deploy.log"
             CURRENT_COMMIT="${{ needs.pre-deploy-checks.outputs.commit_hash }}"
             

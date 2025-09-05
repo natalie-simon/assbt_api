@@ -1,13 +1,11 @@
 services:
   # Service pour l'API NestJS
   api:
-    image: node:18-slim
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     container_name: nestjs_api_ionos
     restart: always
-    working_dir: /app
-    volumes:
-      - ./:/app
-    command: sh /app/entrypoint.sh
     env_file:
       - ./.env.prod.ionos
     environment:
