@@ -74,7 +74,7 @@ services:
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=ionos_prod_network"
+      - "--providers.docker.network=nestjs-prisma-prod_ionos_prod_network"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
