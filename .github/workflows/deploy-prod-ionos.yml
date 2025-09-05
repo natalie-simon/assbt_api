@@ -85,6 +85,13 @@ jobs:
               --data "{\"embeds\":[{\"title\":\"🚀 Déploiement PRODUCTION Started\",\"description\":\"Branch: master\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\",\"color\":3447003}]}"
           fi
 
+      - name: Debug secrets
+        run: |
+          echo "Host defined: ${{ secrets.IONOS_VPS_HOST != '' }}"
+          echo "User defined: ${{ secrets.IONOS_VPS_USER != '' }}"
+          echo "Port defined: ${{ secrets.IONOS_SSH_PORT != '' }}"
+          echo "Key defined: ${{ secrets.SSH_PRIVATE_KEY_IONOS != '' }}"
+
       - name: Deploy to IONOS VPS
         uses: appleboy/ssh-action@master
         with:
