@@ -183,6 +183,12 @@ jobs:
               fi
             fi
             
+            # Créer un lien symbolique .env vers .env.prod.ionos pour Docker Compose
+            if [ -f "${APP_DIR}/.env.prod.ionos" ]; then
+              log "🔗 Création du lien symbolique .env -> .env.prod.ionos"
+              ln -sf .env.prod.ionos "${APP_DIR}/.env"
+            fi
+            
             log "🐳 Phase 4: Build et démarrage des services PRODUCTION"
             cd "$APP_DIR"
             docker-compose -f docker-compose.prod.ionos.yml build --parallel || deploy_failed "Échec du build Docker"
