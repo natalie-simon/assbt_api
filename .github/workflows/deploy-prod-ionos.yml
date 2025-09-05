@@ -85,13 +85,6 @@ jobs:
               --data "{\"embeds\":[{\"title\":\"🚀 Déploiement PRODUCTION Started\",\"description\":\"Branch: master\\nCommit: \`${{ needs.pre-deploy-checks.outputs.commit_hash }}\`\\nTarget: IONOS VPS\",\"color\":3447003}]}"
           fi
 
-      - name: Debug secrets
-        run: |
-          echo "Host defined: ${{ secrets.IONOS_VPS_HOST != '' }}"
-          echo "User defined: ${{ secrets.IONOS_VPS_USER != '' }}"
-          echo "Port defined: ${{ secrets.IONOS_SSH_PORT != '' }}"
-          echo "Key defined: ${{ secrets.SSH_PRIVATE_KEY_IONOS != '' }}"
-
       - name: Deploy to IONOS VPS
         uses: appleboy/ssh-action@master
         with:
@@ -126,6 +119,12 @@ jobs:
             
             mkdir -p "$APP_DIR" "$APP_DIR/backups"
             cd "$APP_DIR"
+            
+            # Sauvegarde du fichier .env.prod.ionos existant
+            if [ -f "${APP_DIR}/.env.prod.ionos" ]; then
+              log "💾 Sauvegarde du fichier .env.prod.ionos actuel"
+              cp "${APP_DIR}/.env.prod.ionos" "${APP_DIR}/.env.prod.ionos.backup"
+            fi
             
             LAST_DEPLOY_COMMIT=$(cat "${APP_DIR}/.last_deploy" 2>/dev/null || echo "")
             if [ "$CURRENT_COMMIT" = "$LAST_DEPLOY_COMMIT" ] && [ "${{ github.event.inputs.force_deploy }}" != "true" ]; then
@@ -166,6 +165,23 @@ jobs:
             cp -R "$TMP_DIR"/* "$APP_DIR"/
             cp -R "$TMP_DIR"/.* "$APP_DIR"/ 2>/dev/null || true
             rm -rf "$TMP_DIR"
+            
+            # Restauration du fichier .env.prod.ionos
+            if [ ! -f "${APP_DIR}/.env.prod.ionos" ]; then
+              log "🔍 Fichier .env.prod.ionos non trouvé, recherche d'alternatives..."
+              
+              # Vérifier si .env.prod.ionos.backup existe
+              if [ -f "${APP_DIR}/.env.prod.ionos.backup" ]; then
+                log "✅ Restauration du fichier .env.prod.ionos.backup"
+                cp "${APP_DIR}/.env.prod.ionos.backup" "${APP_DIR}/.env.prod.ionos"
+              # Vérifier si .env.prod.ionos existe dans le répertoire racine
+              elif [ -f "${VPS_ROOT}/.env.prod.ionos" ]; then
+                log "✅ Copie du fichier .env.prod.ionos depuis ${VPS_ROOT}"
+                cp "${VPS_ROOT}/.env.prod.ionos" "${APP_DIR}/.env.prod.ionos"
+              else
+                log "⚠️ Aucun fichier .env.prod.ionos trouvé! Le déploiement pourrait échouer."
+              fi
+            fi
             
             log "🐳 Phase 4: Build et démarrage des services PRODUCTION"
             cd "$APP_DIR"
