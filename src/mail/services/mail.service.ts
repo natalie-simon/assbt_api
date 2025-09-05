@@ -1,10 +1,8 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { Activite, Membre } from '../../../generated/prisma';
-import * as dotenv from 'dotenv';
 import { MembreWithRelations } from 'src/partage/types/prisma-type';
 import { ContactDto } from 'src/membres/dtos/contact.dto';
-dotenv.config();
 
 /**
  * Service de gestion des mails

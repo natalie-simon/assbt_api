@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_prod_ionos_db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_prod_ionos_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5434:5432"  # Port externe différent pour éviter conflits
+    restart: unless-stopped
+    networks:
+      - ionos_prod_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: api_prod_ionos
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-admin}@db:5432/${DB_NAME:-postgres}?schema=public
+    env_file:
+      - .env.prod.ionos
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ionos_prod_network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-ionos.rule=Host(`prod2025.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api-ionos.entrypoints=websecure"
+      - "traefik.http.routers.api-ionos.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api-ionos.loadbalancer.server.port=3000"
+      # Redirection HTTP vers HTTPS
+      - "traefik.http.routers.api-ionos-http.rule=Host(`prod2025.lesbulleurstoulonnais.fr`)"
+      - "traefik.http.routers.api-ionos-http.entrypoints=web"
+      - "traefik.http.routers.api-ionos-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+      # Spécifier le réseau pour Traefik
+      - "traefik.docker.network=ionos_prod_network"
+
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik_prod_ionos
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_prod_ionos_certs:/etc/traefik/acme
+    networks:
+      - ionos_prod_network
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=ionos_prod_network"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=contact@lesbulleurstoulonnais.fr"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
+      - "--api.dashboard=false"  # Dashboard désactivé en production
+      - "--log.level=INFO"
+    labels:
+      - "traefik.enable=true"
+
+networks:
+  ionos_prod_network:
+    driver: bridge
+
+volumes:
+  postgres_prod_ionos_data:
+  traefik_prod_ionos_certs:
