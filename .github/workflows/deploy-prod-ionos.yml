@@ -1,4 +1,4 @@
-name: Deploy NestJS with Prisma to IONOS VPS (Production)
+name: Deploy NestJS with Prisma to IONOS VPS (Optimized)
 
 on:
   push:
@@ -95,9 +95,9 @@ jobs:
           timeout: 900s
           script: |
             set -e
-            VPS_ROOT="/home/${{ secrets.IONOS_VPS_USER }}/production"
-            APP_DIR="${VPS_ROOT}/nestjs-prisma-prod"
-            DEPLOY_LOG="${APP_DIR}/deploy-prod.log"
+            VPS_ROOT="/home/${{ secrets.IONOS_VPS_USER }}/app"
+            APP_DIR="${VPS_ROOT}/nestjs-prisma"
+            DEPLOY_LOG="${APP_DIR}/deploy.log"
             CURRENT_COMMIT="${{ needs.pre-deploy-checks.outputs.commit_hash }}"
             
             log() {
@@ -105,17 +105,17 @@ jobs:
             }
             
             deploy_failed() {
-              log "❌ Déploiement PRODUCTION échoué à l'étape: $1"
+              log "❌ Déploiement échoué à l'étape: $1"
               if [ -n "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
                 curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
                   -H 'Content-type: application/json' \
-                  --data "{\"embeds\":[{\"title\":\"❌ Déploiement PRODUCTION Failed\",\"description\":\"Erreur: $1\\nCommit: \`$CURRENT_COMMIT\`\\nTarget: IONOS VPS\",\"color\":15158332}]}"
+                  --data "{\"embeds\":[{\"title\":\"❌ Déploiement Failed IONOS\",\"description\":\"Erreur: $1\\nCommit: \`$CURRENT_COMMIT\`\",\"color\":15158332}]}"
               fi
               exit 1
             }
             
             trap 'deploy_failed "Script interrompu"' ERR
-            log "🚀 Démarrage du déploiement PRODUCTION optimisé - Commit: $CURRENT_COMMIT"
+            log "🚀 Démarrage du déploiement optimisé IONOS - Commit: $CURRENT_COMMIT"
             
             mkdir -p "$APP_DIR" "$APP_DIR/backups"
             cd "$APP_DIR"
